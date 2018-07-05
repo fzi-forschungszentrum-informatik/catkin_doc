@@ -1,0 +1,14 @@
+#!/usr/env/bin python
+"""catkin_doc helps creating documentations for catkin packages"""
+
+import catkin_doc.python
+
+def main():
+    """Main worker function"""
+    filename = "/home/mauch/robot_folders/checkout/euroc_usecase/catkin_ws/src/euroc_usecase/scripts/safety_guard.py"
+
+    python_node = catkin_doc.python.PythonNode()
+    python_node.init_from_filename(filename)
+
+if __name__ == "__main__":
+    main()
