@@ -76,3 +76,20 @@ class PythonParser(object):
             self.node.add_publisher(topic, topic_type)
             return True
         return False
+
+    def extract_action_clients(self, line):
+        """
+        Check whether a line contains an action client.
+        Returns True if line contains an action client and False otherwise.
+        """
+        match = re.search("(SimpleActionClient\()(\'|\")(\S+)(\'|\")(, (\S+))\)", line)
+        if match:
+            print(match.groups())
+            topic = str(match.group(3))
+            print('Action topic: ', topic)
+
+            action = str(match.group(6))
+            print('Action: ', action)
+            self.node.add_action_client(topic, action)
+            return True
+        return False

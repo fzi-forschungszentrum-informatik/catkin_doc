@@ -51,6 +51,17 @@ class TestPython(unittest.TestCase):
         self.assertFalse(
             parser.extract_pubs( "rospy.loginfo('~stop_robot_topic')"))
 
+    def test_action_clients(self):
+        parser = catkin_doc.python.PythonParser()
+        self.assertTrue(
+            parser.extract_action_clients(
+                "self.action_client = actionlib.SimpleActionClient('pathloader', PlayTrajectoryAction)"))
+
+    def test_action_clients_false(self):
+        parser = catkin_doc.python.PythonParser()
+        self.assertFalse(
+            parser.extract_action_clients( "rospy.loginfo('~stop_robot_topic')"))
+
     def test_file_exist(self):
         parser = catkin_doc.python.PythonParser()
         parser.extract_params(
@@ -61,6 +72,8 @@ class TestPython(unittest.TestCase):
             'self.joint_state_sub = rospy.Subscriber("pathloader/reordered_joint_states", JointState, self.joint_status_changed)')
         parser.extract_pubs(
             "pub = rospy.Publisher('chatter', String, queue_size=10)")
+        parser.extract_action_clients(
+            "self.action_client = actionlib.SimpleActionClient('pathloader', PlayTrajectoryAction)")
         parser.node.node_to_md_file()
         self.assertTrue(
           os.path.isfile("README.md"))
