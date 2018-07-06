@@ -1,0 +1,13 @@
+image: ubuntu:xenial
+
+before_script:
+  - apt-get update -y
+  - apt-get install -y python-pytest python-dev python-pip python-coverage python-pytest-cov
+
+test:
+  tags: 
+    - docker
+  script:
+    - python setup.py develop  
+    - py.test --version
+    - py.test --cov
