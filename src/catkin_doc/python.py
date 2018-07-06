@@ -106,7 +106,24 @@ class PythonParser(object):
             print('Service topic: ', topic)
 
             type = str(match.group(6))
-            print('used msg-type: ', type)
+            print('used srv-type: ', type)
             self.node.add_service_client(topic, type)
+            return True
+        return False
+
+    def extract_service(self, line):
+        """
+        Check whether a line contains an service.
+        Returns True if line contains an service and False otherwise.
+        """
+        match = re.search("(Service\()(\'|\")(\S+)(\'|\")(, (\S+))(, (\S+))+\)", line)
+        if match:
+            print(match.groups())
+            name = str(match.group(3))
+            print('Service: ', name)
+
+            type = str(match.group(6))
+            print('used srv-type: ', type)
+            self.node.add_service(name, type)
             return True
         return False
