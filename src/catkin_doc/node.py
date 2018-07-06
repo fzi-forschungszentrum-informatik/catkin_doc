@@ -54,7 +54,7 @@ class Node(object):
     def service_clients_to_md(self):
         client = "## Service Client\n"
         for service in self._service_clients:
-            client = "service: " + service + " used msg-type: "  + self._service_clients[service] + "\n"
+            client = client + "service: " + service + " used msg-type: "  + self._service_clients[service] + "\n"
         return client
 
     def node_to_md(self):
