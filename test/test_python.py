@@ -61,6 +61,6 @@ class TestPython(unittest.TestCase):
             'self.joint_state_sub = rospy.Subscriber("pathloader/reordered_joint_states", JointState, self.joint_status_changed)')
         parser.extract_pubs(
             "pub = rospy.Publisher('chatter', String, queue_size=10)")
-        parser.node.node_to_md()
+        parser.node.node_to_md_file()
         self.assertTrue(
           os.path.isfile("README.md"))
