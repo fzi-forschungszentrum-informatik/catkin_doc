@@ -84,6 +84,17 @@ class TestPython(unittest.TestCase):
         self.assertFalse(
             parser.extract_service( "rospy.loginfo('~stop_robot_topic')"))
 
+    def test_action(self):
+        parser = catkin_doc.python.PythonParser()
+        self.assertTrue(
+            parser.extract_action(
+                "self._as = actionlib.SimpleActionServer(self._action_name, actionlib_tutorials.msg.FibonacciAction, execute_cb=self.execute_cb, auto_start=False)"))
+
+    def test_action_false(self):
+        parser = catkin_doc.python.PythonParser()
+        self.assertFalse(
+            parser.extract_action( "rospy.loginfo('~stop_robot_topic')"))
+
     def test_file_exist(self):
         parser = catkin_doc.python.PythonParser()
         parser.extract_params(
@@ -100,6 +111,8 @@ class TestPython(unittest.TestCase):
             "append_points = rospy.ServiceProxy('pathloader/appendPoints', ChangePath)")
         parser.extract_service(
             "s = rospy.Service('add_two_ints', AddTwoInts, handle_add_two_ints)")
+        parser.extract_action(
+            "self._as = actionlib.SimpleActionServer(self._action_name, actionlib_tutorials.msg.FibonacciAction, execute_cb=self.execute_cb, auto_start=False)")
         parser.node.node_to_md_file()
         self.assertTrue(
           os.path.isfile("README.md"))

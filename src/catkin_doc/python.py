@@ -127,3 +127,20 @@ class PythonParser(object):
             self.node.add_service(name, type)
             return True
         return False
+
+    def extract_action(self, line):
+        """
+        Check whether a line contains an action.
+        Returns True if line contains an action and False otherwise.
+        """
+        match = re.search("(SimpleActionServer\()(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+\)", line)
+        if match:
+            print(match.groups())
+            name = str(match.group(3))
+            print('Action: ', name)
+
+            type = str(match.group(6))
+            print('used action-type: ', type)
+            self.node.add_action(name, type)
+            return True
+        return False

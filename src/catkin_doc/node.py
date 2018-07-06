@@ -9,6 +9,7 @@ class Node(object):
         self._action_clients = dict()
         self._service_clients = dict()
         self._services = dict()
+        self._actions = dict()
         self._file = None
 
     def add_parameter(self, parameter_name, default_value=None):
@@ -28,6 +29,9 @@ class Node(object):
 
     def add_service(self, name, type):
         self._services[name] = type
+
+    def add_action(self, name, type):
+        self._actions[name] = type
 
     def parameters_to_md(self):
         md = "## Parameter\n"
@@ -55,6 +59,12 @@ class Node(object):
             client = client + "Action client for action topic: " + action_server + " and action " + self._action_clients[action_server] + "\n"
         return client
 
+    def action_to_md(self):
+        act = "## Actions\n"
+        for action in self._actions:
+            act = act + "Action: " + action + " and action-type: " + self._actions[action] + "\n"
+        return act
+
     def service_clients_to_md(self):
         client = "## Service Client\n"
         for service in self._service_clients:
@@ -74,8 +84,9 @@ class Node(object):
         action_clients = self.action_clients_to_md()
         service_clients = self.service_clients_to_md()
         srvs = self.service_to_md()
+        actions = self.action_to_md()
 
-        md = params + subs + pubs + action_clients + service_clients + srvs
+        md = params + subs + pubs + action_clients + service_clients + srvs + actions
         return md
 
 
