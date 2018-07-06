@@ -62,6 +62,17 @@ class TestPython(unittest.TestCase):
         self.assertFalse(
             parser.extract_action_clients( "rospy.loginfo('~stop_robot_topic')"))
 
+    def test_service_clients(self):
+        parser = catkin_doc.python.PythonParser()
+        self.assertTrue(
+            parser.extract_service_clients(
+                "append_points = rospy.ServiceProxy('pathloader/appendPoints', ChangePath)"))
+
+    def test_service_clients_false(self):
+        parser = catkin_doc.python.PythonParser()
+        self.assertFalse(
+            parser.extract_service_clients( "rospy.loginfo('~stop_robot_topic')"))
+
     def test_file_exist(self):
         parser = catkin_doc.python.PythonParser()
         parser.extract_params(
@@ -74,6 +85,8 @@ class TestPython(unittest.TestCase):
             "pub = rospy.Publisher('chatter', String, queue_size=10)")
         parser.extract_action_clients(
             "self.action_client = actionlib.SimpleActionClient('pathloader', PlayTrajectoryAction)")
+        parser.extract_service_clients(
+            "append_points = rospy.ServiceProxy('pathloader/appendPoints', ChangePath)")
         parser.node.node_to_md_file()
         self.assertTrue(
           os.path.isfile("README.md"))

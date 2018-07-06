@@ -7,6 +7,7 @@ class Node(object):
         self._subscriber = dict()
         self._publisher = dict()
         self._action_clients = dict()
+        self._service_clients = dict()
         self._file = None
 
     def add_parameter(self, parameter_name, default_value=None):
@@ -21,6 +22,8 @@ class Node(object):
     def add_action_client(self, action_server, action):
         self._action_clients[action_server] = action
 
+    def add_service_client(self,service_topic, msg_type):
+        self._service_clients[service_topic] = msg_type
 
     def parameters_to_md(self):
         md = "## Parameter\n"
@@ -45,7 +48,13 @@ class Node(object):
     def action_clients_to_md(self):
         client = "## Action Clients\n"
         for action_server in self._action_clients:
-            client = client + "Action client for action topic: " + action_server + " and action" + self._action_clients[action_server]
+            client = client + "Action client for action topic: " + action_server + " and action " + self._action_clients[action_server] + "\n"
+        return client
+
+    def service_clients_to_md(self):
+        client = "## Service Client\n"
+        for service in self._service_clients:
+            client = "service: " + service + " used msg-type: "  + self._service_clients[service] + "\n"
         return client
 
     def node_to_md(self):
@@ -53,8 +62,9 @@ class Node(object):
         subs = self.subscriber_to_md()
         pubs = self.publisher_to_md()
         action_clients = self.action_clients_to_md()
+        service_clients = self.service_clients_to_md()
 
-        md = params + subs + pubs + action_clients
+        md = params + subs + pubs + action_clients + service_clients
 
         return md
 

@@ -93,3 +93,20 @@ class PythonParser(object):
             self.node.add_action_client(topic, action)
             return True
         return False
+
+    def extract_service_clients(self, line):
+        """
+        Check whether a line contains an service client.
+        Returns True if line contains an service client and False otherwise.
+        """
+        match = re.search("(ServiceProxy\()(\'|\")(\S+)(\'|\")(, (\S+))\)", line)
+        if match:
+            print(match.groups())
+            topic = str(match.group(3))
+            print('Service topic: ', topic)
+
+            type = str(match.group(6))
+            print('used msg-type: ', type)
+            self.node.add_service_client(topic, type)
+            return True
+        return False
