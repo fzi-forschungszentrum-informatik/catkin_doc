@@ -20,6 +20,12 @@ class PythonParser(object):
             lines = filecontent.readlines()
             for line in lines:
                 self.extract_params(line)
+                self.extract_subs(line)
+                self.extract_pubs(line)
+                self.extract_action_clients(line)
+                self.extract_service_clients(line)
+                self.extract_service(line)
+                self.extract_action(line)
         self.node.node_to_md()
 
 
