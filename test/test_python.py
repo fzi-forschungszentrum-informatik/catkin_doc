@@ -37,6 +37,20 @@ class TestPython(unittest.TestCase):
         self.assertFalse(
             parser.extract_subs( "rospy.loginfo('~stop_robot_topic')"))
 
+    def test_extract_pubs(self):
+        parser = catkin_doc.python.PythonParser()
+        self.assertTrue(
+            parser.extract_pubs(
+                "pub = rospy.Publisher('chatter', String, queue_size=10)"))
+        self.assertTrue(
+            parser.extract_pubs(
+                "pub = rospy.Publisher('chatter', String, queue_size=10, latch=True)"))
+
+    def test_extract_pubs_false(self):
+        parser = catkin_doc.python.PythonParser()
+        self.assertFalse(
+            parser.extract_pubs( "rospy.loginfo('~stop_robot_topic')"))
+
     def test_file_exist(self):
         parser = catkin_doc.python.PythonParser()
         parser.extract_params(
@@ -45,6 +59,8 @@ class TestPython(unittest.TestCase):
           "self.stop_robot_topic = rospy.get_param('~start_robot_topic')")
         parser.extract_subs(
             'self.joint_state_sub = rospy.Subscriber("pathloader/reordered_joint_states", JointState, self.joint_status_changed)')
+        parser.extract_pubs(
+            "pub = rospy.Publisher('chatter', String, queue_size=10)")
         parser.node.node_to_md()
         self.assertTrue(
           os.path.isfile("README.md"))

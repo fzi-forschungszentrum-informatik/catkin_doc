@@ -59,3 +59,20 @@ class PythonParser(object):
             self.node.add_subscriber(topic, topic_type)
             return True
         return False
+
+    def extract_pubs(self, line):
+        """
+        Check whether a line contains a Publisher to a topic.
+        Returns True if line contains a Publisher and False otherwise.
+        """
+        match = re.search("(Publisher\()(\'|\")(\S+)(\'|\")(, (\S+))(, (\S+))+\)", line)
+        if match:
+            print(match.groups())
+            topic = str(match.group(3))
+            print('Published topic: ', topic)
+
+            topic_type = str(match.group(6))
+            print('Msg type on topic: ', topic_type)
+            self.node.add_publisher(topic, topic_type)
+            return True
+        return False
