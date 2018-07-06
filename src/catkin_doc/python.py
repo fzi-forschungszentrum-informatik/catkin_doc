@@ -29,15 +29,15 @@ class PythonParser(object):
         Returns True when parameter is found, False otherwise. Parameter name and value will be
         saved in members.
         """
-        match = re.search("(get_param\()\'(\S+)\'(, (\S+))?\)", line)
+        match = re.search("(get_param\()(\'|\")(\S+)(\'|\")(, (\S+))?\)", line)
         if match:
             print(match.groups())
-            parameter_name = str(match.group(2)).strip('\'')
+            parameter_name = str(match.group(3)).strip('\'')
 
             print('Parameter name: ', parameter_name)
             self._node.add_parameter(parameter_name)
 
-            parameter_value = str(match.group(4)).strip('\'')
+            parameter_value = str(match.group(6)).strip('\'')
             print('Default value: ', parameter_value)
             if not match.group(4):
                parameter_value = None
