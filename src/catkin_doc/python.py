@@ -18,7 +18,10 @@ class PythonParser(object):
     def init_from_filename(self, filename):
         with open(filename) as filecontent:
             lines = filecontent.readlines()
-            for line in lines:
+            #TODO: find out if there is a nicer way to handel statements over more lines than concatenating lines
+            i = 0
+            while i < len(lines) - 2:
+                line = lines[i].lstrip(' ').strip('\n') + lines[i+1].lstrip(' ').strip('\n') + lines[i+2].lstrip(' ')
                 self.extract_params(line)
                 self.extract_subs(line)
                 self.extract_pubs(line)
@@ -26,6 +29,7 @@ class PythonParser(object):
                 self.extract_service_clients(line)
                 self.extract_service(line)
                 self.extract_action(line)
+                i= i + 1
         self.node.node_to_md()
 
 
