@@ -34,48 +34,69 @@ class Node(object):
         self._actions[name] = type
 
     def parameters_to_md(self):
-        md = "## Parameter\n"
+        md = "## Parameters\n"
+        md += "<dl>\n"
         for param in self._parameters:
-          md = md + param + ": "
+          md += "  <dt>" + param
           if self._parameters[param]:
-            md = md + "default:" + self._parameters[param] + "\n"
+            md += "( default : " + self._parameters[param] + ")"
+          md += "</dt>\n  <dd>Please add description here.</dd>\n"
+        md += "</dl>\n \n"
         return md
 
     def subscriber_to_md(self):
-        sub = "## Subscriber\n"
+        md = "## Subscribed Topics\n"
+        md += "<dl>\n"
         for topic in self._subscriber:
-          sub = sub + "topic: "+ topic + " msg-type: " + self._subscriber[topic] + "\n"
-        return sub
+          md += "  <dt>" + topic + " (" + self._subscriber[topic] + ") </dt>\n"
+          md += "  <dd>Please add description here.</dd>\n"
+        md += "</dl>\n \n"
+        return md
 
     def publisher_to_md(self):
-        pub = "## Publisher\n"
+        md = "## Published Topics\n"
+        md += "<dl>\n"
         for topic in self._publisher:
-          pub = pub + "topic: "+ topic + " msg-type: " + self._publisher[topic] + "\n"
-        return pub
+          md += "  <dt>" + topic + " (" + self._publisher[topic] + ") </dt>\n"
+          md += "  <dd>Please add description here.</dd>\n"
+        md += "</dl>\n \n"
+        return md
 
     def action_clients_to_md(self):
         client = "## Action Clients\n"
+        client += "<dl>\n"
         for action_server in self._action_clients:
-            client = client + "Action client for action topic: " + action_server + " and action " + self._action_clients[action_server] + "\n"
+            client += "  <dt>" + action_server + " (" + self._action_clients[action_server] + ") </dt>\n"
+            client += "  <dd>Please add description here.</dd>\n"
+        client += "</dl>\n \n"
         return client
 
     def action_to_md(self):
-        act = "## Actions\n"
+        md = "## Actions\n"
+        md += "<dl>\n"
         for action in self._actions:
-            act = act + "Action: " + action + " and action-type: " + self._actions[action] + "\n"
-        return act
+            md += "  <dt>" + action + " (" + self._actions[action] + ") </dt>\n"
+            md += "  <dd>Please add description here.</dd>\n"
+        md += "</dl>\n \n"
+        return md
 
     def service_clients_to_md(self):
-        client = "## Service Client\n"
+        md = "## Service Clients\n"
+        md += "<dl>\n"
         for service in self._service_clients:
-            client = client + "service: " + service + " used service-type: "  + self._service_clients[service] + "\n"
-        return client
+            md += "  <dt>" + service + " ("  + self._service_clients[service] + ") </dt>\n"
+            md += "  <dd>Please add description here.</dd>\n"
+        md += "</dl>\n \n"
+        return md
 
     def service_to_md(self):
-        srv = "## Services\n"
+        md = "## Services\n"
+        md += "<dl>\n"
         for service in self._services:
-            srv = srv + "Name: " + service + " srv-type: " + self._services[service] + "\n"
-        return srv
+            md += "  <dt>" + service + " ("  + self._services[service] + ") </dt>\n"
+            md += "  <dd>Please add description here.</dd>\n"
+        md += "</dl>\n \n"
+        return md
 
     def node_to_md(self):
         params = self.parameters_to_md()
