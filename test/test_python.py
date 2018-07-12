@@ -95,6 +95,12 @@ class TestPython(unittest.TestCase):
         self.assertFalse(
             parser.extract_action( "rospy.loginfo('~stop_robot_topic')"))
 
+    def test_comment(self):
+        parser = catkin_doc.python.PythonParser()
+        self.assertTrue(
+            parser.extract_comment(
+                "#This should be recognized as comment") == "This should be recognized as comment")
+
     def test_file_exist(self):
         parser = catkin_doc.python.PythonParser()
         parser.extract_params(

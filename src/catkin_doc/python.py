@@ -19,17 +19,34 @@ class PythonParser(object):
         with open(filename) as filecontent:
             lines = filecontent.readlines()
             #TODO: find out if there is a nicer way to handel statements over more lines than concatenating lines
-            i = 0
-            while i < len(lines) - 2:
-                line = lines[i].lstrip(' ').strip('\n') + ' ' +  lines[i+1].lstrip(' ').strip('\n') + ' ' + lines[i+2].lstrip(' ')
-                self.extract_params(line)
-                self.extract_subs(line)
-                self.extract_pubs(line)
-                self.extract_action_clients(line)
-                self.extract_service_clients(line)
-                self.extract_service(line)
-                self.extract_action(line)
-                i= i + 1
+            linenumber = 0
+            while linenumber < len(lines) - 2:
+                line = lines[linenumber].lstrip(' ').strip('\n') + ' ' +  lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + lines[linenumber+2].lstrip(' ')
+                param = self.extract_params(line)
+                subs = self.extract_subs(line)
+                pubs = self.extract_pubs(line)
+                a_clients = self.extract_action_clients(line)
+                s_clients = self.extract_service_clients(line)
+                serv = self.extract_service(line)
+                act = self.extract_action(line)
+
+                #From here on comment extraction
+                if param or subs or pubs or a_clients or s_clients or serv or act :
+                    print("Try to extract comments")
+                    still_comment = True
+                    comment = ''
+                    line_of_comment = linenumber -1
+                    while still_comment:
+                        comm_line = self.extract_comment(lines[line_of_comment])
+                        if comm_line:
+                            comment = comm_line + " "  + comment
+                            line_of_comment -= 1
+                        else:
+                            still_comment = False
+                    if comment != '':
+                      print(comment)
+                      self.node.add_comment(comment)
+                linenumber += 1
         self.node.node_to_md()
 
 
@@ -47,9 +64,9 @@ class PythonParser(object):
 
             parameter_value = str(match.group(6)).strip('\'')
             print('Default value: ', parameter_value)
-            if not match.group(4):
-               parameter_value = None
             self.node.add_parameter(parameter_name, parameter_value)
+
+
             return True
         return False
 
@@ -154,3 +171,10 @@ class PythonParser(object):
             self.node.add_action(name, type)
             return True
         return False
+
+    def extract_comment(self, line):
+        comment = None
+        match = re.match("( )*(#)(.*)", line)
+        if match:
+            comment = str(match.group(3))
+        return comment
