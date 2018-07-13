@@ -10,47 +10,53 @@ import catkin_doc.node
 
 class PythonParser(object):
     """Parser for python nodes which fills the node representation"""
-    def __init__(self):
-        self.node = catkin_doc.node.Node()
-
-
-
-    def init_from_filename(self, filename):
+    def __init__(self, filename):
+        self.node = catkin_doc.node.Node(filename)
+        self.parser_fcts = [(self.extract_param, self.add_param), (self.extract_sub, self.add_sub), (self.extract_pub, self.add_pub), (self.extract_action_client, self.add_action_client),
+                            (self.extract_service_client, self.add_service_client), (self.extract_service, self.add_service), (self.extract_action, self. add_action)]
         with open(filename) as filecontent:
-            lines = filecontent.readlines()
-            #TODO: find out if there is a nicer way to handel statements over more lines than concatenating lines
-            linenumber = 0
-            while linenumber < len(lines) - 2:
-                line = lines[linenumber].lstrip(' ').strip('\n') + ' ' +  lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + lines[linenumber+2].lstrip(' ')
-                param = self.extract_params(line)
-                subs = self.extract_subs(line)
-                pubs = self.extract_pubs(line)
-                a_clients = self.extract_action_clients(line)
-                s_clients = self.extract_service_clients(line)
-                serv = self.extract_service(line)
-                act = self.extract_action(line)
-
-                #From here on comment extraction
-                if param or subs or pubs or a_clients or s_clients or serv or act :
-                    print("Try to extract comments")
-                    still_comment = True
-                    comment = ''
-                    line_of_comment = linenumber -1
-                    while still_comment:
-                        comm_line = self.extract_comment(lines[line_of_comment])
-                        if comm_line:
-                            comment = comm_line + " "  + comment
-                            line_of_comment -= 1
-                        else:
-                            still_comment = False
-                    if comment != '':
-                      print(comment)
-                      self.node.add_comment(comment)
-                linenumber += 1
-        self.node.node_to_md()
+            self.lines = filecontent.readlines()
 
 
-    def extract_params(self, line):
+
+    def parse(self):
+        """
+        Parses the lines extracted from file in init method.
+        Therefore extract and add all relevant features from python node including comments on them.
+        """
+        #TODO: find out if there is a nicer way to handel statements over more lines than concatenating lines
+        linenumber = 0
+        while linenumber < len(self.lines) - 2:
+            line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +  self.lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + self.lines[linenumber+2].lstrip(' ')
+
+            for extract,add in self.parser_fcts:
+                success, key, value = extract(line)
+                if success:
+                    comment = self.search_for_comment(linenumber)
+                    add(key, value, comment)
+
+            linenumber += 1
+
+
+    def search_for_comment(self, linenumber):
+        """
+        searches for commented lines right above the given linenumber until one line without comment is found
+        """
+        still_comment = True
+        comment = ''
+        line_of_comment = linenumber -1
+        while still_comment:
+            comm_line = self.extract_comment(self.lines[line_of_comment])
+            if comm_line:
+                comment = comm_line + " "  + comment
+                line_of_comment -= 1
+            else:
+                still_comment = False
+        return comment
+
+
+
+    def extract_param(self, line):
         """
         Check whether a line contains a parameter definition and extract parameters.
         Returns True when parameter is found, False otherwise. Parameter name and value will be
@@ -64,13 +70,16 @@ class PythonParser(object):
 
             parameter_value = str(match.group(6)).strip('\'')
             print('Default value: ', parameter_value)
-            self.node.add_parameter(parameter_name, parameter_value)
+            return True, parameter_name, parameter_value
+        return False, None, None
 
+    def add_param(self, name, value, comment):
+        """
+        Add given param + value + comment to node
+        """
+        self.node.add_parameter(name, value, comment)
 
-            return True
-        return False
-
-    def extract_subs(self, line):
+    def extract_sub(self, line):
         """
         Check whether a line contains a Subscriber to a topic.
         Returns True if line contains a subscriber and False otherwise.
@@ -83,11 +92,18 @@ class PythonParser(object):
 
             topic_type = str(match.group(6))
             print('Msg type on topic: ', topic_type)
-            self.node.add_subscriber(topic, topic_type)
-            return True
-        return False
 
-    def extract_pubs(self, line):
+            return True, topic, topic_type
+        return False, None, None
+
+    def add_sub(self, topic, msg_type, comment):
+        """
+        Add given subscriber + msg_type + comment to node
+        """
+        self.node.add_subscriber(topic, msg_type, comment)
+
+
+    def extract_pub(self, line):
         """
         Check whether a line contains a Publisher to a topic.
         Returns True if line contains a Publisher and False otherwise.
@@ -100,11 +116,16 @@ class PythonParser(object):
 
             topic_type = str(match.group(6))
             print('Msg type on topic: ', topic_type)
-            self.node.add_publisher(topic, topic_type)
-            return True
-        return False
+            return True, topic, topic_type
+        return False, None, None
 
-    def extract_action_clients(self, line):
+    def add_pub(self, topic, msg_type, comment):
+        """
+        Add given publisher + msg_type + comment to node
+        """
+        self.node.add_publisher(topic, msg_type, comment)
+
+    def extract_action_client(self, line):
         """
         Check whether a line contains an action client.
         Returns True if line contains an action client and False otherwise.
@@ -117,11 +138,17 @@ class PythonParser(object):
 
             action = str(match.group(6))
             print('Action: ', action)
-            self.node.add_action_client(topic, action)
-            return True
-        return False
+            return True, topic, action
+        return False, None, None
 
-    def extract_service_clients(self, line):
+    def add_action_client(self, topic, action, comment):
+        """
+        Add given topic + action + comment to node
+        """
+        self.node.add_action_client(topic, action, comment)
+
+
+    def extract_service_client(self, line):
         """
         Check whether a line contains an service client.
         Returns True if line contains an service client and False otherwise.
@@ -134,9 +161,15 @@ class PythonParser(object):
 
             type = str(match.group(6))
             print('used srv-type: ', type)
-            self.node.add_service_client(topic, type)
-            return True
-        return False
+            return True, topic, type
+        return False, None, None
+
+    def add_service_client(self, topic, type, comment):
+        """
+        Adds service client to node with given topic + type + comment
+        """
+        self.node.add_service_client(topic, type, comment)
+
 
     def extract_service(self, line):
         """
@@ -151,9 +184,15 @@ class PythonParser(object):
 
             type = str(match.group(6))
             print('used srv-type: ', type)
-            self.node.add_service(name, type)
-            return True
-        return False
+
+            return True, name, type
+        return False, None, None
+
+    def add_service(self, name, type, comment):
+        """
+        Adds servcie to node with given name, type and comment
+        """
+        self.node.add_service(name, type, comment)
 
     def extract_action(self, line):
         """
@@ -168,11 +207,21 @@ class PythonParser(object):
 
             type = str(match.group(6))
             print('used action-type: ', type)
-            self.node.add_action(name, type)
-            return True
-        return False
+
+            return True, name, type
+        return False, None, None
+
+    def add_action(self, name, type, comment):
+        """
+        Add action to node with given name, type and comment
+        """
+        self.node.add_action(name, type, comment)
 
     def extract_comment(self, line):
+        """
+        Checks whether the line contains an comment
+        If so method returns comment, None otherwise
+        """
         comment = None
         match = re.match("( )*(#)(.*)", line)
         if match:

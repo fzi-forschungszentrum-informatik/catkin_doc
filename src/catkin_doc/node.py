@@ -2,7 +2,8 @@
 
 class Node(object):
     """An abstract representation for a ROS node"""
-    def __init__(self):
+    def __init__(self, name):
+        self.filename = name
         self._parameters = dict()
         self._subscriber = dict()
         self._publisher = dict()
@@ -10,51 +11,42 @@ class Node(object):
         self._service_clients = dict()
         self._services = dict()
         self._actions = dict()
-        self._comments = dict()
-        self._last_key = ''
 
-    def add_parameter(self, parameter_name, default_value="-"):
-        self._parameters[parameter_name] = default_value
 
-    def add_subscriber(self, topic, msg_type):
-        self._subscriber[topic] = msg_type
-        self._last_key = topic
+    def add_parameter(self, parameter_name, default_value, comment):
+        self._parameters[parameter_name] = (default_value, comment)
 
-    def add_publisher(self, topic, msg_type):
-        self._publisher[topic] = msg_type
-        self._last_key = topic
+    def add_subscriber(self, topic, msg_type, comment):
+        self._subscriber[topic] = (msg_type, comment)
 
-    def add_action_client(self, action_server, action):
-        self._action_clients[action_server] = action
-        self._last_key = action_server
+    def add_publisher(self, topic, msg_type, comment):
+        self._publisher[topic] = (msg_type, comment)
 
-    def add_service_client(self, service_topic, srv_type):
-        self._service_clients[service_topic] = srv_type
-        self._last_key = service_topic
+    def add_action_client(self, action_server, action, comment):
+        self._action_clients[action_server] = (action, comment)
 
-    def add_service(self, name, srv_type):
-        self._services[name] = srv_type
-        self._last_key = name
+    def add_service_client(self, service_topic, srv_type, comment):
+        self._service_clients[service_topic] = (srv_type, comment)
 
-    def add_action(self, name, act_type):
-        self._actions[name] = act_type
-        self._last_key = name
+    def add_service(self, name, srv_type, comment):
+        self._services[name] = (srv_type, comment)
 
-    def add_comment(self, comment):
-        self._comments[self._last_key] = comment
+    def add_action(self, name, act_type, comment):
+        self._actions[name] = (act_type, comment)
 
     def parameters_to_md(self):
         md = "## Parameters\n"
         md += "<dl>\n"
         for param in self._parameters:
+            default_value, comment = self._parameters[param]
             md += "  <dt>" + param
             if self._parameters[param] != "None":
-                md += "( default : " + self._parameters[param] + ")"
+                md += "( default : " + default_value + ")"
             else:
                 md += "( default : - )"
 
-            if param in self._comments:
-                md += " <dd>" + self._comments[param] + "</dd>\n"
+            if comment != "":
+                md += "  <dd>" + comment + "</dd>\n"
             else:
                 md += "</dt>\n  <dd>Please add description here.</dd>\n"
         md += "</dl>\n \n"
@@ -64,9 +56,10 @@ class Node(object):
         md = "## Subscribed Topics\n"
         md += "<dl>\n"
         for topic in self._subscriber:
-            md += "  <dt>" + topic + " (" + self._subscriber[topic] + ") </dt>\n"
-            if topic in self._comments:
-                md += " <dd>" + self._comments[topic] + "</dd>\n"
+            msg_type, comment = self._subscriber[topic]
+            md += "  <dt>" + topic + " (" + msg_type + ") </dt>\n"
+            if comment != "":
+                md += "  <dd>" + comment + "</dd>\n"
             else:
                 md += "  <dd>Please add description here.</dd>\n"
         md += "</dl>\n \n"
@@ -76,33 +69,36 @@ class Node(object):
         md = "## Published Topics\n"
         md += "<dl>\n"
         for topic in self._publisher:
-            md += "  <dt>" + topic + " (" + self._publisher[topic] + ") </dt>\n"
-            if topic in self._comments:
-                md += " <dd>" + self._comments[topic] + "</dd>\n"
+            msg_type, comment = self._publisher[topic]
+            md += "  <dt>" + topic + " (" + msg_type + ") </dt>\n"
+            if comment != "":
+                md += "  <dd>" + comment + "</dd>\n"
             else:
                 md += "  <dd>Please add description here.</dd>\n"
         md += "</dl>\n \n"
         return md
 
     def action_clients_to_md(self):
-        client = "## Action Clients\n"
-        client += "<dl>\n"
+        md = "## Action Clients\n"
+        md += "<dl>\n"
         for action_server in self._action_clients:
-            client += "  <dt>" + action_server + " (" + self._action_clients[action_server] + ") </dt>\n"
-            if action_server in self._comments:
-                client += " <dd>" + self._comments[action_server] + "</dd>\n"
+            msg_type, comment = self._action_clients[action_server]
+            md += "  <dt>" + action_server + " (" + msg_type + ") </dt>\n"
+            if comment != "":
+                md += "  <dd>" + comment + "</dd>\n"
             else:
-                client += "  <dd>Please add description here.</dd>\n"
-        client += "</dl>\n \n"
-        return client
+                md += "  <dd>Please add description here.</dd>\n"
+        md += "</dl>\n \n"
+        return md
 
     def action_to_md(self):
         md = "## Actions\n"
         md += "<dl>\n"
         for action in self._actions:
-            md += "  <dt>" + action + " (" + self._actions[action] + ") </dt>\n"
-            if action in self._comments:
-                md += " <dd>" + self._comments[action] + "</dd>\n"
+            msg_type, comment = self._actions[action]
+            md += "  <dt>" + action + " (" + msg_type + ") </dt>\n"
+            if comment != "":
+                md += "  <dd>" + comment + "</dd>\n"
             else:
                 md += "  <dd>Please add description here.</dd>\n"
         md += "</dl>\n \n"
@@ -112,9 +108,10 @@ class Node(object):
         md = "## Service Clients\n"
         md += "<dl>\n"
         for service in self._service_clients:
-            md += "  <dt>" + service + " ("  + self._service_clients[service] + ") </dt>\n"
-            if service in self._comments:
-                md += " <dd>" + self._comments[service] + "</dd>\n"
+            msg_type, comment = self._service_clients[service]
+            md += "  <dt>" + service + " ("  + msg_type + ") </dt>\n"
+            if comment != "":
+                md += "  <dd>" + comment + "</dd>\n"
             else:
                 md += "  <dd>Please add description here.</dd>\n"
         md += "</dl>\n \n"
@@ -124,9 +121,10 @@ class Node(object):
         md = "## Services\n"
         md += "<dl>\n"
         for service in self._services:
-            md += "  <dt>" + service + " ("  + self._services[service] + ") </dt>\n"
-            if service in self._comments:
-                md += " <dd>" + self._comments[service] + "</dd>\n"
+            msg_type, comment = self._services[service]
+            md += "  <dt>" + service + " ("  + msg_type + ") </dt>\n"
+            if comment != "":
+                md += "  <dd>" + comment + "</dd>\n"
             else:
                 md += "  <dd>Please add description here.</dd>\n"
         md += "</dl>\n \n"
