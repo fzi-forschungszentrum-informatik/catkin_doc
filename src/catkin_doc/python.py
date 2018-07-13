@@ -227,3 +227,9 @@ class PythonParser(object):
         if match:
             comment = str(match.group(3))
         return comment
+
+    def get_node(self):
+        """
+        Returns the Node Object
+        """
+        return self.node
