@@ -12,8 +12,13 @@ class PythonParser(object):
     """Parser for python nodes which fills the node representation"""
     def __init__(self, filename):
         self.node = catkin_doc.node.Node(filename)
-        self.parser_fcts = [(self.extract_param, self.add_param), (self.extract_sub, self.add_sub), (self.extract_pub, self.add_pub), (self.extract_action_client, self.add_action_client),
-                            (self.extract_service_client, self.add_service_client), (self.extract_service, self.add_service), (self.extract_action, self. add_action)]
+        self.parser_fcts = [(self.extract_param, self.add_param),
+                            (self.extract_sub, self.add_sub),
+                            (self.extract_pub, self.add_pub),
+                            (self.extract_action_client, self.add_action_client),
+                            (self.extract_service_client, self.add_service_client),
+                            (self.extract_service, self.add_service),
+                            (self.extract_action, self. add_action)]
         with open(filename) as filecontent:
             self.lines = filecontent.readlines()
 
