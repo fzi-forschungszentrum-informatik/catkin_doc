@@ -190,7 +190,7 @@ class PythonParser(object):
 
     def add_service(self, name, type, comment):
         """
-        Adds servcie to node with given name, type and comment
+        Adds service to node with given name, type and comment
         """
         self.node.add_service(name, type, comment)
 
