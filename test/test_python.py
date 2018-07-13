@@ -103,22 +103,6 @@ class TestPython(unittest.TestCase):
 
     def test_file_exist(self):
         parser = catkin_doc.python.PythonParser("setup.py")
-        parser.extract_param(
-          "self.stop_robot_topic = rospy.get_param('~stop_robot_topic', '/hello')")
-        parser.extract_param(
-          "self.stop_robot_topic = rospy.get_param('~start_robot_topic')")
-        parser.extract_sub(
-            'self.joint_state_sub = rospy.Subscriber("pathloader/reordered_joint_states", JointState, self.joint_status_changed)')
-        parser.extract_pub(
-            "pub = rospy.Publisher('chatter', String, queue_size=10)")
-        parser.extract_action_client(
-            "self.action_client = actionlib.SimpleActionClient('pathloader', PlayTrajectoryAction)")
-        parser.extract_service_client(
-            "append_points = rospy.ServiceProxy('pathloader/appendPoints', ChangePath)")
-        parser.extract_service(
-            "s = rospy.Service('add_two_ints', AddTwoInts, handle_add_two_ints)")
-        parser.extract_action(
-            "self._as = actionlib.SimpleActionServer(self._action_name, actionlib_tutorials.msg.FibonacciAction, execute_cb=self.execute_cb, auto_start=False)")
         parser.node.node_to_md_file()
         self.assertTrue(
           os.path.isfile("README.md"))
