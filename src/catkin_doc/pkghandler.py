@@ -13,12 +13,14 @@ class PkgHandler:
             elif os.path.isfile(pkg_name + "/" + filename):
               filetype = magic.from_file(pkg_name + "/" + filename)
               if ("python" in filetype) | ("Python" in filetype):
-                  self.check_if_ros_node(pkg_name + "/" + filename)
+                  if self.check_if_ros_node(pkg_name + "/" + filename):
+                      print(pkg_name + "/" + filename)
 
     def check_if_ros_node(self, filename):
         file = open(filename, "r")
         if "rospy.init_node" in file.read():
-            print(filename)
+            return True
+        return False
 
 
 
