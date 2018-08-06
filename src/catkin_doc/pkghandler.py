@@ -6,17 +6,19 @@ class PkgHandler:
     def __init__(self):
         pass
 
-    def search_for_python(self, pkg_name):
+    @staticmethod
+    def search_for_python(pkg_name):
         for filename in os.listdir(pkg_name):
             if os.path.isdir(pkg_name + "/" + filename):
-                self.search_for_python(pkg_name + "/" + filename)
+                PkgHandler.search_for_python(pkg_name + "/" + filename)
             elif os.path.isfile(pkg_name + "/" + filename):
               filetype = magic.from_file(pkg_name + "/" + filename)
               if ("python" in filetype) | ("Python" in filetype):
-                  if self.check_if_ros_node(pkg_name + "/" + filename):
+                  if PkgHandler.check_if_ros_node(pkg_name + "/" + filename):
                       print(pkg_name + "/" + filename)
 
-    def check_if_ros_node(self, filename):
+    @staticmethod
+    def check_if_ros_node(filename):
         file = open(filename, "r")
         if "rospy.init_node" in file.read():
             return True
