@@ -51,6 +51,7 @@ class PkgHandler:
                 self.parse_project_name(linenumber)
                 self.parse_executables(linenumber)
                 linenumber += 1
+            self.remove_not_nodes(pkg_name)
 
     def parse_project_name(self, linenumber):
         """
@@ -85,6 +86,19 @@ class PkgHandler:
             self.executables[exec_name] = cpp_files
 
 
+    def remove_not_nodes(self, pkg_name):
+        """
+        Method to remove executables which are not ros nodes.
+        This is done by checking if one of the corresponding files contains ros::init()
+        """
+        for key in self.executables:
+            node = False
+            for file in self.executables[key]:
+                content = open(pkg_name + "/" + file, "r")
+                if "ros::init" in content.read():
+                    node = True
+            if not node:
+                self.executables.pop(key)
 
 
 
