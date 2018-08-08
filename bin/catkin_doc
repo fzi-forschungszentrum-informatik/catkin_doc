@@ -7,8 +7,7 @@ def main():
     """Main worker function"""
     filename = "/home/mauch/robot_folders/checkout/euroc_usecase/catkin_ws/src/euroc_usecase/scripts/safety_guard.py"
 
-    python_node = catkin_doc.python.PythonNode()
-    python_node.init_from_filename(filename)
+    python_node = catkin_doc.python.PythonParser(filename)
 
 if __name__ == "__main__":
     main()

@@ -52,7 +52,7 @@ class PkgHandler:
                 self.parse_project_name(linenumber)
                 self.parse_executables(linenumber)
                 linenumber += 1
-            self.remove_not_nodes(self.pkg_name)
+            self.remove_not_nodes()
 
     def parse_project_name(self, linenumber):
         """
