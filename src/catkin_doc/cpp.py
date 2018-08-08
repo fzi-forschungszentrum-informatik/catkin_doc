@@ -12,3 +12,13 @@ class CppParser(object):
         self.lines = None
         self.parser_fcts = None
 
+    def parse_node(self):
+        """
+        Parses every file belonging to the node.
+        """
+        for file in self.files:
+            with open(filename) as filecontent:
+                self.lines = filecontent.readlines()
+
+
+
