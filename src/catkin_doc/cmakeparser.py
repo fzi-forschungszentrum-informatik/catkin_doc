@@ -1,8 +1,6 @@
 import os
 import re
-import clang.cindex
-
-class ClangParser:
+class CmakeListParser:
     __init__(self, pkg_name):
         self.pkg_name = pkg_name
         self.executables = dict()
@@ -11,17 +9,6 @@ class ClangParser:
             #each key in self.executables represents a ros Node therefore for each key a node representation should be filled also a node may consist of muliple cpp files
             for file in self.executables[node]:
                 self.parse_cpp_node_file(file)
-
-
-
-"""
-So the problem seems to be that clang is also just run on single files but than can handle includes etc.
-It seems like it may be necessary to find the necessary cpp file just by parsing the CmakeList or alternativlely run libclang on all cpp files which seems to be overhead.
-"""
-def parse_cpp_node_file(self, file):
-    index = clang.cindex.Index.create()
-    ast = index.parse(file)
-    #after receiving the ast of a file it will be necessary to extract the neccessary features of a rosnode
 
 
 def search_for_cpp_node(self):
