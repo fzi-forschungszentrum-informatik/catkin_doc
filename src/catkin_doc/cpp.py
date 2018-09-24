@@ -106,7 +106,7 @@ class CppParser(object):
         if match:
             service_name = str(match.group(3))
             service_type = str(match.group(2))
-            return True, service_name, service, type
+            return True, service_name, service_type
         return False, None, None
 
     def add_service(self, name, type, comment):
