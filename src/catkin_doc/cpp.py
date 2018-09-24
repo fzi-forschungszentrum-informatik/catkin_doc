@@ -15,15 +15,51 @@ class CppParser(object):
                             (self.extract_pub, self.add_pub),
                             (self.extract_service, self.add_service),
                             (self.extract_service_client, self.add_service_client),
-                            (self.extract_action_client, self.add_action_client)]
+                            (self.extract_action_client, self.add_action_client),
+                            (self.extract_action_server, self.add_action_server)]
         self.lines = None
+        self.parse_node()
 
 
     def parse_node(self):
         """parses all files belonging to cpp node"""
-        for file in files:
-            with open(filename) as filecontent:
+        for file in self.files:
+            with open(file) as filecontent:
                 self.lines = filecontent.readlines()
+                self.parse()
+
+    def parse(self):
+        """
+        Therefore extract and add all relevant features from python node including comments on them.
+        """
+        #TODO: find out if there is a nicer way to handel statements over more lines than concatenating lines
+        linenumber = 0
+        while linenumber < len(self.lines) - 2:
+            line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +  self.lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + self.lines[linenumber+2].lstrip(' ')
+
+            for extract,add in self.parser_fcts:
+                success, key, value = extract(line)
+                if success:
+                    comment = self.search_for_comment(linenumber)
+                    add(key, value, comment)
+
+            linenumber += 1
+
+    def search_for_comment(self, linenumber):
+        """
+        searches for commented lines right above the given linenumber until one line without comment is found
+        """
+        still_comment = True
+        comment = ''
+        line_of_comment = linenumber -1
+        while still_comment:
+            comm_line = self.extract_comment(self.lines[line_of_comment])
+            if comm_line:
+                comment = comm_line + " "  + comment
+                line_of_comment -= 1
+            else:
+                still_comment = False
+        return comment
 
     def extract_param(self, line):
         """
@@ -158,7 +194,7 @@ class CppParser(object):
         """
         Add given topic + action + comment to node
         """
-        self.node.add_action_client(topic, action, comment)
+        self.node.add_action_client(action, action, comment)
 
     def extract_action_server(self, line):
         """
@@ -175,7 +211,19 @@ class CppParser(object):
         """
         Add action to node with given name, type and comment
         """
-        self.node.add_action(name, type, comment)
+        self.node.add_action(type, type, comment)
+
+    def extract_comment(self, line):
+        """
+        Checks whether the line contains an comment
+        If so method returns comment, None otherwise
+        """
+        comment = None
+        match = re.match("( )*(//)(.*)", line)
+        if match:
+            comment = str(match.group(3))
+        return comment
+
 
 
 

@@ -110,6 +110,12 @@ class TestCpp(unittest.TestCase):
             node.extract_action_server(
                 ' ros_control_action_service = m_nh.resolveName(ros_control_action_service);')[0])
 
+    def test_comment(self):
+         node = catkin_doc.cpp.CppParser("test", ["setup.py"])
+         self.assertTrue(
+            node.extract_comment(
+                "//This should be recognized as comment") == "This should be recognized as comment")
+
     def test_file_exist(self):
         parser = catkin_doc.cpp.CppParser("test", ["setup.py"])
         succ, param , value = parser.extract_param(
