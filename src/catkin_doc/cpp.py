@@ -60,7 +60,6 @@ class CppParser(object):
         """
         self.node.add_parameter(name, value, comment)
 
-
     def extract_sub(self, line):
         """
         Check wheter given line contains a subscriber
@@ -79,4 +78,21 @@ class CppParser(object):
         """
         self.node.add_subscriber(topic, msg_type, comment)
 
+    def extract_pub(self, line):
+        """
+        Check wheter given line contains a publisher
+        Returns (True, topic, msg_type) if publisher is found, (False, None, None) otherwise.
+        """
+        match = re.search('advertise(<([^>]*)>)?\("([^"]*)",', line)
+        if match:
+            published_topic = str(match.group(3))
+            msg_type = str(match.group(2))
+            return True, published_topic, msg_type
+        return False, None, None
+
+    def add_pub(self, topic, msg_type, comment):
+        """
+        Add given publisher + msg_type + comment to node
+        """
+        self.node.add_publisher(topic, msg_type, comment)
 

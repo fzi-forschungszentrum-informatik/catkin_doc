@@ -41,5 +41,29 @@ class TestCpp(unittest.TestCase):
     def test_subscriber_false(self):
         node = catkin_doc.cpp.CppParser("test", ["setup.py"])
         self.assertFalse(
-            node.extract_param(
+            node.extract_sub(
                 ' ros_control_action_service = m_nh.resolveName(ros_control_action_service);')[0])
+
+    def test_publisher(self):
+        node = catkin_doc.cpp.CppParser("test", ["setup.py"])
+        self.assertTrue(
+            node.extract_pub(
+                'ros::Publisher pub = nh.advertise<std_msgs::String>("topic_name", 5);')[0])
+
+    def test_publisher_false(self):
+        node = catkin_doc.cpp.CppParser("test", ["setup.py"])
+        self.assertFalse(
+            node.extract_pub(
+                ' ros_control_action_service = m_nh.resolveName(ros_control_action_service);')[0])
+
+    def test_file_exist(self):
+        parser = catkin_doc.cpp.CppParser("test", ["setup.py"])
+        succ, param , value = parser.extract_param(
+          'ros::param::param<std::string>("param1", param1, "default_value1");')
+        parser.add_param(param, value, "Some kind of comment")
+        succ, sub , value = parser.extract_sub(
+           'm_start_stop_sub = m_glob_node_handle.subscribe("start_stop", 1, &PathLoader::startStopCallback, this);')
+        parser.add_sub(sub, value, "")
+        parser.node.node_to_md_file()
+        self.assertTrue(
+          os.path.isfile("README.md"))
