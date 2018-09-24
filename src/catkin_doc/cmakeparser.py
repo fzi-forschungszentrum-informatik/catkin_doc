@@ -1,14 +1,14 @@
 import os
 import re
+import catkin_doc.cpp
 class CmakeListParser:
     __init__(self, pkg_name):
         self.pkg_name = pkg_name
         self.executables = dict()
         self.search_for_cpp_node()
+        self.parser = list()
         for node in self.executables:
-            #each key in self.executables represents a ros Node therefore for each key a node representation should be filled also a node may consist of muliple cpp files
-            for file in self.executables[node]:
-                self.parse_cpp_node_file(file)
+            self.parser.add(catkin_doc.cpp.CppParser(self.pkg_name, self.executables[node]))
 
 
 def search_for_cpp_node(self):
