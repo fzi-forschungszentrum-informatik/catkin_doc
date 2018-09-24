@@ -100,7 +100,7 @@ class CppParser(object):
     def extract_service(self, line):
         """
         Check wheter a given line contains a Service advertisement
-        Returns (True, name, type) if service is found (FAlse, None, None) otherwise.
+        Returns (True, name, type) if service is found (False, None, None) otherwise.
         """
         match = re.search('advertiseService(<([^>]*)>)?\("([^"]*)",', line)
         if match:
@@ -114,5 +114,30 @@ class CppParser(object):
         Add given name+ type + comment as service to node
         """
         self.node.add_service(name, type, comment)
+
+    def extract_service_client(self, line):
+        """
+        Check whether a given line contains a service client.
+        Returns (True, service_topic, type) if service client is found, (FAlse, None, None) otherwise.
+        """
+        match = re.search('serviceClient(<([^>]*)>)?\("([^"]*)"', line)
+        if match:
+            service_topic = str(match.group(3))
+            service_type = str(match.group(2))
+            return True, service_topic, service_type
+
+        match = re.search('service::call\("([^"]*)", ([^,]+)\)', line)
+        if match:
+            service_topic = str(match.group(1))
+            service_type = str(match.group(2))
+            return True, service_topic, service_type
+        return False, None, None
+
+
+    def add_service_client(self, topic, type, comment):
+        """
+        Adds service client to node with given topic + type + comment
+        """
+        self.node.add_service_client(topic, type, comment)
 
 
