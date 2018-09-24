@@ -86,6 +86,18 @@ class TestCpp(unittest.TestCase):
             node.extract_service_client(
                 ' ros_control_action_service = m_nh.resolveName(ros_control_action_service);')[0])
 
+    def test_action_client(self):
+        node = catkin_doc.cpp.CppParser("test", ["setup.py"])
+        self.assertTrue(
+            node.extract_action_client(
+                'actionlib::SimpleActionClient<chores::DoDishesAction> Client;')[0])
+
+    def test_action_client_false(self):
+        node = catkin_doc.cpp.CppParser("test", ["setup.py"])
+        self.assertFalse(
+            node.extract_action_client(
+                ' ros_control_action_service = m_nh.resolveName(ros_control_action_service);')[0])
+
     def test_file_exist(self):
         parser = catkin_doc.cpp.CppParser("test", ["setup.py"])
         succ, param , value = parser.extract_param(

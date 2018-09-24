@@ -12,7 +12,10 @@ class CppParser(object):
         self.files = files
         self.parser_fcts = [(self.extract_param, self.add_param),
                             (self.extract_sub, self.add_sub),
-                            (self.extract_pub, self.add_pub)]
+                            (self.extract_pub, self.add_pub),
+                            (self.extract_service, self.add_service),
+                            (self.extract_service_client, self.add_service_client),
+                            (self.extract_action_client, self.add_action_client)]
         self.lines = None
 
 
@@ -118,7 +121,7 @@ class CppParser(object):
     def extract_service_client(self, line):
         """
         Check whether a given line contains a service client.
-        Returns (True, service_topic, type) if service client is found, (FAlse, None, None) otherwise.
+        Returns (True, service_topic, type) if service client is found, (False, None, None) otherwise.
         """
         match = re.search('serviceClient(<([^>]*)>)?\("([^"]*)"', line)
         if match:
@@ -139,5 +142,22 @@ class CppParser(object):
         Adds service client to node with given topic + type + comment
         """
         self.node.add_service_client(topic, type, comment)
+
+    def extract_action_client(self, line):
+        """
+        Function to extract action clients from given line.
+        Returns(True, action_name) if client is found (False, None, None) otherwise
+        """
+        match = re.search('actionlib::SimpleActionClient<([^>]*)>', line)
+        if match:
+            action_type = str(match.group(1))
+            return True, None, action_type
+        return False, None, None
+
+    def add_action_client(self, topic, action, comment):
+        """
+        Add given topic + action + comment to node
+        """
+        self.node.add_action_client(topic, action, comment)
 
 
