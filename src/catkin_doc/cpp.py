@@ -11,7 +11,8 @@ class CppParser(object):
         self.node = catkin_doc.node.Node(node_name)
         self.files = files
         self.parser_fcts = [(self.extract_param, self.add_param),
-                            (self.extract_sub, self.add_sub) ]
+                            (self.extract_sub, self.add_sub),
+                            (self.extract_pub, self.add_pub)]
         self.lines = None
 
 
@@ -95,4 +96,23 @@ class CppParser(object):
         Add given publisher + msg_type + comment to node
         """
         self.node.add_publisher(topic, msg_type, comment)
+
+    def extract_service(self, line):
+        """
+        Check wheter a given line contains a Service advertisement
+        Returns (True, name, type) if service is found (FAlse, None, None) otherwise.
+        """
+        match = re.search('advertiseService(<([^>]*)>)?\("([^"]*)",', line)
+        if match:
+            service_name = str(match.group(3))
+            service_type = str(match.group(2))
+            return True, service_name, service, type
+        return False, None, None
+
+    def add_service(self, name, type, comment):
+        """
+        Add given name+ type + comment as service to node
+        """
+        self.node.add_service(name, type, comment)
+
 

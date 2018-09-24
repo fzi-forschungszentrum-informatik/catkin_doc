@@ -56,6 +56,21 @@ class TestCpp(unittest.TestCase):
             node.extract_pub(
                 ' ros_control_action_service = m_nh.resolveName(ros_control_action_service);')[0])
 
+    def test_service(self):
+        node = catkin_doc.cpp.CppParser("test", ["setup.py"])
+        self.assertTrue(
+            node.extract_service(
+                'ros::ServiceServer srv = nh.advertiseService<std_srvs::Empty::Request, std_srvs::Empty::Response>("my_service", Foo());')[0])
+        self.assertTrue(
+            node.extract_service(
+                'ros::ServiceServer service = nh.advertiseService("my_service", &Foo::callback, &foo_object);')[0])
+
+    def test_service_false(self):
+        node = catkin_doc.cpp.CppParser("test", ["setup.py"])
+        self.assertFalse(
+            node.extract_service(
+                ' ros_control_action_service = m_nh.resolveName(ros_control_action_service);')[0])
+
     def test_file_exist(self):
         parser = catkin_doc.cpp.CppParser("test", ["setup.py"])
         succ, param , value = parser.extract_param(
