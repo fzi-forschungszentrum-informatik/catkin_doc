@@ -146,7 +146,7 @@ class CppParser(object):
     def extract_action_client(self, line):
         """
         Function to extract action clients from given line.
-        Returns(True, action_name) if client is found (False, None, None) otherwise
+        Returns(True, None,  action_type) if client is found (False, None, None) otherwise
         """
         match = re.search('actionlib::SimpleActionClient<([^>]*)>', line)
         if match:
@@ -159,5 +159,23 @@ class CppParser(object):
         Add given topic + action + comment to node
         """
         self.node.add_action_client(topic, action, comment)
+
+    def extract_action_server(self, line):
+        """
+        Function to extract action server from given line.
+        Returns (True, None, action_type) if server is found, (False, None, None) otherwise.
+        """
+        match = re.search('actionlib::SimpleActionServer<([^>]*)>', line)
+        if match:
+            action_type = str(match.group(1))
+            return True, None, action_type
+        return False, None, None
+
+    def add_action_server(self, name, type, comment):
+        """
+        Add action to node with given name, type and comment
+        """
+        self.node.add_action(name, type, comment)
+
 
 
