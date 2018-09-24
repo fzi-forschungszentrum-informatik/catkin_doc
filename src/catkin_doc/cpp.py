@@ -35,13 +35,14 @@ class CppParser(object):
         #TODO: find out if there is a nicer way to handel statements over more lines than concatenating lines
         linenumber = 0
         while linenumber < len(self.lines) - 2:
-            line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +  self.lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + self.lines[linenumber+2].lstrip(' ')
+            if not (self.lines[linenumber].lstrip(' ').startswith("//")):
+              line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +  self.lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + self.lines[linenumber+2].lstrip(' ')
 
-            for extract,add in self.parser_fcts:
-                success, key, value = extract(line)
-                if success:
-                    comment = self.search_for_comment(linenumber)
-                    add(key, value, comment)
+              for extract,add in self.parser_fcts:
+                  success, key, value = extract(line)
+                  if success:
+                      comment = self.search_for_comment(linenumber)
+                      add(key, value, comment)
 
             linenumber += 1
 

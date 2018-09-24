@@ -71,7 +71,9 @@ class Node(object):
         for param in self._parameters:
             default_value, comment = self._parameters[param]
             md += "  <dt>" + param
-            if self._parameters[param] != "None":
+            if default_value is not None:
+                print(default_value)
+                print(md)
                 md += "( default: " + default_value + ")"
             else:
                 md += "( default: - )"
