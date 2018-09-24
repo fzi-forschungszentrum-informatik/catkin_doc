@@ -4,31 +4,46 @@ import re
 import os
 import catkin_doc.node
 
+
 class CppParser(object):
 
     def __init__(self, node_name, files):
         self.node = catkin_doc.node.Node(node_name)
         self.files = files
+        self.parser_fnct = [(self.extract_param, self.add_param)]
         self.lines = None
-        self.parser_fcts = None
+
 
     def parse_node(self):
-        """
-        Parses every file belonging to the node.
-        """
-        #TODO same as in PythonParser concatenating lines is not so nice aslo it is not necessary to parse the header for anything but comments
-        for file in self.files:
+        """parses all files belonging to cpp node"""
+        for file in files:
             with open(filename) as filecontent:
                 self.lines = filecontent.readlines()
-                linenumber = 0
-            while linenumber < len(self.lines) - 2:
-                line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +  self.lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + self.lines[linenumber+2].lstrip(' ')
-                for extract,add in self.parser_fcts:
-                    success, key, value = extract(line)
-                    if success:
-                        comment = None
-                        add(key, value, comment)
-                linenumber += 1
+
+    def extract_param(self, line):
+        """
+        Check whether a line contains a parameter definition and extract parameters.
+        Returns True when parameter is found, False otherwise. Parameter name and value will be
+        saved in members.
+        """
+        match = re.search('param<([^>]*)>\("([^"]*)", [^,]+, ([^\)]+)\)', line)
+        if match:
+            print(match.groups())
+            parameter_name = str(match.group(2)).strip('\'')
+            print('Parameter name: ', parameter_name)
+
+            parameter_value = str(match.group(3)).strip('\'')
+            print('Default value: ', parameter_value)
+            return True, parameter_name, parameter_value
+
+        return False, None, None
+
+    def add_param(self, name, value, comment):
+        """
+        Add given param + value + comment to node
+        """
+        self.node.add_parameter(name, value, comment)
+
 
 
 
