@@ -10,7 +10,8 @@ class CppParser(object):
     def __init__(self, node_name, files):
         self.node = catkin_doc.node.Node(node_name)
         self.files = files
-        self.parser_fnct = [(self.extract_param, self.add_param)]
+        self.parser_fcts = [(self.extract_param, self.add_param),
+                            (self.extract_sub, self.add_sub) ]
         self.lines = None
 
 
@@ -23,8 +24,7 @@ class CppParser(object):
     def extract_param(self, line):
         """
         Check whether a line contains a parameter definition and extract parameters.
-        Returns True when parameter is found, False otherwise. Parameter name and value will be
-        saved in members.
+        Returns True when parameter is found, False otherwise.
         """
         match = re.search('param<([^>]*)>\("([^"]*)", [^,]+, ([^\)]+)\)', line)
         if match:
@@ -61,5 +61,22 @@ class CppParser(object):
         self.node.add_parameter(name, value, comment)
 
 
+    def extract_sub(self, line):
+        """
+        Check wheter given line contains a subscriber
+        Returns (True, topic, msg_type) if subscriber is found, (False, None, None) otherwise.
+        """
+        match = re.search('subscribe(<([^>]*)>)?\("([^"]*)",', line)
+        if match:
+            subscribed_topic = str(match.group(3))
+            msg_type = str(match.group(2))
+            return True, subscribed_topic, msg_type
+        return False, None, None
+
+    def add_sub(self, topic, msg_type, comment):
+        """
+        Add given subscriber + msg_type + comment to node
+        """
+        self.node.add_subscriber(topic, msg_type, comment)
 
 

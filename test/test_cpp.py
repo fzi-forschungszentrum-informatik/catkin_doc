@@ -22,3 +22,24 @@ class TestCpp(unittest.TestCase):
         self.assertTrue(
             node.extract_param(
                 'nh.param<std::string>("param4", param4, "default_value4");')[0])
+
+    def test_extract_params_false(self):
+        node = catkin_doc.cpp.CppParser("test", ["setup.py"])
+        self.assertFalse(
+            node.extract_param(
+                ' ros_control_action_service = m_nh.resolveName(ros_control_action_service);')[0])
+
+    def test_subscriber(self):
+        node = catkin_doc.cpp.CppParser("test", ["setup.py"])
+        self.assertTrue(
+            node.extract_sub(
+                ' m_start_stop_sub = m_glob_node_handle.subscribe("start_stop", 1, &PathLoader::startStopCallback, this);')[0])
+        self.assertTrue(
+            node.extract_sub(
+                'ros::Subscriber sub = nh.subscribe<std_msgs::String>("my_topic", 1, Foo());')[0])
+
+    def test_subscriber_false(self):
+        node = catkin_doc.cpp.CppParser("test", ["setup.py"])
+        self.assertFalse(
+            node.extract_param(
+                ' ros_control_action_service = m_nh.resolveName(ros_control_action_service);')[0])
