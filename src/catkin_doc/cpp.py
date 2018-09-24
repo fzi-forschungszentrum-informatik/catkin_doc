@@ -35,6 +35,22 @@ class CppParser(object):
             parameter_value = str(match.group(3)).strip('\'')
             print('Default value: ', parameter_value)
             return True, parameter_name, parameter_value
+        match = re.search('getParam\("([^"]*)", [^,]+\)', line)
+        if match:
+            print(match.groups())
+            parameter_name = str(match.group(1)).strip('\'')
+            print('Parameter name: ', parameter_name)
+
+            parameter_value = None
+            return True, parameter_name, parameter_value
+        match = re.search('param::get\("([^"]*)", [^,]+\)', line)
+        if match:
+            print(match.groups())
+            parameter_name = str(match.group(1)).strip('\'')
+            print('Parameter name: ', parameter_name)
+
+            parameter_value = None
+            return True, parameter_name, parameter_value
 
         return False, None, None
 

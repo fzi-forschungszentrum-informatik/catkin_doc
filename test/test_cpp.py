@@ -13,10 +13,10 @@ class TestCpp(unittest.TestCase):
         self.assertTrue(
             node.extract_param(
                 'ros::param::param<std::string>("param1", param1, "default_value1");')[0])
-        self.assertFalse(
+        self.assertTrue(
             node.extract_param(
                 'ros::param::get("/param2", param2)')[0])
-        self.assertFalse(
+        self.assertTrue(
             node.extract_param(
                 'nh.getParam("param3", param3)')[0])
         self.assertTrue(
