@@ -2,14 +2,16 @@
 import os
 import re
 import magic
+import catkin_doc.python
 
 class PkgHandler:
     def __init__(self, pkg_path):
-        self.lines = None
-        self.executables = dict()
+        self.executables = list()
+        self.parser = list()
         self.project_name = None
         self.pkg_path = pkg_path
-        pass
+        self.search_for_python()
+        self.create_parser()
 
 
 
@@ -25,7 +27,7 @@ class PkgHandler:
                 filetype = magic.from_file(self.pkg_path + "/" + filename)
                 if ("python" in filetype) | ("Python" in filetype):
                     if PkgHandler.check_if_ros_node(self.pkg_path + "/" + filename):
-                        print(self.pkg_path + "/" + filename)
+                        executables.add(self.pkg_path + "/" + filename)
 
     @staticmethod
     def check_if_ros_node(filename):
@@ -39,6 +41,9 @@ class PkgHandler:
             return True
         return False
 
+    def create_parser():
+        for file in executables:
+            parser.add(catkin_doc.python.PythonParser(file))
 
 
 
