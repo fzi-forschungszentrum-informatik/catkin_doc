@@ -183,7 +183,7 @@ class NodeConverter(object):
         srvs = self.service_to_rst()
         actions = self.action_to_rst()
 
-        rst = "# " + self.node.filename + "\n ===================================\n "
+        rst = self.node.filename + "\n===================================\n"
 
         rst += params + subs + pubs + action_clients + service_clients + srvs + actions
         return rst
@@ -198,9 +198,9 @@ class NodeConverter(object):
         else:
             rst += "Add type here)\n"
         if comment != "":
-            rst += "\t" + comment
+            rst += "\t" + comment + "\n"
         else:
-            rst += "\tPlease add description here"
+            rst += "\tPlease add description here\n"
         return rst
 
     def parameters_to_rst(self):
@@ -210,8 +210,12 @@ class NodeConverter(object):
         rst = "Parameter \n----------------------------------------------\n"
         for param in self.node.parameters:
             default_value, comment = self.node.parameters[param]
-            default_value_rst = "default value: " + default_value
+            if default_value is not None:
+                default_value_rst = "default value: " + default_value
+            else:
+                default_value_rst = "default value: -"
             rst += self. rst_definition(param, default_value_rst, comment)
+        rst += "\n"
         return rst
 
     def subscriber_to_rst(self):
@@ -222,6 +226,7 @@ class NodeConverter(object):
         for topic in self.node.subscriber:
             msg_type, comment = self.node.subscriber[topic]
             rst += self. rst_definition(topic, msg_type, comment)
+        rst += "\n"
         return rst
 
     def publisher_to_rst(self):
@@ -232,6 +237,7 @@ class NodeConverter(object):
         for topic in self.node.publisher:
             msg_type, comment = self.node.publisher[topic]
             rst += self. rst_definition(topic, msg_type, comment)
+        rst += "\n"
         return rst
 
     def action_clients_to_rst(self):
@@ -242,35 +248,39 @@ class NodeConverter(object):
         for action_server in self.node.action_clients:
             msg_type, comment = self.node.action_clients[action_server]
             rst += self. rst_definition(action_server, msg_type, comment)
+        rst += "\n"
         return rst
 
     def action_to_rst(self):
         """
         Turn action from node representation to rst
         """
-        rst = "Actions\\n----------------------------------------\n"
+        rst = "Actions\n----------------------------------------\n"
         for action in self.node.actions:
             msg_type, comment = self.node.actions[action]
             rst += self. rst_definition(action, msg_type, comment)
+        rst += "\n"
         return rst
 
     def service_clients_to_rst(self):
         """
         Turn service clients from node representation to rst
         """
-        rst =  "Service Clients\\n----------------------------------------\n"
+        rst =  "Service Clients\n----------------------------------------\n"
         for service in self.node.service_clients:
             msg_type, comment = self.node.service_clients[service]
             rst += self. rst_definition(service, msg_type, comment)
+        rst += "\n"
         return rst
 
     def service_to_rst(self):
         """
         Turn services from node representation to rst
         """
-        rst =  "Services\\n----------------------------------------\n"
+        rst =  "Services\n----------------------------------------\n"
         for service in self.node.services:
             msg_type, comment = self.node.services[service]
             rst += self. rst_definition(service, msg_type, comment)
+        rst += "\n"
         return rst
 

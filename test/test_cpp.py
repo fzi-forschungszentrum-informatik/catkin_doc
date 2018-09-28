@@ -116,14 +116,3 @@ class TestCpp(unittest.TestCase):
             node.extract_comment(
                 "//This should be recognized as comment") == "This should be recognized as comment")
 
-    def test_file_exist(self):
-        parser = catkin_doc.cpp.CppParser("test", ["setup.py"])
-        succ, param , value = parser.extract_param(
-          'ros::param::param<std::string>("param1", param1, "default_value1");')
-        parser.add_param(param, value, "Some kind of comment")
-        succ, sub , value = parser.extract_sub(
-           'm_start_stop_sub = m_glob_node_handle.subscribe("start_stop", 1, &PathLoader::startStopCallback, this);')
-        parser.add_sub(sub, value, "")
-        parser.node.node_to_md_file()
-        self.assertTrue(
-          os.path.isfile("README.md"))
