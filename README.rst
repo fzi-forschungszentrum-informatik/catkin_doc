@@ -16,7 +16,7 @@ Cpp-Nodes
 To get all cpp-nodes from your package you have to create a cmakeparser.
 So import the catkin_doc.cmakeparser module and then create a parser for your package by
 ::
-    parser = catkin_doc.cnakeparser.CmakeListParser("path\to\your\package")
+    cmakeparser = catkin_doc.cmakeparser.CmakeListParser("path\to\your\package")
     
 The cmakeparser will parse the CmakeList.txt and will create a cpp-parser for each executable which seems to be a ros node.
 To create a output file for your nodes you have to use the nodeconverter.
@@ -27,6 +27,6 @@ First import the module and then create a nodeconverter by
 
 To convert a node to a file you use the function convert_to_file so for example
 ::
-    conv.convert_to_file(parser.parser[1].node, "rst")
+    conv.convert_to_file(cmakeparser.parser[1].node, "rst")
     
 To see which parser you want to use you can look at the list parser.executables there you can see the nodenames in the same order as in the parser list.
