@@ -1,13 +1,21 @@
 #!/usr/env/bin python
 """catkin_doc helps creating documentations for catkin packages"""
 
-import catkin_doc.python
+import catkin_doc.cmakeparser
+import catkin_doc.pkghandler
+import catkin_doc.nodeconverter
+import sys
 
 def main():
-    """Main worker function"""
-    filename = "/home/mauch/robot_folders/checkout/euroc_usecase/catkin_ws/src/euroc_usecase/scripts/safety_guard.py"
-
-    python_node = catkin_doc.python.PythonParser(filename)
+    package_path = sys.argv[1]
+    file_format = sys.argv[2]
+    cpp_handler = catkin_doc.cmakeparser.CmakeListParser(package_path)
+    py_handler = catkin_doc.pkghandler.PkgHandler(package_path)
+    nodeconverter = catkin_doc.nodeconverter.NodeConverter()
+    for parser in cpp_handler.parser:
+        nodeconverter.convert_to_file(parser.node, file_format)
+    for parser in py_handler.parser:
+        nodeconverter.convert_to_file(parser.node, file_format)
 
 if __name__ == "__main__":
     main()
