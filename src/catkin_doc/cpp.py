@@ -142,7 +142,7 @@ class CppParser(object):
         Check wheter a given line contains a Service advertisement
         Returns (True, name, type) if service is found (False, None, None) otherwise.
         """
-        match = re.search('advertiseService(<([^>]*)>)?\("([^"]*)",', line)
+        match = re.search('advertiseService(<([^>]*)>)?\(\s?"([^"]*)', line)
         if match:
             service_name = str(match.group(3))
             service_type = str(match.group(2))
