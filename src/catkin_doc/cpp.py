@@ -18,6 +18,7 @@ class CppParser(object):
                             (self.extract_action_client, self.add_action_client),
                             (self.extract_action_server, self.add_action_server)]
         self.lines = None
+        self.boost_binds = dict()
         self.parse_node()
 
 
@@ -37,7 +38,7 @@ class CppParser(object):
         while linenumber < len(self.lines) - 2:
             if not (self.lines[linenumber].lstrip(' ').startswith("//")):
               line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +  self.lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + self.lines[linenumber+2].lstrip(' ')
-
+              self.extract_boost_bind(line)
               for extract,add in self.parser_fcts:
                   success, key, value = extract(line)
                   if success:
@@ -69,27 +70,18 @@ class CppParser(object):
         """
         match = re.search('param<([^>]*)>\("([^"]*)", [^,]+, ([^\)]+)\)', line)
         if match:
-            print(match.groups())
             parameter_name = str(match.group(2)).strip('\'')
-            print('Parameter name: ', parameter_name)
-
             parameter_value = str(match.group(3)).strip('\'')
-            print('Default value: ', parameter_value)
             return True, parameter_name, parameter_value
         match = re.search('getParam\("([^"]*)", [^,]+\)', line)
         if match:
-            print(match.groups())
             parameter_name = str(match.group(1)).strip('\'')
-            print('Parameter name: ', parameter_name)
 
             parameter_value = None
             return True, parameter_name, parameter_value
         match = re.search('param::get\("([^"]*)", [^,]+\)', line)
         if match:
-            print(match.groups())
             parameter_name = str(match.group(1)).strip('\'')
-            print('Parameter name: ', parameter_name)
-
             parameter_value = None
             return True, parameter_name, parameter_value
 
@@ -142,10 +134,13 @@ class CppParser(object):
         Check wheter a given line contains a Service advertisement
         Returns (True, name, type) if service is found (False, None, None) otherwise.
         """
-        match = re.search('advertiseService(<([^>]*)>)?\(\s?"([^"]*)', line)
+        match = re.search('advertiseService(<([^>]*)>)?\(\s?"([^"]*)",\s?([^\(]*)', line)
         if match:
             service_name = str(match.group(3))
             service_type = str(match.group(2))
+            bind = str(match.group(4))
+            if bind in self.boost_binds:
+                service_type = self.boost_binds[bind]
             return True, service_name, service_type
         return False, None, None
 
@@ -225,6 +220,17 @@ class CppParser(object):
             comment = str(match.group(3))
         return comment
 
+    def extract_boost_bind(self, line):
+        """
+        Function to parse boost bindings and saves type of binded functions input.
+        """
+        match = re.search('boost::function<bool\((\S+)::Request&,\s?\S+::Response&\)>\s?(\S+);', line)
+        if match:
+            service_type = str(match.group(1))
+            bind_fct = str(match.group(2))
+            self.boost_binds[bind_fct] = service_type
+            return True
+        return False
 
 
 
