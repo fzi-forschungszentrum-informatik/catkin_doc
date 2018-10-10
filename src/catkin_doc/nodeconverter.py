@@ -247,6 +247,11 @@ class NodeConverter(object):
         rst = "Action clients\n----------------------------------------\n"
         for action_server in sorted(self.node.action_clients.iterkeys()):
             msg_type, comment = self.node.action_clients[action_server]
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               types[1] = types[1].strip('Action')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
+               msg_type ="`" + msg_type + " <" + url + ">`_"
             rst += self. rst_definition(action_server, msg_type, comment)
         rst += "\n"
         return rst
@@ -269,6 +274,10 @@ class NodeConverter(object):
         rst =  "Service clients\n----------------------------------------\n"
         for service in sorted(self.node.service_clients.iterkeys()):
             msg_type, comment = self.node.service_clients[service]
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
+               msg_type ="`" + msg_type + " <" + url + ">`_"
             rst += self. rst_definition(service, msg_type, comment)
         rst += "\n"
         return rst
