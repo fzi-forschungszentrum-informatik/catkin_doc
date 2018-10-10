@@ -22,7 +22,7 @@ class NodeConverter(object):
         """
         md = "## Parameters\n"
         md += "<dl>\n"
-        for param in self.node.parameters:
+        for param in sorted(self.node.parameters.iterkeys()):
             default_value, comment = self.node.parameters[param]
             md += "  <dt>" + param
             if default_value is not None:
@@ -43,7 +43,7 @@ class NodeConverter(object):
         """
         md = "## Subscribed Topics\n"
         md += "<dl>\n"
-        for topic in self.node.subscriber:
+        for topic in sorted(self.node.subscriber.iterkeys()):
             msg_type, comment = self.node.subscriber[topic]
             md += "  <dt>" + topic + " (" + msg_type + ") </dt>\n"
             if comment != "":
@@ -59,7 +59,7 @@ class NodeConverter(object):
         """
         md = "## Advertised Topics\n"
         md += "<dl>\n"
-        for topic in self.node.publisher:
+        for topic in sorted(self.node.publisher.iterkeys()):
             msg_type, comment = self.node.publisher[topic]
             md += "  <dt>" + topic + " (" + msg_type + ") </dt>\n"
             if comment != "":
@@ -75,7 +75,7 @@ class NodeConverter(object):
         """
         md = "## Action clients\n"
         md += "<dl>\n"
-        for action_server in self.node.action_clients:
+        for action_server in sorted(self.node.action_clients.iterkeys()):
             msg_type, comment = self.node.action_clients[action_server]
             md += "  <dt>" + action_server + " (" + msg_type + ") </dt>\n"
             if comment != "":
@@ -91,7 +91,7 @@ class NodeConverter(object):
         """
         md = "## Action servers\n"
         md += "<dl>\n"
-        for action in self.node.actions:
+        for action in sorted(self.node.actions.iterkeys()):
             msg_type, comment = self.node.actions[action]
             md += "  <dt>" + action + " (" + msg_type + ") </dt>\n"
             if comment != "":
@@ -107,7 +107,7 @@ class NodeConverter(object):
         """
         md = "## Service Clients\n"
         md += "<dl>\n"
-        for service in self.node.service_clients:
+        for service in sorted(self.node.service_clients.iterkeys()):
             msg_type, comment = self.node.service_clients[service]
             md += "  <dt>" + service + " ("  + msg_type + ") </dt>\n"
             if comment != "":
@@ -123,7 +123,7 @@ class NodeConverter(object):
         """
         md = "## Advertised services\n"
         md += "<dl>\n"
-        for service in self.node.services:
+        for service in sorted(self.node.services.iterkeys()):
             msg_type, comment = self.node.services[service]
             md += "  <dt>" + service + " ("  + msg_type + ") </dt>\n"
             if comment != "":
@@ -208,7 +208,7 @@ class NodeConverter(object):
         Turn params from node representation to rst
         """
         rst = "Parameter \n----------------------------------------------\n"
-        for param in self.node.parameters:
+        for param in sorted(self.node.parameters.iterkeys()):
             default_value, comment = self.node.parameters[param]
             if default_value is not None:
                 default_value_rst = "default value: " + default_value
@@ -223,7 +223,7 @@ class NodeConverter(object):
         Turn subs from node representation to rst
         """
         rst = "Subscribed Topics\n---------------------------------------\n"
-        for topic in self.node.subscriber:
+        for topic in sorted(self.node.subscriber.iterkeys()):
             msg_type, comment = self.node.subscriber[topic]
             rst += self. rst_definition(topic, msg_type, comment)
         rst += "\n"
@@ -234,7 +234,7 @@ class NodeConverter(object):
         Turn pubs from node representation to rst
         """
         rst = "Advertised Topics\n----------------------------------------\n"
-        for topic in self.node.publisher:
+        for topic in sorted(self.node.publisher.iterkeys()):
             msg_type, comment = self.node.publisher[topic]
             rst += self. rst_definition(topic, msg_type, comment)
         rst += "\n"
@@ -245,7 +245,7 @@ class NodeConverter(object):
         Turn action clients from node representation to rst
         """
         rst = "Action clients\n----------------------------------------\n"
-        for action_server in self.node.action_clients:
+        for action_server in sorted(self.node.action_clients.iterkeys()):
             msg_type, comment = self.node.action_clients[action_server]
             rst += self. rst_definition(action_server, msg_type, comment)
         rst += "\n"
@@ -256,7 +256,7 @@ class NodeConverter(object):
         Turn action from node representation to rst
         """
         rst = "Action servers\n----------------------------------------\n"
-        for action in self.node.actions:
+        for action in sorted(self.node.actions.iterkeys()):
             msg_type, comment = self.node.actions[action]
             rst += self. rst_definition(action, msg_type, comment)
         rst += "\n"
@@ -267,7 +267,7 @@ class NodeConverter(object):
         Turn service clients from node representation to rst
         """
         rst =  "Service clients\n----------------------------------------\n"
-        for service in self.node.service_clients:
+        for service in sorted(self.node.service_clients.iterkeys()):
             msg_type, comment = self.node.service_clients[service]
             rst += self. rst_definition(service, msg_type, comment)
         rst += "\n"
@@ -278,7 +278,7 @@ class NodeConverter(object):
         Turn services from node representation to rst
         """
         rst =  "Advertised services\n----------------------------------------\n"
-        for service in self.node.services:
+        for service in sorted(self.node.services.iterkeys()):
             msg_type, comment = self.node.services[service]
             rst += self. rst_definition(service, msg_type, comment)
         rst += "\n"
