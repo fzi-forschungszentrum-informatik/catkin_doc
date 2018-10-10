@@ -57,7 +57,7 @@ class NodeConverter(object):
         """
         Generates a markdown text from publishers
         """
-        md = "## Published Topics\n"
+        md = "## Advertised Topics\n"
         md += "<dl>\n"
         for topic in self.node.publisher:
             msg_type, comment = self.node.publisher[topic]
@@ -73,7 +73,7 @@ class NodeConverter(object):
         """
         Generates a markdowntext from action clients
         """
-        md = "## Action Clients\n"
+        md = "## Action clients\n"
         md += "<dl>\n"
         for action_server in self.node.action_clients:
             msg_type, comment = self.node.action_clients[action_server]
@@ -89,7 +89,7 @@ class NodeConverter(object):
         """
         Generates a markdowntext from actions
         """
-        md = "## Actions\n"
+        md = "## Action servers\n"
         md += "<dl>\n"
         for action in self.node.actions:
             msg_type, comment = self.node.actions[action]
@@ -121,7 +121,7 @@ class NodeConverter(object):
         """
         Generates a markdowntext from services
         """
-        md = "## Services\n"
+        md = "## Advertised services\n"
         md += "<dl>\n"
         for service in self.node.services:
             msg_type, comment = self.node.services[service]
@@ -198,9 +198,9 @@ class NodeConverter(object):
         else:
             rst += "Add type here)\n"
         if comment != "":
-            rst += "\t" + comment + "\n"
+            rst += "    " + comment + "\n"
         else:
-            rst += "\tPlease add description here\n"
+            rst += "    Please add description here\n"
         return rst
 
     def parameters_to_rst(self):
@@ -233,7 +233,7 @@ class NodeConverter(object):
         """
         Turn pubs from node representation to rst
         """
-        rst = "Published Topics\n----------------------------------------\n"
+        rst = "Advertised Topics\n----------------------------------------\n"
         for topic in self.node.publisher:
             msg_type, comment = self.node.publisher[topic]
             rst += self. rst_definition(topic, msg_type, comment)
@@ -244,7 +244,7 @@ class NodeConverter(object):
         """
         Turn action clients from node representation to rst
         """
-        rst = "Action Clients\n----------------------------------------\n"
+        rst = "Action clients\n----------------------------------------\n"
         for action_server in self.node.action_clients:
             msg_type, comment = self.node.action_clients[action_server]
             rst += self. rst_definition(action_server, msg_type, comment)
@@ -255,7 +255,7 @@ class NodeConverter(object):
         """
         Turn action from node representation to rst
         """
-        rst = "Actions\n----------------------------------------\n"
+        rst = "Action servers\n----------------------------------------\n"
         for action in self.node.actions:
             msg_type, comment = self.node.actions[action]
             rst += self. rst_definition(action, msg_type, comment)
@@ -266,7 +266,7 @@ class NodeConverter(object):
         """
         Turn service clients from node representation to rst
         """
-        rst =  "Service Clients\n----------------------------------------\n"
+        rst =  "Service clients\n----------------------------------------\n"
         for service in self.node.service_clients:
             msg_type, comment = self.node.service_clients[service]
             rst += self. rst_definition(service, msg_type, comment)
@@ -277,7 +277,7 @@ class NodeConverter(object):
         """
         Turn services from node representation to rst
         """
-        rst =  "Services\n----------------------------------------\n"
+        rst =  "Advertised services\n----------------------------------------\n"
         for service in self.node.services:
             msg_type, comment = self.node.services[service]
             rst += self. rst_definition(service, msg_type, comment)
