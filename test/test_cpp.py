@@ -90,7 +90,7 @@ class TestCpp(unittest.TestCase):
         node = catkin_doc.cpp.CppParser("test", ["setup.py"])
         self.assertTrue(
             node.extract_action_client(
-                'actionlib::SimpleActionClient<chores::DoDishesAction> Client;')[0])
+                ' m_ros_control_action_client = new actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction>("controller_topic", true);')[0])
 
     def test_action_client_false(self):
         node = catkin_doc.cpp.CppParser("test", ["setup.py"])
@@ -102,7 +102,7 @@ class TestCpp(unittest.TestCase):
         node = catkin_doc.cpp.CppParser("test", ["setup.py"])
         self.assertTrue(
             node.extract_action_server(
-                'actionlib::SimpleActionServer<chores::DoDishesAction> Client;')[0])
+                'm_action_server = new actionlib::SimpleActionServer<fzi_manipulation_msgs::PlayTrajectoryAction>(m_private_nh, action_name, false);')[0])
 
     def test_action_server_false(self):
         node = catkin_doc.cpp.CppParser("test", ["setup.py"])
