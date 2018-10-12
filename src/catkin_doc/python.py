@@ -38,12 +38,12 @@ class PythonParser(object):
             line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +  self.lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + self.lines[linenumber+2].lstrip(' ')
 
             for extract,add in self.parser_fcts:
-                success, key, value = extract(line)
+                success, key, value, brackets = extract(line)
                 if success:
                     comment = self.search_for_comment(linenumber)
                     if comment == '':
                         filename = self.filename.split("/")[-1]
-                        comment = 'Please add description. See ' + filename + ' linenumber: ' + str(linenumber+1)
+                        comment = 'Please add description. See ' + filename + ' linenumber: ' + str(linenumber+1) + "\n    Constructor input : " + brackets
                     add(key, value, comment)
 
             linenumber += 1
@@ -73,13 +73,13 @@ class PythonParser(object):
         Returns True when parameter is found, False otherwise. Parameter name and value will be
         saved in members.
         """
-        match = re.search("(get_param\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))?\)", line)
+        match = re.search("get_param\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))?)\)", line)
         if match:
             parameter_name = str(match.group(3)).strip('\'')
-
             parameter_value = str(match.group(6)).strip('\'')
-            return True, parameter_name, parameter_value
-        return False, None, None
+            brackets = str(match.group(1))
+            return True, parameter_name, parameter_value, brackets
+        return False, None, None, None
 
     def add_param(self, name, value, comment):
         """
@@ -92,14 +92,14 @@ class PythonParser(object):
         Check whether a line contains a Subscriber to a topic.
         Returns True if line contains a subscriber and False otherwise.
         """
-        match = re.search("(Subscriber\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))\)", line)
+        match = re.search("Subscriber\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+)))\)", line)
         if match:
             topic = str(match.group(3))
 
             topic_type = str(match.group(6))
-
-            return True, topic, topic_type
-        return False, None, None
+            brackets = str(match.group(1))
+            return True, topic, topic_type, brackets
+        return False, None, None, None
 
     def add_sub(self, topic, msg_type, comment):
         """
@@ -113,13 +113,13 @@ class PythonParser(object):
         Check whether a line contains a Publisher to a topic.
         Returns True if line contains a Publisher and False otherwise.
         """
-        match = re.search("(Publisher\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+\)", line)
+        match = re.search("Publisher\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+)\)", line)
         if match:
             topic = str(match.group(3))
-
             topic_type = str(match.group(6))
-            return True, topic, topic_type
-        return False, None, None
+            brackets = str(match.group(1))
+            return True, topic, topic_type, brackets
+        return False, None, None, None
 
     def add_pub(self, topic, msg_type, comment):
         """
@@ -132,13 +132,13 @@ class PythonParser(object):
         Check whether a line contains an action client.
         Returns True if line contains an action client and False otherwise.
         """
-        match = re.search("(SimpleActionClient\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))\)", line)
+        match = re.search("SimpleActionClient\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+)))\)", line)
         if match:
             topic = str(match.group(3))
-
             action = str(match.group(6))
-            return True, topic, action
-        return False, None, None
+            brackets = str(match.group(1))
+            return True, topic, action, brackets
+        return False, None, None, None
 
     def add_action_client(self, topic, action, comment):
         """
@@ -152,13 +152,13 @@ class PythonParser(object):
         Check whether a line contains an service client.
         Returns True if line contains an service client and False otherwise.
         """
-        match = re.search("(ServiceProxy\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))\)", line)
+        match = re.search("ServiceProxy\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+)))\)", line)
         if match:
             topic = str(match.group(3))
-
             type = str(match.group(6))
-            return True, topic, type
-        return False, None, None
+            brackets = str(match.group(1))
+            return True, topic, type, brackets
+        return False, None, None, None
 
     def add_service_client(self, topic, type, comment):
         """
@@ -172,14 +172,14 @@ class PythonParser(object):
         Check whether a line contains an service.
         Returns True if line contains an service and False otherwise.
         """
-        match = re.search("(Service\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+\)", line)
+        match = re.search("Service\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+)\)", line)
         if match:
             name = str(match.group(3))
-
             type = str(match.group(6))
+            brackets = str(match.group(1))
 
-            return True, name, type
-        return False, None, None
+            return True, name, type, brackets
+        return False, None, None, None
 
     def add_service(self, name, type, comment):
         """
@@ -192,14 +192,14 @@ class PythonParser(object):
         Check whether a line contains an action.
         Returns True if line contains an action and False otherwise.
         """
-        match = re.search("(SimpleActionServer\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+\)", line)
+        match = re.search("SimpleActionServer\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+)\)", line)
         if match:
             name = str(match.group(3))
-
             type = str(match.group(6))
+            brackets = str(match.group(1))
 
-            return True, name, type
-        return False, None, None
+            return True, name, type, brackets
+        return False, None, None, None
 
     def add_action(self, name, type, comment):
         """
