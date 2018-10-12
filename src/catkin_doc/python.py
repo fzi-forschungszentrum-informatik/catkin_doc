@@ -43,7 +43,7 @@ class PythonParser(object):
                     comment = self.search_for_comment(linenumber)
                     if comment == '':
                         filename = self.filename.split("/")[-1]
-                        comment = 'Please add description. See ' + filename + ' linenumber: ' + str(linenumber+1) + "\n    Constructor input : " + brackets
+                        comment = 'Please add description. See ' + filename + ' line number: ' + str(linenumber+1) + "\n    Constructor input : " + brackets
                     add(key, value, comment)
 
             linenumber += 1

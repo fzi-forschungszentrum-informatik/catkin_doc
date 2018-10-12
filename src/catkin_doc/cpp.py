@@ -45,7 +45,7 @@ class CppParser(object):
                       comment = self.search_for_comment(linenumber)
                       if comment == '':
                           filename = file.split("/")[-1]
-                          comment = 'Please add description. See ' + filename + ' linenumber: ' + str(linenumber+1) + '\n    ' + "Input in constructor: " + brackets
+                          comment = 'Please add description. See ' + filename + ' line number: ' + str(linenumber+1) + '\n    ' + "Input in constructor: " + brackets
                       add(key, value, comment)
 
             linenumber += 1
