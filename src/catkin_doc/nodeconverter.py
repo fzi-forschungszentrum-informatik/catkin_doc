@@ -1,3 +1,4 @@
+import urllib2
 """class to convert node representation to documentation file"""
 class NodeConverter(object):
     def __init__(self):
@@ -16,25 +17,38 @@ class NodeConverter(object):
         else:
             print("Please use one of the filetypes 'md' or 'rst'!")
 
+
+    def md_definition(self, name, type, comment):
+        """
+        Helper function to create markdown
+        """
+        md = "  **" + name.strip(" ") + "** ("
+        if type != "":
+            md += type + ")\n "
+        else:
+            md += "Add type here)\n "
+        if comment != "":
+            md += "    " + comment + "\n"
+        else:
+            md += "    Please add description here.\n"
+        return md
+
+
     def parameters_to_md(self):
         """
         Generates a markdowntext from parameters
         """
         md = "## Parameters\n"
-        md += "<dl>\n"
+        md += ""
         for param in sorted(self.node.parameters.iterkeys()):
             default_value, comment = self.node.parameters[param]
-            md += "  <dt>" + param
             if default_value is not None:
-                md += "( default: " + default_value + ")"
+                value = "default: " + default_value
             else:
-                md += "( default: - )"
+                value = "default: -"
+            md += self.md_definition(param, value, comment)
 
-            if comment != "":
-                md += "  <dd>" + comment + "</dd>\n"
-            else:
-                md += "</dt>\n  <dd>Please add description here.</dd>\n"
-        md += "</dl>\n \n"
+        md += "\n \n"
         return md
 
     def subscriber_to_md(self):
@@ -42,15 +56,17 @@ class NodeConverter(object):
         Generates a markdown text from subscribers
         """
         md = "## Subscribed Topics\n"
-        md += "<dl>\n"
+        md += ""
         for topic in sorted(self.node.subscriber.iterkeys()):
             msg_type, comment = self.node.subscriber[topic]
-            md += "  <dt>" + topic + " (" + msg_type + ") </dt>\n"
-            if comment != "":
-                md += "  <dd>" + comment + "</dd>\n"
-            else:
-                md += "  <dd>Please add description here.</dd>\n"
-        md += "</dl>\n \n"
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               types[1] = types[1].strip('Action')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/msg/" + types[1] + ".html"
+               if self.check_url(url):
+                  msg_type ="[" + msg_type + "](" + url + ")"
+            md += self.md_definition(topic, msg_type, comment)
+        md += "\n \n"
         return md
 
     def publisher_to_md(self):
@@ -58,15 +74,17 @@ class NodeConverter(object):
         Generates a markdown text from publishers
         """
         md = "## Advertised Topics\n"
-        md += "<dl>\n"
+        md += ""
         for topic in sorted(self.node.publisher.iterkeys()):
             msg_type, comment = self.node.publisher[topic]
-            md += "  <dt>" + topic + " (" + msg_type + ") </dt>\n"
-            if comment != "":
-                md += "  <dd>" + comment + "</dd>\n"
-            else:
-                md += "  <dd>Please add description here.</dd>\n"
-        md += "</dl>\n \n"
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               types[1] = types[1].strip('Action')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/msg/" + types[1] + ".html"
+               if self.check_url(url):
+                  msg_type ="[" + msg_type + "](" + url + ")"
+            md += self.md_definition(topic, msg_type, comment)
+        md += "\n \n"
         return md
 
     def action_clients_to_md(self):
@@ -74,15 +92,17 @@ class NodeConverter(object):
         Generates a markdowntext from action clients
         """
         md = "## Action clients\n"
-        md += "<dl>\n"
+        md += ""
         for action_server in sorted(self.node.action_clients.iterkeys()):
             msg_type, comment = self.node.action_clients[action_server]
-            md += "  <dt>" + action_server + " (" + msg_type + ") </dt>\n"
-            if comment != "":
-                md += "  <dd>" + comment + "</dd>\n"
-            else:
-                md += "  <dd>Please add description here.</dd>\n"
-        md += "</dl>\n \n"
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               types[1] = types[1].strip('Action')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
+               if self.check_url(url):
+                  msg_type ="[" + msg_type + "](" + url + ")"
+            md += self.md_definition(action_server, msg_type, comment)
+        md += "\n \n"
         return md
 
     def action_to_md(self):
@@ -90,15 +110,17 @@ class NodeConverter(object):
         Generates a markdowntext from actions
         """
         md = "## Action servers\n"
-        md += "<dl>\n"
+        md += ""
         for action in sorted(self.node.actions.iterkeys()):
             msg_type, comment = self.node.actions[action]
-            md += "  <dt>" + action + " (" + msg_type + ") </dt>\n"
-            if comment != "":
-                md += "  <dd>" + comment + "</dd>\n"
-            else:
-                md += "  <dd>Please add description here.</dd>\n"
-        md += "</dl>\n \n"
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               types[1] = types[1].strip('Action')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
+               if self.check_url(url):
+                  msg_type ="[" + msg_type + "](" + url + ")"
+            md += self.md_definition(action, msg_type, comment)
+        md += "\n \n"
         return md
 
     def service_clients_to_md(self):
@@ -106,15 +128,17 @@ class NodeConverter(object):
         Generates a markdowntext from service clients
         """
         md = "## Service Clients\n"
-        md += "<dl>\n"
+        md += ""
         for service in sorted(self.node.service_clients.iterkeys()):
             msg_type, comment = self.node.service_clients[service]
-            md += "  <dt>" + service + " ("  + msg_type + ") </dt>\n"
-            if comment != "":
-                md += "  <dd>" + comment + "</dd>\n"
-            else:
-                md += "  <dd>Please add description here.</dd>\n"
-        md += "</dl>\n \n"
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               types[1] = types[1].strip('Action')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
+               if self.check_url(url):
+                  msg_type ="[" + msg_type + "](" + url + ")"
+            md += self.md_definition(service, msg_type, comment)
+        md += "\n \n"
         return md
 
     def service_to_md(self):
@@ -122,15 +146,17 @@ class NodeConverter(object):
         Generates a markdowntext from services
         """
         md = "## Advertised services\n"
-        md += "<dl>\n"
+        md += ""
         for service in sorted(self.node.services.iterkeys()):
             msg_type, comment = self.node.services[service]
-            md += "  <dt>" + service + " ("  + msg_type + ") </dt>\n"
-            if comment != "":
-                md += "  <dd>" + comment + "</dd>\n"
-            else:
-                md += "  <dd>Please add description here.</dd>\n"
-        md += "</dl>\n \n"
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               types[1] = types[1].strip('Action')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
+               if self.check_url(url):
+                  msg_type ="[" + msg_type + "](" + url + ")"
+            md += self.md_definition(service, msg_type, comment)
+        md += "\n \n"
         return md
 
     def node_to_md(self):
@@ -225,7 +251,13 @@ class NodeConverter(object):
         rst = "Subscribed Topics\n---------------------------------------\n"
         for topic in sorted(self.node.subscriber.iterkeys()):
             msg_type, comment = self.node.subscriber[topic]
-            rst += self. rst_definition(topic, msg_type, comment)
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               types[1] = types[1].strip('Action')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/msg/" + types[1] + ".html"
+               if self.check_url(url):
+                  msg_type ="`" + msg_type + " <" + url + ">`_"
+            rst += self.rst_definition(topic, msg_type, comment)
         rst += "\n"
         return rst
 
@@ -236,7 +268,13 @@ class NodeConverter(object):
         rst = "Advertised Topics\n----------------------------------------\n"
         for topic in sorted(self.node.publisher.iterkeys()):
             msg_type, comment = self.node.publisher[topic]
-            rst += self. rst_definition(topic, msg_type, comment)
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               types[1] = types[1].strip('Action')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/msg/" + types[1] + ".html"
+               if self.check_url(url):
+                  msg_type ="`" + msg_type + " <" + url + ">`_"
+            rst += self.rst_definition(topic, msg_type, comment)
         rst += "\n"
         return rst
 
@@ -251,8 +289,9 @@ class NodeConverter(object):
                types = msg_type.split('::')
                types[1] = types[1].strip('Action')
                url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
-               msg_type ="`" + msg_type + " <" + url + ">`_"
-            rst += self. rst_definition(action_server, msg_type, comment)
+               if self.check_url(url):
+                  msg_type ="`" + msg_type + " <" + url + ">`_"
+            rst += self.rst_definition(action_server, msg_type, comment)
         rst += "\n"
         return rst
 
@@ -263,7 +302,13 @@ class NodeConverter(object):
         rst = "Action servers\n----------------------------------------\n"
         for action in sorted(self.node.actions.iterkeys()):
             msg_type, comment = self.node.actions[action]
-            rst += self. rst_definition(action, msg_type, comment)
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               types[1] = types[1].strip('Action')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
+               if self.check_url(url):
+                  msg_type ="`" + msg_type + " <" + url + ">`_"
+            rst += self.rst_definition(action, msg_type, comment)
         rst += "\n"
         return rst
 
@@ -277,8 +322,9 @@ class NodeConverter(object):
             if not 'fzi' in msg_type:
                types = msg_type.split('::')
                url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
-               msg_type ="`" + msg_type + " <" + url + ">`_"
-            rst += self. rst_definition(service, msg_type, comment)
+               if self.check_url(url):
+                  msg_type ="`" + msg_type + " <" + url + ">`_"
+            rst += self.rst_definition(service, msg_type, comment)
         rst += "\n"
         return rst
 
@@ -289,7 +335,34 @@ class NodeConverter(object):
         rst =  "Advertised services\n----------------------------------------\n"
         for service in sorted(self.node.services.iterkeys()):
             msg_type, comment = self.node.services[service]
-            rst += self. rst_definition(service, msg_type, comment)
+            if not 'fzi' in msg_type:
+               types = msg_type.split('::')
+               url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
+               if self.check_url(url):
+                  msg_type ="`" + msg_type + " <" + url + ">`_"
+            rst += self.rst_definition(service, msg_type, comment)
         rst += "\n"
         return rst
+
+    def check_url(self, url):
+        """
+        Function to check if url is valid and functioning
+        """
+        try:
+                if not urllib2.urlparse.urlparse(url).netloc:
+                    return False
+
+                website = urllib2.urlopen(url)
+                html = website.read()
+
+                if website.code != 200 :
+                    return False
+        except Exception, e:
+                print "Errored while attempting to validate link : ", url
+                print e
+                return False
+
+        return True
+
+
 
