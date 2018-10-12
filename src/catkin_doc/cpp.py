@@ -40,12 +40,12 @@ class CppParser(object):
               line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +  self.lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + self.lines[linenumber+2].lstrip(' ')
               self.extract_boost_bind(line)
               for extract,add in self.parser_fcts:
-                  success, key, value = extract(line)
+                  success, key, value, brackets = extract(line)
                   if success:
                       comment = self.search_for_comment(linenumber)
                       if comment == '':
                           filename = file.split("/")[-1]
-                          comment = 'Please add description. See ' + filename + ' linenumber: ' + str(linenumber+1)
+                          comment = 'Please add description. See ' + filename + ' linenumber: ' + str(linenumber+1) + '\n    ' + "Input in constructor: " + brackets
                       add(key, value, comment)
 
             linenumber += 1
@@ -71,24 +71,26 @@ class CppParser(object):
         Check whether a line contains a parameter definition and extract parameters.
         Returns True when parameter is found, False otherwise.
         """
-        match = re.search('param<([^>]*)>\("([^"]*)", [^,]+, ([^\)]+)\)', line)
+        match = re.search('param<([^>]*)>\(("([^"]*)", [^,]+, ([^\)]+))\)', line)
+        if match:
+            parameter_name = str(match.group(3)).strip('\'')
+            parameter_value = str(match.group(4)).strip('\'')
+            parameter_brackets = str(match.group(2))
+            return True, parameter_name, parameter_value, parameter_brackets
+        match = re.search('getParam\(("([^"]*)", [^,]+)\)', line)
         if match:
             parameter_name = str(match.group(2)).strip('\'')
-            parameter_value = str(match.group(3)).strip('\'')
-            return True, parameter_name, parameter_value
-        match = re.search('getParam\("([^"]*)", [^,]+\)', line)
-        if match:
-            parameter_name = str(match.group(1)).strip('\'')
-
+            parameter_brackets = str(match.group(1))
             parameter_value = None
-            return True, parameter_name, parameter_value
+            return True, parameter_name, parameter_value, parameter_brackets
         match = re.search('param::get\("([^"]*)", [^,]+\)', line)
         if match:
-            parameter_name = str(match.group(1)).strip('\'')
+            parameter_name = str(match.group(2)).strip('\'')
+            parameter_brackets = str(match.group(1))
             parameter_value = None
-            return True, parameter_name, parameter_value
+            return True, parameter_name, parameter_value, parameter_brackets
 
-        return False, None, None
+        return False, None, None, None
 
     def add_param(self, name, value, comment):
         """
@@ -101,12 +103,13 @@ class CppParser(object):
         Check wheter given line contains a subscriber
         Returns (True, topic, msg_type) if subscriber is found, (False, None, None) otherwise.
         """
-        match = re.search('subscribe(<([^>]*)>)?\("([^"]*)",', line)
+        match = re.search('subscribe(<([^>]*)>)?\(("([^"]*)", [^)]*)\)', line)
         if match:
-            subscribed_topic = str(match.group(3))
+            subscribed_topic = str(match.group(4))
             msg_type = str(match.group(2))
-            return True, subscribed_topic, msg_type
-        return False, None, None
+            brackets = str(match.group(3))
+            return True, subscribed_topic, msg_type, brackets
+        return False, None, None, None
 
     def add_sub(self, topic, msg_type, comment):
         """
@@ -119,12 +122,13 @@ class CppParser(object):
         Check wheter given line contains a publisher
         Returns (True, topic, msg_type) if publisher is found, (False, None, None) otherwise.
         """
-        match = re.search('advertise(<([^>]*)>)?\("([^"]*)",', line)
+        match = re.search('advertise(<([^>]*)>)?\(("([^"]*)",[^)]*)\)', line)
         if match:
-            published_topic = str(match.group(3))
+            published_topic = str(match.group(4))
             msg_type = str(match.group(2))
-            return True, published_topic, msg_type
-        return False, None, None
+            brackets = str(match.group(3))
+            return True, published_topic, msg_type, brackets
+        return False, None, None, None
 
     def add_pub(self, topic, msg_type, comment):
         """
@@ -137,15 +141,16 @@ class CppParser(object):
         Check wheter a given line contains a Service advertisement
         Returns (True, name, type) if service is found (False, None, None) otherwise.
         """
-        match = re.search('advertiseService(<([^>]*)>)?\(\s?"([^"]*)",\s?([^\(]*)', line)
+        match = re.search('advertiseService(<([^>]*)>)?\((\s?"([^"]*)",\s?([^\(]*)[^)]*)\)', line)
         if match:
-            service_name = str(match.group(3))
+            service_name = str(match.group(4))
             service_type = str(match.group(2))
-            bind = str(match.group(4))
+            brackets = str(match.group(3))
+            bind = str(match.group(5))
             if bind in self.boost_binds:
                 service_type = self.boost_binds[bind]
-            return True, service_name, service_type
-        return False, None, None
+            return True, service_name, service_type, brackets
+        return False, None, None, None
 
     def add_service(self, name, type, comment):
         """
@@ -158,18 +163,20 @@ class CppParser(object):
         Check whether a given line contains a service client.
         Returns (True, service_topic, type) if service client is found, (False, None, None) otherwise.
         """
-        match = re.search('serviceClient(<([^>]*)>)?\("([^"]*)"', line)
+        match = re.search('serviceClient(<([^>]*)>)?\(("([^"]*)"[^)]*)\)', line)
         if match:
-            service_topic = str(match.group(3))
+            service_topic = str(match.group(4))
             service_type = str(match.group(2))
-            return True, service_topic, service_type
+            brackets = str(match.group(3))
+            return True, service_topic, service_type, brackets
 
-        match = re.search('service::call\("([^"]*)", ([^,]+)\)', line)
+        match = re.search('service::call\(("([^"]*)", ([^,]+))\)', line)
         if match:
-            service_topic = str(match.group(1))
-            service_type = str(match.group(2))
-            return True, service_topic, service_type
-        return False, None, None
+            service_topic = str(match.group(2))
+            service_type = str(match.group(3))
+            brackets = str(match.group(1))
+            return True, service_topic, service_type, brackets
+        return False, None, None, None
 
 
     def add_service_client(self, topic, type, comment):
@@ -183,12 +190,13 @@ class CppParser(object):
         Function to extract action clients from given line.
         Returns(True, None,  action_type) if client is found (False, None, None) otherwise
         """
-        match = re.search('actionlib::SimpleActionClient<([^>]*)>\(\s*([^,^)^(]*)?,?\s*([^,^)]*)?,([^,^)]*)\)', line)
+        match = re.search('actionlib::SimpleActionClient<([^>]*)>\((\s*([^,^)^(]*)?,?\s*([^,^)]*)?,([^,^)]*))\)', line)
         if match:
             action_type = str(match.group(1))
-            topic = str(match.group(2)).strip('"') + " " + str(match.group(3).strip('"'))
-            return True, topic, action_type
-        return False, None, None
+            topic = str(match.group(3)).strip('"') + " " + str(match.group(4).strip('"'))
+            brackets = str(match.group(2))
+            return True, topic, action_type, brackets
+        return False, None, None, None
 
     def add_action_client(self, topic, action, comment):
         """
@@ -201,12 +209,13 @@ class CppParser(object):
         Function to extract action server from given line.
         Returns (True, None, action_type) if server is found, (False, None, None) otherwise.
         """
-        match = re.search('actionlib::SimpleActionServer<([^>]*)>\(\s*([^,]*),\s*([^,]*)', line)
+        match = re.search('actionlib::SimpleActionServer<([^>]*)>\((\s*([^,]*),\s*([^,]*)[^)]*)\)', line)
         if match:
             action_type = str(match.group(1))
-            topic = str(match.group(2)) + " " + str(match.group(3))
-            return True, topic, action_type
-        return False, None, None
+            topic = str(match.group(3)) + " " + str(match.group(4))
+            brackets = str(match.group(2))
+            return True, topic, action_type, brackets
+        return False, None, None, None
 
     def add_action_server(self, name, type, comment):
         """
