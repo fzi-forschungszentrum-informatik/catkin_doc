@@ -11,7 +11,9 @@ import catkin_doc.node
 class PythonParser(object):
     """Parser for python nodes which fills the node representation"""
     def __init__(self, filename):
-        self.node = catkin_doc.node.Node(filename)
+        node_name = filename.split('/')[-1].strip(".py")
+        self.node = catkin_doc.node.Node(node_name)
+        self.filename = filename.split('/')[-1]
         self.parser_fcts = [(self.extract_param, self.add_param),
                             (self.extract_sub, self.add_sub),
                             (self.extract_pub, self.add_pub),
@@ -21,6 +23,7 @@ class PythonParser(object):
                             (self.extract_action, self. add_action)]
         with open(filename) as filecontent:
             self.lines = filecontent.readlines()
+        self.parse()
 
 
 
@@ -39,7 +42,7 @@ class PythonParser(object):
                 if success:
                     comment = self.search_for_comment(linenumber)
                     if comment == '':
-                        filename = file.split("/")[-1]
+                        filename = self.filename.split("/")[-1]
                         comment = 'Please add description. See ' + filename + ' linenumber: ' + str(linenumber+1)
                     add(key, value, comment)
 
@@ -72,12 +75,9 @@ class PythonParser(object):
         """
         match = re.search("(get_param\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))?\)", line)
         if match:
-            print(match.groups())
             parameter_name = str(match.group(3)).strip('\'')
-            print('Parameter name: ', parameter_name)
 
             parameter_value = str(match.group(6)).strip('\'')
-            print('Default value: ', parameter_value)
             return True, parameter_name, parameter_value
         return False, None, None
 
@@ -94,12 +94,9 @@ class PythonParser(object):
         """
         match = re.search("(Subscriber\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))\)", line)
         if match:
-            print(match.groups())
             topic = str(match.group(3))
-            print('Subscribed topic: ', topic)
 
             topic_type = str(match.group(6))
-            print('Msg type on topic: ', topic_type)
 
             return True, topic, topic_type
         return False, None, None
@@ -118,12 +115,9 @@ class PythonParser(object):
         """
         match = re.search("(Publisher\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+\)", line)
         if match:
-            print(match.groups())
             topic = str(match.group(3))
-            print('Published topic: ', topic)
 
             topic_type = str(match.group(6))
-            print('Msg type on topic: ', topic_type)
             return True, topic, topic_type
         return False, None, None
 
@@ -140,12 +134,9 @@ class PythonParser(object):
         """
         match = re.search("(SimpleActionClient\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))\)", line)
         if match:
-            print(match.groups())
             topic = str(match.group(3))
-            print('Action topic: ', topic)
 
             action = str(match.group(6))
-            print('Action: ', action)
             return True, topic, action
         return False, None, None
 
@@ -163,12 +154,9 @@ class PythonParser(object):
         """
         match = re.search("(ServiceProxy\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))\)", line)
         if match:
-            print(match.groups())
             topic = str(match.group(3))
-            print('Service topic: ', topic)
 
             type = str(match.group(6))
-            print('used srv-type: ', type)
             return True, topic, type
         return False, None, None
 
@@ -186,12 +174,9 @@ class PythonParser(object):
         """
         match = re.search("(Service\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+\)", line)
         if match:
-            print(match.groups())
             name = str(match.group(3))
-            print('Service: ', name)
 
             type = str(match.group(6))
-            print('used srv-type: ', type)
 
             return True, name, type
         return False, None, None
@@ -209,12 +194,9 @@ class PythonParser(object):
         """
         match = re.search("(SimpleActionServer\()\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+\)", line)
         if match:
-            print(match.groups())
             name = str(match.group(3))
-            print('Action: ', name)
 
             type = str(match.group(6))
-            print('used action-type: ', type)
 
             return True, name, type
         return False, None, None

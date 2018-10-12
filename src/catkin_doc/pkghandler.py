@@ -21,13 +21,13 @@ class PkgHandler:
         Currently prints filenames of files which are probably python ros nodes
         """
         for filename in os.listdir(pkg_path):
-            if os.path.isdir(self.pkg_path + "/" + filename):
+            if os.path.isdir(pkg_path + "/" + filename):
                 self.search_for_python(pkg_path + "/" + filename)
             elif os.path.isfile(pkg_path + "/" + filename):
                 filetype = magic.from_file(pkg_path + "/" + filename)
                 if ("python" in filetype) | ("Python" in filetype):
                     if PkgHandler.check_if_ros_node(pkg_path + "/" + filename):
-                        executables.add(pkg_path + "/" + filename)
+                        self.executables.append(pkg_path + "/" + filename)
 
     @staticmethod
     def check_if_ros_node(filename):
@@ -38,12 +38,13 @@ class PkgHandler:
         """
         file = open(filename, "r")
         if "rospy.init_node" in file.read():
+            print(filename)
             return True
         return False
 
     def create_parser(self):
         for file in self.executables:
-            parser.add(catkin_doc.python.PythonParser(file))
+            self.parser.append(catkin_doc.python.PythonParser(file))
 
 
 
