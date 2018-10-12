@@ -83,7 +83,7 @@ class CppParser(object):
             parameter_brackets = str(match.group(1))
             parameter_value = None
             return True, parameter_name, parameter_value, parameter_brackets
-        match = re.search('param::get\("([^"]*)", [^,]+\)', line)
+        match = re.search('param::get\(("([^"]*)", [^,]+)\)', line)
         if match:
             parameter_name = str(match.group(2)).strip('\'')
             parameter_brackets = str(match.group(1))
