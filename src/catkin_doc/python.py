@@ -38,6 +38,9 @@ class PythonParser(object):
                 success, key, value = extract(line)
                 if success:
                     comment = self.search_for_comment(linenumber)
+                    if comment == '':
+                        filename = file.split("/")[-1]
+                        comment = 'Please add description. See ' + filename + ' linenumber: ' + str(linenumber+1)
                     add(key, value, comment)
 
             linenumber += 1

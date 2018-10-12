@@ -27,9 +27,9 @@ class CppParser(object):
         for file in self.files:
             with open(file) as filecontent:
                 self.lines = filecontent.readlines()
-                self.parse()
+                self.parse(file)
 
-    def parse(self):
+    def parse(self, file):
         """
         Therefore extract and add all relevant features from python node including comments on them.
         """
@@ -43,6 +43,9 @@ class CppParser(object):
                   success, key, value = extract(line)
                   if success:
                       comment = self.search_for_comment(linenumber)
+                      if comment == '':
+                          filename = file.split("/")[-1]
+                          comment = 'Please add description. See ' + filename + ' linenumber: ' + str(linenumber+1)
                       add(key, value, comment)
 
             linenumber += 1
