@@ -289,7 +289,7 @@ class NodeConverter(object):
         """
         Turn action clients from node representation to rst
         """
-        rst = "Action clients\n----------------------------------------\n"
+        rst = "Action Clients\n----------------------------------------\n"
         for action_server in sorted(self.node.action_clients.iterkeys()):
             msg_type, comment = self.node.action_clients[action_server]
             if not 'fzi' in msg_type:
@@ -307,7 +307,7 @@ class NodeConverter(object):
         """
         Turn action from node representation to rst
         """
-        rst = "Action servers\n----------------------------------------\n"
+        rst = "Action Server\n----------------------------------------\n"
         for action in sorted(self.node.actions.iterkeys()):
             msg_type, comment = self.node.actions[action]
             if not 'fzi' in msg_type:
@@ -325,7 +325,7 @@ class NodeConverter(object):
         """
         Turn service clients from node representation to rst
         """
-        rst =  "Service clients\n----------------------------------------\n"
+        rst =  "Service Clients\n----------------------------------------\n"
         for service in sorted(self.node.service_clients.iterkeys()):
             msg_type, comment = self.node.service_clients[service]
             if not 'fzi' in msg_type:
@@ -342,7 +342,7 @@ class NodeConverter(object):
         """
         Turn services from node representation to rst
         """
-        rst =  "Advertised services\n----------------------------------------\n"
+        rst =  "Advertised Services\n----------------------------------------\n"
         for service in sorted(self.node.services.iterkeys()):
             msg_type, comment = self.node.services[service]
             if not 'fzi' in msg_type:
