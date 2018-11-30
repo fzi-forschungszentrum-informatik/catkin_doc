@@ -12,6 +12,7 @@ class NodeComparator(object):
         self.compare_params()
         self.compare_subscriber()
         self.compare_publisher()
+        self.compare_service_clients()
 
     def compare_params(self):
         """
@@ -98,7 +99,7 @@ class NodeComparator(object):
         Cases are basically the same as for params
         """
         for key in self.new_node.publisher:
-            new_msg, new_comment = self. new_node.publisher[key]
+            new_msg, new_comment = self.new_node.publisher[key]
             if key in self.old_node.publisher:
                 old_msg, old_comment = self.old_node.publisher[key]
                 if not new_msg == old_msg:
@@ -124,6 +125,39 @@ class NodeComparator(object):
                                    key + " msg type: " +  old_msg + "\n"+ old_comment + " (<n>/y)")
                 if answer == "y":
                     self.merged_node.add_publisher(key, old_msg, old_comment)
+
+    def compare_service_clients(self):
+        """
+        Function to compare service client entries of both nodes
+        and add correct entry to the merged nodes
+        """
+        for key in self.new_node.service_clients:
+            new_msg, new_comment = self.new_node.service_clients[key]
+            if key in self.old_node.service_clients:
+                old_msg, old_comment = self.old_node.service_clients[key]
+                if not new_msg == old_msg:
+                    print("Warning! The msg type for the service client " + key + " has changed.\n")
+                if "Please add description" in old_comment or old_comment == new_comment:
+                    self.merged_node.add_service_client(key, new_msg, new_comment)
+                elif "Please add description" in new_comment:
+                    self.merged_node.add_service_client(key, new_msg, old_comment)
+                else:
+                    answer = raw_input("There are two different comments for the service client " + key + "\n Please choose the comment you want by typing <1> or 2. Choices: \n" +
+                                       "1. " + new_comment + "\n2. "+ old_comment)
+                    if str(answer) == "2":
+                        self.merged_node.add_service_client(key, new_msg, old_comment)
+                    else:
+                        self.merged_node.add_service_client(key, new_msg, new_comment)
+            else:
+                self.merged_node.add_service_client(key, new_msg, new_comment)
+
+        for key in self.old_node.service_clients:
+            if not key in self.new_node.service_clients:
+                old_msg, old_comment = self.old_node.service_clients[key]
+                answer = raw_input("In the docu generated from code the service client " + key + " is not defined. \n" "Do you still want to keep the service client " +
+                                   key + " msg type: " +  old_msg + "\n"+ old_comment + " (<n>/y)")
+                if answer == "y":
+                    self.merged_node.add_service_client(key, old_msg, old_comment)
 
 
 
