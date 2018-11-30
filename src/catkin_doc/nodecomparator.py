@@ -13,6 +13,7 @@ class NodeComparator(object):
         self.compare_subscriber()
         self.compare_publisher()
         self.compare_service_clients()
+        self.compare_services()
 
     def compare_params(self):
         """
@@ -158,6 +159,39 @@ class NodeComparator(object):
                                    key + " msg type: " +  old_msg + "\n"+ old_comment + " (<n>/y)")
                 if answer == "y":
                     self.merged_node.add_service_client(key, old_msg, old_comment)
+
+    def compare_services(self):
+        """
+        Function to compare the service entries in both nodes
+        and add the correct one to the merged node
+        """
+        for key in self.new_node.services:
+            new_msg, new_comment = self.new_node.services[key]
+            if key in self.old_node.services:
+                old_msg, old_comment = self.old_node.services[key]
+                if not new_msg == old_msg:
+                    print("Warning! The msg type for the service" + key + " has changed.\n")
+                if "Please add description" in old_comment or old_comment == new_comment:
+                    self.merged_node.add_service(key, new_msg, new_comment)
+                elif "Please add description" in new_comment:
+                    self.merged_node.add_service(key, new_msg, old_comment)
+                else:
+                    answer = raw_input("There are two different comments for the service " + key + "\n Please choose the comment you want by typing <1> or 2. Choices: \n" +
+                                       "1. " + new_comment + "\n2. "+ old_comment)
+                    if str(answer) == "2":
+                        self.merged_node.add_service(key, new_msg, old_comment)
+                    else:
+                        self.merged_node.add_service(key, new_msg, new_comment)
+            else:
+                self.merged_node.add_service(key, new_msg, new_comment)
+
+        for key in self.old_node.services:
+            if not key in self.new_node.services:
+                old_msg, old_comment = self.old_node.services[key]
+                answer = raw_input("In the docu generated from code the service " + key + " is not defined. \n" "Do you still want to keep the service client " +
+                                   key + " msg type: " +  old_msg + "\n"+ old_comment + " (<n>/y)")
+                if answer == "y":
+                    self.merged_node.add_service(key, old_msg, old_comment)
 
 
 
