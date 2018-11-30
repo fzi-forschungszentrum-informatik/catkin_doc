@@ -210,21 +210,21 @@ class NodeConverter(object):
         params = self.parameters_to_rst()
         subs = self.subscriber_to_rst()
         pubs = self.publisher_to_rst()
-        action_clients = self.action_clients_to_rst()
         service_clients = self.service_clients_to_rst()
         srvs = self.service_to_rst()
+        action_clients = self.action_clients_to_rst()
         actions = self.action_to_rst()
 
         rst = self.node.filename + "\n===================================\n"
 
-        rst += params + subs + pubs + action_clients + service_clients + srvs + actions
+        rst += params + subs + pubs + service_clients + srvs + action_clients + actions
         return rst
 
     def rst_definition(self, name, type, comment):
         """
         Helper function to create rst
         """
-        rst = name + " ("
+        rst = name.strip(' ') + " ("
         if type != "":
             rst += type + ")\n"
         else:
@@ -254,7 +254,7 @@ class NodeConverter(object):
         """
         Turn subs from node representation to rst
         """
-        rst = "Subscribed Topics\n---------------------------------------\n"
+        rst = "Subscribed topics\n---------------------------------------\n"
         for topic in sorted(self.node.subscriber.iterkeys()):
             msg_type, comment = self.node.subscriber[topic]
             if not 'fzi' in msg_type:
@@ -272,7 +272,7 @@ class NodeConverter(object):
         """
         Turn pubs from node representation to rst
         """
-        rst = "Advertised Topics\n----------------------------------------\n"
+        rst = "Advertised topics\n----------------------------------------\n"
         for topic in sorted(self.node.publisher.iterkeys()):
             msg_type, comment = self.node.publisher[topic]
             if not 'fzi' in msg_type:
@@ -289,7 +289,7 @@ class NodeConverter(object):
         """
         Turn action clients from node representation to rst
         """
-        rst = "Action Clients\n----------------------------------------\n"
+        rst = "Action clients\n----------------------------------------\n"
         for action_server in sorted(self.node.action_clients.iterkeys()):
             msg_type, comment = self.node.action_clients[action_server]
             if not 'fzi' in msg_type:
@@ -307,7 +307,7 @@ class NodeConverter(object):
         """
         Turn action from node representation to rst
         """
-        rst = "Action Server\n----------------------------------------\n"
+        rst = "Action server\n----------------------------------------\n"
         for action in sorted(self.node.actions.iterkeys()):
             msg_type, comment = self.node.actions[action]
             if not 'fzi' in msg_type:
@@ -325,7 +325,7 @@ class NodeConverter(object):
         """
         Turn service clients from node representation to rst
         """
-        rst =  "Service Clients\n----------------------------------------\n"
+        rst =  "Service clients\n----------------------------------------\n"
         for service in sorted(self.node.service_clients.iterkeys()):
             msg_type, comment = self.node.service_clients[service]
             if not 'fzi' in msg_type:
@@ -342,7 +342,7 @@ class NodeConverter(object):
         """
         Turn services from node representation to rst
         """
-        rst =  "Advertised Services\n----------------------------------------\n"
+        rst =  "Advertised services\n----------------------------------------\n"
         for service in sorted(self.node.services.iterkeys()):
             msg_type, comment = self.node.services[service]
             if not 'fzi' in msg_type:

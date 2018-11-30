@@ -192,7 +192,7 @@ class CppParser(object):
         """
         match = re.search('actionlib::SimpleActionClient<([^>]*)>\((\s*([^,^)^(]*)?,?\s*([^,^)]*)?,([^,^)]*))\)', line)
         if match:
-            action_type = str(match.group(1))
+            action_type = str(match.group(1)).strip(' ')
             topic = str(match.group(3)).strip('"') + " " + str(match.group(4).strip('"'))
             brackets = str(match.group(2))
             return True, topic, action_type, brackets
