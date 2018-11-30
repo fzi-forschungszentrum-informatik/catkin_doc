@@ -91,13 +91,13 @@ class RstParser(object):
         # Parse subscribed topics until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for name of subscribed topic and message type
-            match = re.search('(\S+) \((\S+)\)', self.lines[linenumber])
+            match = re.search('(\S+) \((\S+)\s?\S*\)', self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
                 linenumber +=1
                 #Extract description of parameter
-                linenumber, description = self.extract_description(linenumber, '(\S+) \((\S+)\)')
+                linenumber, description = self.extract_description(linenumber, '(\S+) \((\S+\s?\S*)\)')
                 self.node.add_subscriber(topic, msg_type, description)
             else:
                 linenumber +=1
@@ -112,13 +112,13 @@ class RstParser(object):
         # Parse advertised topics until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for name of advertised topic and message type
-            match = re.search('(\S+) \((\S+)\)', self.lines[linenumber])
+            match = re.search('(\S+) \((\S+)\s?\S*\)', self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
                 linenumber +=1
                 #Extract description of parameter
-                linenumber, description = self.extract_description(linenumber, '(\S+) \((\S+)\)')
+                linenumber, description = self.extract_description(linenumber, '(\S+) \((\S+\s?\S*)\)')
                 self.node.add_publisher(topic, msg_type, description)
             else:
                 linenumber +=1
@@ -133,7 +133,7 @@ class RstParser(object):
         # Parse service clients until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for topic of the service client and message type
-            match = re.search('(\S+) \((\S+\s?\S*)\)', self.lines[linenumber])
+            match = re.search('(\S+) \((\S+)\s?\S*\)', self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
@@ -154,7 +154,7 @@ class RstParser(object):
         # Parse services until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for the service name and message type
-            match = re.search('(\S+) \((\S+\s?\S*)\)', self.lines[linenumber])
+            match = re.search('(\S+) \((\S+)\s?\S*\)', self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
@@ -175,7 +175,7 @@ class RstParser(object):
         # Parse action clients until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for the action clients name and message type
-            match = re.search('(\S+) \((\S+\s?\S*)\)', self.lines[linenumber])
+            match = re.search('(\S+) \((\S+)\s?\S*\)', self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
@@ -196,7 +196,7 @@ class RstParser(object):
         # Parse action server until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for the action clients name and message type
-            match = re.search('(\S+\s?\S*) \((\S+\s?\S*)\)', self.lines[linenumber])
+            match = re.search('(\S+\s?\S*) \((\S+)\s?\S*\)', self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
