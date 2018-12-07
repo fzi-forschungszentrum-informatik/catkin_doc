@@ -14,6 +14,8 @@ class NodeComparator(object):
         self.compare_publisher()
         self.compare_service_clients()
         self.compare_services()
+        self.compare_action_clients()
+        self.compare_actions()
 
     def compare_params(self):
         """
@@ -188,12 +190,77 @@ class NodeComparator(object):
         for key in self.old_node.services:
             if not key in self.new_node.services:
                 old_msg, old_comment = self.old_node.services[key]
-                answer = raw_input("In the docu generated from code the service " + key + " is not defined. \n" "Do you still want to keep the service client " +
+                answer = raw_input("In the docu generated from code the service " + key + " is not defined. \n" "Do you still want to keep the service " +
                                    key + " msg type: " +  old_msg + "\n"+ old_comment + " (<n>/y)")
                 if answer == "y":
                     self.merged_node.add_service(key, old_msg, old_comment)
 
 
+    def compare_action_clients(self):
+        """
+        Function to compare the action client entries in both nodes
+        and add the correct one to the merged node
+        """
+        for key in self.new_node.action_clients:
+            new_msg, new_comment = self.new_node.action_clients[key]
+            if key in self.old_node.action_clients:
+                old_msg, old_comment = self.old_node.action_clients[key]
+                if not new_msg == old_msg:
+                    print("Warning! The action type for the action client" + key + " has changed.\n")
+                if "Please add description" in old_comment or old_comment == new_comment:
+                    self.merged_node.add_action_client(key, new_msg, new_comment)
+                elif "Please add description" in new_comment:
+                    self.merged_node.add_action_client(key, new_msg, old_comment)
+                else:
+                    answer = raw_input("There are two different comments for the action client " + key + "\n Please choose the comment you want by typing <1> or 2. Choices: \n" +
+                                       "1. " + new_comment + "\n2. "+ old_comment)
+                    if str(answer) == "2":
+                        self.merged_node.add_action_client(key, new_msg, old_comment)
+                    else:
+                        self.merged_node.add_action_client(key, new_msg, new_comment)
+            else:
+                self.merged_node.add_action_client(key, new_msg, new_comment)
+
+        for key in self.old_node.action_clients:
+            if not key in self.new_node.action_clients:
+                old_msg, old_comment = self.old_node.action_clients[key]
+                answer = raw_input("In the docu generated from code the action client " + key + " is not defined. \n" "Do you still want to keep the action client " +
+                                   key + " msg type: " +  old_msg + "\n"+ old_comment + " (<n>/y)")
+                if answer == "y":
+                    self.merged_node.add_action_client(key, old_msg, old_comment)
+
+    def compare_actions(self):
+        """
+        Function to compare the action entries in both nodes
+        and add the correct one to the merged node
+        """
+        for key in self.new_node.actions:
+            new_msg, new_comment = self.new_node.actions[key]
+            if key in self.old_node.action_clients:
+                old_msg, old_comment = self.old_node.actions[key]
+                if not new_msg == old_msg:
+                    print("Warning! The action type for the action " + key + " has changed.\n")
+                if "Please add description" in old_comment or old_comment == new_comment:
+                    self.merged_node.add_action(key, new_msg, new_comment)
+                elif "Please add description" in new_comment:
+                    self.merged_node.add_action(key, new_msg, old_comment)
+                else:
+                    answer = raw_input("There are two different comments for the action " + key + "\n Please choose the comment you want by typing <1> or 2. Choices: \n" +
+                                       "1. " + new_comment + "\n2. "+ old_comment)
+                    if str(answer) == "2":
+                        self.merged_node.add_action(key, new_msg, old_comment)
+                    else:
+                        self.merged_node.add_action(key, new_msg, new_comment)
+            else:
+                self.merged_node.add_action(key, new_msg, new_comment)
+
+        for key in self.old_node.actions:
+            if not key in self.new_node.actions:
+                old_msg, old_comment = self.old_node.actions[key]
+                answer = raw_input("In the docu generated from code the action " + key + " is not defined. \n" "Do you still want to keep the action " +
+                                   key + " msg type: " +  old_msg + "\n"+ old_comment + " (<n>/y)")
+                if answer == "y":
+                    self.merged_node.add_action(key, old_msg, old_comment)
 
 
 
