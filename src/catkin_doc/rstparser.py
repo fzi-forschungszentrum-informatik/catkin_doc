@@ -45,7 +45,7 @@ class RstParser(object):
         """
         Helperfunction to recognize underlinings which indicate new paragraph
         """
-        if "-----" in self.lines[linenumber]:
+        if not linenumber < len(self.lines) or "-----" in self.lines[linenumber]:
             return True
         else:
             return False
@@ -55,9 +55,10 @@ class RstParser(object):
         Helperfunction for extracting the description
         """
         description = ""
-        while (not re.search(pattern, self.lines[linenumber]) and linenumber < len(self.lines)-1
+        while (not re.search(pattern, self.lines[linenumber]) and linenumber < len(self.lines)
                and not self.paragraph_finished(linenumber+1)):
-            description += self.lines[linenumber].strip('\n').strip(' ') + " "
+            if not self.lines[linenumber].strip(" ").strip("\n") == "":
+                description += self.lines[linenumber]
             linenumber +=1
 
         return linenumber, description
