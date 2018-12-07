@@ -55,8 +55,8 @@ class RstParser(object):
         Helperfunction for extracting the description
         """
         description = ""
-        while (not re.search(pattern, self.lines[linenumber])
-               and not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1):
+        while (not re.search(pattern, self.lines[linenumber]) and linenumber < len(self.lines)-1
+               and not self.paragraph_finished(linenumber+1)):
             description += self.lines[linenumber].strip('\n').strip(' ') + " "
             linenumber +=1
 
@@ -137,7 +137,7 @@ class RstParser(object):
         # Parse service clients until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for topic of the service client and message type
-            match = re.search('(\S+) \((\S+)\s?\S*\)', self.lines[linenumber])
+            match = re.search('(\S+) \(`?(\S+)\s?\S*\)', self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
@@ -158,7 +158,7 @@ class RstParser(object):
         # Parse services until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for the service name and message type
-            match = re.search('(\S+) \((\S+)\s?\S*\)', self.lines[linenumber])
+            match = re.search('(\S+) \(`?(\S+)\s?\S*\)', self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
@@ -179,7 +179,7 @@ class RstParser(object):
         # Parse action clients until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for the action clients name and message type
-            match = re.search('(\S+) \((\S+)\s?\S*\)', self.lines[linenumber])
+            match = re.search('(\S+) \(`?(\S+)\s?\S*\)', self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
@@ -200,7 +200,7 @@ class RstParser(object):
         # Parse action server until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for the action clients name and message type
-            match = re.search('(\S+\s?\S*) \((\S+)\s?\S*\)', self.lines[linenumber])
+            match = re.search('(\S+\s?\S*) \(`?(\S+)\s?\S*\)', self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))

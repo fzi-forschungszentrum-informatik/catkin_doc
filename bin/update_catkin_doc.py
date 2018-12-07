@@ -33,8 +33,9 @@ for parser in cpp_handler.parser:
           comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
           nodeconverter.convert_to_file(comp.merged_node, file_format)
     if not found_parser:
-        answer = raw_input("Did not found matching docu for node " + parser.node.filename + ". \n Please enter path to documentation or type 's' to skip compare and write node to docu. \n")
-        if answer == "s":
+        answer = raw_input("Did not found matching docu for node " + parser.node.filename + ". \n Please enter path to documentation or press enter to skip compare and write node to docu. \n")
+        if answer == "":
+            print("Skipping compare ...\n")
             nodeconverter.convert_to_file(parser.node, file_format)
         else:
             if ".rst" in answer:
@@ -46,4 +47,25 @@ for parser in cpp_handler.parser:
                 nodeconverter.convert_to_file(parser.node, file_format)
 
 
+for parser in py_handler.parser:
+    found_parser = False
+    for docu in docu_list:
+      if (parser.node.filename + ".rst") in docu:
+          found_parser = True
+          rst_parser = catkin_doc.rstparser.RstParser(docu)
+          comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
+          nodeconverter.convert_to_file(comp.merged_node, file_format)
+    if not found_parser:
+        answer = raw_input("Did not found matching docu for node " + parser.node.filename + ". \n Please enter path to documentation or press enter to skip compare and write node to docu. \n")
+        if answer == "":
+            print("Skipping compare ...\n")
+            nodeconverter.convert_to_file(parser.node, file_format)
+        else:
+            if ".rst" in answer:
+                rst_parser = catkin_doc.rstparser.RstParser(answer)
+                comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
+                nodeconverter.convert_to_file(comp.merged_node, file_format)
+            else:
+                print("Inserted path does not match an rst path. Skipping compare ...")
+                nodeconverter.convert_to_file(parser.node, file_format)
 

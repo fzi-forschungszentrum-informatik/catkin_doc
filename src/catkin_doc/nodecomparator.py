@@ -206,7 +206,7 @@ class NodeComparator(object):
             if key in self.old_node.action_clients:
                 old_msg, old_comment = self.old_node.action_clients[key]
                 if not new_msg == old_msg:
-                    print("Warning! The action type for the action client" + key + " has changed.\n")
+                    print("Warning! The action type for the action client " + key + " has changed.\n")
                 if "Please add description" in old_comment or old_comment == new_comment:
                     self.merged_node.add_action_client(key, new_msg, new_comment)
                 elif "Please add description" in new_comment:
@@ -236,7 +236,7 @@ class NodeComparator(object):
         """
         for key in self.new_node.actions:
             new_msg, new_comment = self.new_node.actions[key]
-            if key in self.old_node.action_clients:
+            if key in self.old_node.actions:
                 old_msg, old_comment = self.old_node.actions[key]
                 if not new_msg == old_msg:
                     print("Warning! The action type for the action " + key + " has changed.\n")
