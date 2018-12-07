@@ -43,8 +43,22 @@ class PkgHandler:
         return False
 
     def create_parser(self):
+        """
+        Function which creates a parser for each found python file
+        """
         for file in self.executables:
             self.parser.append(catkin_doc.python.PythonParser(file))
+
+    @staticmethod
+    def find_docu(pkg_path):
+        doculist = []
+        for filename in os.listdir(pkg_path):
+            if ".rst" in filename or ".md" in filename:
+                doculist.append(pkg_path + "/" + filename)
+            elif os.path.isdir(pkg_path + "/" + filename):
+                PkgHandler.find_docu(pkg_path + "/" + filename)
+
+        return doculist
 
 
 

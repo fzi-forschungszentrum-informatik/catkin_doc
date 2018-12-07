@@ -8,11 +8,15 @@ class RstParser(object):
     """Parser for existing rst files generated with the catkin doc module
        to fill node representation for update"""
     def __init__(self, filename):
-        node_name = filename.split(".")[0]
-        self.node = catkin_doc.node.Node(node_name)
-        with open(filename) as filecontent:
-            self.lines = filecontent.readlines()
-        self.parse()
+        if ".rst" in filename:
+            node_name = filename.split(".")[0]
+            self.node = catkin_doc.node.Node(node_name)
+            with open(filename) as filecontent:
+                self.lines = filecontent.readlines()
+            self.parse()
+        else:
+            print("This is not an rst file.")
+            self.node = None
 
     def parse(self):
         """
