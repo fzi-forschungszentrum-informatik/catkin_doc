@@ -33,7 +33,8 @@ def main():
               comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
               nodeconverter.convert_to_file(comp.merged_node, file_format)
         if not found_parser:
-            answer = raw_input("Did not found matching docu for node " + parser.node.filename + ". \n Please enter path to documentation or press enter to skip compare and write node to docu. \n")
+            answer = raw_input("Did not found matching docu for node " + parser.node.filename +
+                               ". \n Please enter path to documentation or press enter to skip compare and write node to docu. \n")
             if answer == "":
                 print("Skipping compare ...\n")
                 nodeconverter.convert_to_file(parser.node, file_format)
@@ -43,7 +44,7 @@ def main():
                     comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
                     nodeconverter.convert_to_file(comp.merged_node, file_format)
                 else:
-                    print("Inserted path does not match an rst path. Skipping compare ...")
+                    print("Inserted path does not match an rst file. Skipping compare ...")
                     nodeconverter.convert_to_file(parser.node, file_format)
 
 
@@ -56,7 +57,8 @@ def main():
               comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
               nodeconverter.convert_to_file(comp.merged_node, file_format)
         if not found_parser:
-            answer = raw_input("Did not found matching docu for node " + parser.node.filename + ". \n Please enter path to documentation or press enter to skip compare and write node to docu. \n")
+            answer = raw_input("Did not found matching docu for node " + parser.node.filename + " in directory " + package_path + "and its subdirectories." +
+                               " \n Please enter path to documentation or press enter to skip compare and write node to docu. \n")
             if answer == "":
                 print("Skipping compare ...\n")
                 nodeconverter.convert_to_file(parser.node, file_format)
