@@ -15,7 +15,7 @@ class RstParser(object):
                 self.lines = filecontent.readlines()
             self.parse()
         else:
-            print("This is not an rst file.")
+            print("This is not a rst file.")
             self.node = None
 
     def parse(self):

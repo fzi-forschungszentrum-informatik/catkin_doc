@@ -5,6 +5,7 @@ import catkin_doc.cmakeparser
 import catkin_doc.pkghandler
 import catkin_doc.nodeconverter
 import catkin_doc.rstparser
+import catkin_doc.mdparser
 import catkin_doc.nodecomparator
 import sys
 
@@ -32,6 +33,11 @@ def main():
               rst_parser = catkin_doc.rstparser.RstParser(docu)
               comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
               nodeconverter.convert_to_file(comp.merged_node, file_format)
+          elif(parser.node.filename + ".md") in docu:
+              found_parser =True
+              md_parser = catkin_doc.mdparser.MdParser(docu)
+              comp = catkin_doc.nodecomparator.NodeComparator(parser.node, md_parser.node)
+              nodeconverter.convert_to_file(comp.merged_node, file_format)
         if not found_parser:
             answer = raw_input("Did not found matching docu for node " + parser.node.filename +
                                ". \n Please enter path to documentation or press enter to skip compare and write node to docu. \n")
@@ -42,6 +48,10 @@ def main():
                 if ".rst" in answer:
                     rst_parser = catkin_doc.rstparser.RstParser(answer)
                     comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
+                    nodeconverter.convert_to_file(comp.merged_node, file_format)
+                elif ".md" in answer:
+                    md_parser = catkin_doc.mdparser.MdParser(answer)
+                    comp = catkin_doc.nodecomparator.NodeComparator(parser.node, md_parser.node)
                     nodeconverter.convert_to_file(comp.merged_node, file_format)
                 else:
                     print("Inserted path does not match an rst file. Skipping compare ...")
@@ -56,6 +66,11 @@ def main():
               rst_parser = catkin_doc.rstparser.RstParser(docu)
               comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
               nodeconverter.convert_to_file(comp.merged_node, file_format)
+          elif (parser.node.filename + ".md") in docu:
+              found_parser =True
+              md_parser = catkin_doc.mdparser.MdParser(docu)
+              comp = catkin_doc.nodecomparator.NodeComparator(parser.node, md_parser.node)
+              nodeconverter.convert_to_file(comp.merged_node, file_format)
         if not found_parser:
             answer = raw_input("Did not found matching docu for node " + parser.node.filename + " in directory " + package_path + "and its subdirectories." +
                                " \n Please enter path to documentation or press enter to skip compare and write node to docu. \n")
@@ -66,6 +81,10 @@ def main():
                 if ".rst" in answer:
                     rst_parser = catkin_doc.rstparser.RstParser(answer)
                     comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
+                    nodeconverter.convert_to_file(comp.merged_node, file_format)
+                elif ".md" in answer:
+                    md_parser = catkin_doc.mdparser.MdParser(answer)
+                    comp = catkin_doc.nodecomparator.NodeComparator(parser.node, md_parser.node)
                     nodeconverter.convert_to_file(comp.merged_node, file_format)
                 else:
                     print("Inserted path does not match an rst path. Skipping compare ...")
