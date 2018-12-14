@@ -13,6 +13,10 @@ class MdParser(object):
         self.re_param = '\*\*(\S+)\*\* \(default: (\S+)\)'
         self.re_subscriber = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
         self.re_publisher = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
+        self.re_service_clients = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
+        self.re_services = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
+        self.re_action_clients = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
+        self.re_actions = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
 
         if ".md" in filename:
             node_name = filename.split(".")[0]
@@ -34,6 +38,10 @@ class MdParser(object):
                 linenumber = self.parse_subscriber(linenumber + 1)
             elif "## Advertised Topics" in self.lines[linenumber]:
                 linenumber = self.parse_publisher(linenumber + 1)
+            elif "## Action clients" in self.lines[linenumber]:
+                linenumber = self.parse_action_clients(linenumber + 1)
+            elif "## Action servers" in self.lines[linenumber]:
+                linenumber = self.parse_actions(linenumber + 1)
             else:
                 linenumber += 1
 
@@ -111,6 +119,40 @@ class MdParser(object):
                linenumber +=1
                linenumber, description = self.extract_description(linenumber, self.re_publisher)
                self.node.add_publisher(topic, type, description)
+           else:
+               linenumber += 1
+        return linenumber
+
+    def parse_action_clients(self, linenumber):
+        """
+        Function to parse action clients from markdown file and add them to node
+        """
+        while not self.paragraph_finished(linenumber):
+           #extract action clients topic and action type
+           match = re.search(self.re_action_clients, self.lines[linenumber])
+           if match:
+               topic = str(match.group(1))
+               type = str(match.group(2))
+               linenumber +=1
+               linenumber, description = self.extract_description(linenumber, self.re_action_clients)
+               self.node.add_action_client(topic, type, description)
+           else:
+               linenumber += 1
+        return linenumber
+
+    def parse_actions(self, linenumber):
+        """
+        Function to parse actions from markdown file and add them to node
+        """
+        while not self.paragraph_finished(linenumber):
+           #extract action topic and action type
+           match = re.search(self.re_actions, self.lines[linenumber])
+           if match:
+               topic = str(match.group(1))
+               type = str(match.group(2))
+               linenumber +=1
+               linenumber, description = self.extract_description(linenumber, self.re_actions)
+               self.node.add_action(topic, type, description)
            else:
                linenumber += 1
         return linenumber
