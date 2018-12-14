@@ -11,12 +11,12 @@ class MdParser(object):
 
         #regex for parsing according things
         self.re_param = '\*\*(\S+)\*\* \(default: (\S+)\)'
-        self.re_subscriber = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
-        self.re_publisher = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
-        self.re_service_clients = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
-        self.re_services = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
-        self.re_action_clients = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
-        self.re_actions = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
+        self.re_subscriber = '\*\*(\S+)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
+        self.re_publisher = '\*\*(\S+)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
+        self.re_service_clients = '\*\*(\S+)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
+        self.re_services = '\*\*(\S+)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
+        self.re_action_clients = '\*\*(\S+)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
+        self.re_actions = '\*\*(\S+\s?\S*)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
 
         if ".md" in filename:
             node_name = filename.split(".")[0]
@@ -42,6 +42,10 @@ class MdParser(object):
                 linenumber = self.parse_action_clients(linenumber + 1)
             elif "## Action servers" in self.lines[linenumber]:
                 linenumber = self.parse_actions(linenumber + 1)
+            elif "## ## Service Clients" in self.lines[linenumber]:
+                linenumber = self.parse_service_clients(linenumber + 1)
+            elif "## Advertised services" in self.lines[linenumber]:
+                linenumber = self.parse_services(linenumber + 1)
             else:
                 linenumber += 1
 
@@ -152,7 +156,42 @@ class MdParser(object):
                type = str(match.group(2))
                linenumber +=1
                linenumber, description = self.extract_description(linenumber, self.re_actions)
+               print(description)
                self.node.add_action(topic, type, description)
+           else:
+               linenumber += 1
+        return linenumber
+
+    def parse_service_clients(self, linenumber):
+        """
+        Function to parse service clients from markdown file and add them to node
+        """
+        while not self.paragraph_finished(linenumber):
+           #extract service clients topic and service type
+           match = re.search(self.re_service_clients, self.lines[linenumber])
+           if match:
+               topic = str(match.group(1))
+               type = str(match.group(2))
+               linenumber +=1
+               linenumber, description = self.extract_description(linenumber, self.re_service_clients)
+               self.node.add_service_client(topic, type, description)
+           else:
+               linenumber += 1
+        return linenumber
+
+    def parse_services(self, linenumber):
+        """
+        Function to parse services from markdown file and add them to node
+        """
+        while not self.paragraph_finished(linenumber):
+           #extract service name and service type
+           match = re.search(self.re_services, self.lines[linenumber])
+           if match:
+               name = str(match.group(1))
+               type = str(match.group(2))
+               linenumber +=1
+               linenumber, description = self.extract_description(linenumber, self.re_services)
+               self.node.add_service(name, type, description)
            else:
                linenumber += 1
         return linenumber
