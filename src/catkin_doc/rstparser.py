@@ -8,6 +8,16 @@ class RstParser(object):
     """Parser for existing rst files generated with the catkin doc module
        to fill node representation for update"""
     def __init__(self, filename):
+
+        # regex for parsing things
+        self.re_param = '(\S+) \(default value: (\S+)\)'
+        self.re_subscriber = '(\S+) \((\S+)\s?\S*\)'
+        self.re_publisher = '(\S+) \((\S+)\s?\S*\)'
+        self.re_service_clients = '(\S+) \(`?(\S+)\s?\S*\)'
+        self.re_services = '(\S+) \(`?(\S+)\s?\S*\)'
+        self.re_action_clients = '(\S+) \(`?(\S+)\s?\S*\)'
+        self.re_actions = '(\S+\s?\S*) \(`?(\S+)\s?\S*\)'
+
         if ".rst" in filename:
             node_name = filename.split(".")[0]
             self.node = catkin_doc.node.Node(node_name)
@@ -73,7 +83,7 @@ class RstParser(object):
         # Parse params until next heading which we recognize by the undelining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for parametername and default value
-            match = re.search('(\S+) \(default value: (\S+)\)', self.lines[linenumber])
+            match = re.search(self.re_param, self.lines[linenumber])
             if match:
                 param_name = str(match.group(1))
                 param_value = None
@@ -81,7 +91,7 @@ class RstParser(object):
                     param_value = str(match.group(2))
                 linenumber +=1
                 #Extract description of parameter
-                linenumber, description = self.extract_description(linenumber, '(\S+) \(default value: (\S+)\)')
+                linenumber, description = self.extract_description(linenumber, self.re_param)
                 self.node.add_parameter(param_name, param_value, description)
             else:
                 linenumber +=1
@@ -96,13 +106,13 @@ class RstParser(object):
         # Parse subscribed topics until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for name of subscribed topic and message type
-            match = re.search('(\S+) \((\S+)\s?\S*\)', self.lines[linenumber])
+            match = re.search(self.re_subscriber, self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
                 linenumber +=1
                 #Extract description of parameter
-                linenumber, description = self.extract_description(linenumber, '(\S+) \((\S+\s?\S*)\)')
+                linenumber, description = self.extract_description(linenumber, self.re_subscriber)
                 self.node.add_subscriber(topic, msg_type, description)
             else:
                 linenumber +=1
@@ -117,13 +127,13 @@ class RstParser(object):
         # Parse advertised topics until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for name of advertised topic and message type
-            match = re.search('(\S+) \((\S+)\s?\S*\)', self.lines[linenumber])
+            match = re.search(self.re_publisher, self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
                 linenumber +=1
                 #Extract description of parameter
-                linenumber, description = self.extract_description(linenumber, '(\S+) \((\S+\s?\S*)\)')
+                linenumber, description = self.extract_description(linenumber, self.re_publisher)
                 self.node.add_publisher(topic, msg_type, description)
             else:
                 linenumber +=1
@@ -138,13 +148,13 @@ class RstParser(object):
         # Parse service clients until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for topic of the service client and message type
-            match = re.search('(\S+) \(`?(\S+)\s?\S*\)', self.lines[linenumber])
+            match = re.search(self.re_service_clients, self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
                 linenumber +=1
                 #Extract description of parameter
-                linenumber, description = self.extract_description(linenumber, '(\S+) \((\S+\s?\S*)\)')
+                linenumber, description = self.extract_description(linenumber, self.re_service_clients)
                 self.node.add_service_client(topic, msg_type, description)
             else:
                 linenumber +=1
@@ -159,13 +169,13 @@ class RstParser(object):
         # Parse services until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for the service name and message type
-            match = re.search('(\S+) \(`?(\S+)\s?\S*\)', self.lines[linenumber])
+            match = re.search(self.re_services, self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
                 linenumber +=1
                 #Extract description of parameter
-                linenumber, description = self.extract_description(linenumber, '(\S+) \((\S+\s?\S*)\)')
+                linenumber, description = self.extract_description(linenumber, self.re_services)
                 self.node.add_service(topic, msg_type, description)
             else:
                 linenumber +=1
@@ -180,13 +190,13 @@ class RstParser(object):
         # Parse action clients until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for the action clients name and message type
-            match = re.search('(\S+) \(`?(\S+)\s?\S*\)', self.lines[linenumber])
+            match = re.search(self.re_action_clients, self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
                 linenumber +=1
                 #Extract description of parameter
-                linenumber, description = self.extract_description(linenumber, '(\S+) \((\S+\s?\S*)\)')
+                linenumber, description = self.extract_description(linenumber, self.re_action_clients)
                 self.node.add_action_client(topic, msg_type, description)
             else:
                 linenumber +=1
@@ -201,13 +211,13 @@ class RstParser(object):
         # Parse action server until next heading which we recognize by the underlining
         while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
             #search for the action clients name and message type
-            match = re.search('(\S+\s?\S*) \(`?(\S+)\s?\S*\)', self.lines[linenumber])
+            match = re.search(self.re_actions, self.lines[linenumber])
             if match:
                 topic = str(match.group(1))
                 msg_type = str(match.group(2))
                 linenumber +=1
                 #Extract description of parameter
-                linenumber, description = self.extract_description(linenumber, '(\S+\s?\S*) \((\S+\s?\S*)\)')
+                linenumber, description = self.extract_description(linenumber, self.re_actions)
                 self.node.add_action(topic, msg_type, description)
             else:
                 linenumber +=1

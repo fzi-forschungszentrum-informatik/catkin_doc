@@ -23,10 +23,10 @@ How to update existing documentation:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 If resulting new documentation sould be restruckturedtext type:
 ::
-    python bin/update_catkin_doc.py "/path/to/your/package" "rst"
+    python bin/update_catkin_doc "/path/to/your/package" "rst"
 For markdown type:
 ::
-    python bin/update_catkin_doc.py "/path/to/your/package" "md"
+    python bin/update_catkin_doc "/path/to/your/package" "md"
     
 Be aware that the type of the previous documentation does not influence the type of the resulting docu.
 Meaning this functionality also allows switching between markdown and restruckturedtext documentation.
