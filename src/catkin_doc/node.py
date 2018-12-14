@@ -21,6 +21,10 @@ class Node(object):
         if default_value is not None:
             default_value = default_value.strip(" ")
         comment = comment.strip(" ")
+        if parameter_name in self.parameters:
+            oldmsg, oldcom = self.parameters[parameter_name]
+            if "Please add description" not in oldcom and "Please add description" in comment:
+                comment = oldcom
         self.parameters[parameter_name] = (default_value, comment)
         return True
 
@@ -31,6 +35,10 @@ class Node(object):
         topic = topic.strip(" ")
         msg_type = msg_type.strip(" ")
         comment = comment.strip(" ")
+        if topic in self.subscriber:
+            oldmsg, oldcom = self.subscriber[topic]
+            if "Please add description" not in oldcom and "Please add description" in comment:
+                comment = oldcom
         self.subscriber[topic] = (msg_type, comment)
         return True
 
@@ -41,6 +49,10 @@ class Node(object):
         topic = topic.strip(" ")
         msg_type = msg_type.strip(" ")
         comment = comment.strip(" ")
+        if topic in self.publisher:
+            oldmsg, oldcom = self.publisher[topic]
+            if "Please add description" not in oldcom and "Please add description" in comment:
+                comment = oldcom
         self.publisher[topic] = (msg_type, comment)
         return True
 
@@ -51,6 +63,10 @@ class Node(object):
         action_server = action_server.strip(" ")
         action = action.strip(" ")
         comment = comment.strip(" ")
+        if action_server in self.action_clients:
+            oldmsg, oldcom = self.action_clients[action_server]
+            if "Please add description" not in oldcom and "Please add description" in comment:
+                comment = oldcom
         self.action_clients[action_server] = (action, comment)
         return True
 
@@ -61,6 +77,10 @@ class Node(object):
         topic = topic.strip(" ")
         srv_type = srv_type.strip(" ")
         comment = comment.strip(" ")
+        if topic in self.service_clients:
+            oldmsg, oldcom = self.service_clients[topic]
+            if "Please add description" not in oldcom and "Please add description" in comment:
+                comment = oldcom
         self.service_clients[topic] = (srv_type, comment)
         return True
 
@@ -71,6 +91,10 @@ class Node(object):
         topic = topic.strip(" ")
         srv_type = srv_type.strip(" ")
         comment = comment.strip(" ")
+        if topic in self.services:
+            oldmsg, oldcom = self.services[topic]
+            if "Please add description" not in oldcom and "Please add description" in comment:
+                comment = oldcom
         self.services[topic] = (srv_type, comment)
         return True
 
@@ -81,6 +105,10 @@ class Node(object):
         name = name.strip(" ")
         act_type = act_type.strip(" ")
         comment = comment.strip(" ")
+        if name in self.actions:
+            oldmsg, oldcom = self.actions[name]
+            if "Please add description" not in oldcom and "Please add description" in comment:
+                comment = oldcom
         self.actions[name] = (act_type, comment)
         return True
 
