@@ -11,6 +11,8 @@ class MdParser(object):
 
         #regex for parsing according things
         self.re_param = '\*\*(\S+)\*\* \(default: (\S+)\)'
+        self.re_subscriber = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
+        self.re_publisher = '\*\*(\S+)\*\* \(\[?([^]]*)\]?[^]^\s]*\)'
 
         if ".md" in filename:
             node_name = filename.split(".")[0]
@@ -28,6 +30,10 @@ class MdParser(object):
         while linenumber < len(self.lines):
             if "## Parameters" in self.lines[linenumber]:
                 linenumber = self.parse_params(linenumber + 1)
+            elif "## Subscribed Topics" in self.lines[linenumber]:
+                linenumber = self.parse_subscriber(linenumber + 1)
+            elif "## Advertised Topics" in self.lines[linenumber]:
+                linenumber = self.parse_publisher(linenumber + 1)
             else:
                 linenumber += 1
 
@@ -74,4 +80,41 @@ class MdParser(object):
            else:
                linenumber += 1
         return linenumber
+
+    def parse_subscriber(self, linenumber):
+        """
+        Function to parse subscriber from markdown file and add them to node
+        """
+        while not self.paragraph_finished(linenumber):
+           #extract subscriber topic and msg type
+           match = re.search(self.re_subscriber, self.lines[linenumber])
+           if match:
+               topic = str(match.group(1))
+               type = str(match.group(2))
+               linenumber +=1
+               linenumber, description = self.extract_description(linenumber, self.re_re_subscriber)
+               self.node.add_subscriber(topic, type, description)
+           else:
+               linenumber += 1
+        return linenumber
+
+    def parse_publisher(self, linenumber):
+        """
+        Function to parse publisher from markdown file and add them to node
+        """
+        while not self.paragraph_finished(linenumber):
+           #extract publisher topic and msg type
+           match = re.search(self.re_publisher, self.lines[linenumber])
+           if match:
+               topic = str(match.group(1))
+               type = str(match.group(2))
+               linenumber +=1
+               linenumber, description = self.extract_description(linenumber, self.re_publisher)
+               self.node.add_publisher(topic, type, description)
+           else:
+               linenumber += 1
+        return linenumber
+
+
+
 
