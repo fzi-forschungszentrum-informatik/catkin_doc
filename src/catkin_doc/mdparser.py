@@ -104,7 +104,7 @@ class MdParser(object):
                topic = str(match.group(1))
                type = str(match.group(2))
                linenumber +=1
-               linenumber, description = self.extract_description(linenumber, self.re_re_subscriber)
+               linenumber, description = self.extract_description(linenumber, self.re_subscriber)
                self.node.add_subscriber(topic, type, description)
            else:
                linenumber += 1
