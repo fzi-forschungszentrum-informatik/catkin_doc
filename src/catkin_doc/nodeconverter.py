@@ -368,9 +368,10 @@ class NodeConverter(object):
 
                 if website.code != 200 :
                     return False
-        except Exception, e:
-                print "Errored while attempting to validate link : ", url
+        except urllib2.URLError, e:
+                print "Could not validate link: ", url
                 print e
+                print "Skipping url"
                 return False
 
         return True
