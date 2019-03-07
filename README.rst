@@ -9,24 +9,16 @@ How to use:
 ____________
 Please consider that the generated files are currently put in the directory from which you envoke the script.
 
-How to create new documentation for a package:
+How to create new  or update documentation for a package:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Just type in your console for restruckturedtext docu:
 ::
-    python bin/catkin_doc "/path/to/your/package" "rst"
+    catkin_doc "/path/to/your/package" "rst"
     
 or for markdown docu:
 ::
-    python bin/catkin_doc "/path/to/your/package" "md"
+    catkin_doc "/path/to/your/package" "md"
     
-How to update existing documentation:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If resulting new documentation sould be restruckturedtext type:
-::
-    python bin/update_catkin_doc "/path/to/your/package" "rst"
-For markdown type:
-::
-    python bin/update_catkin_doc "/path/to/your/package" "md"
     
 Be aware that the type of the previous documentation does not influence the type of the resulting docu.
 Meaning this functionality also allows switching between markdown and restruckturedtext documentation.
@@ -37,6 +29,7 @@ Be aware that anything additional you wrote in the documentation except explanat
 
 The update funcionality will automatically find the documentation for the nodes if the documentation is within the given package and you did not change the filename.
 If no matching documentation is found you will be asked to enter the path to and including the documentation file.
+If no documentation exists you can press enter to generate a documentation.
 
 The functionality will not delete any of explanations you made concerning the entries by default.
 Instead if it finds a new comment in the code it will ask you if you want to keep the old comment or replace it.
