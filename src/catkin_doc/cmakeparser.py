@@ -9,8 +9,8 @@ class CmakeListParser:
         self.search_for_cpp_node()
         self.parser = list()
         for node in self.executables:
+            print(node)
             self.parser.append(catkin_doc.cpp.CppParser(node, self.executables[node]))
-
 
     def search_for_cpp_node(self):
         """
