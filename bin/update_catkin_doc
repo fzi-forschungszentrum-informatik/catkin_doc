@@ -1,4 +1,4 @@
-#!/usr/env/bin python
+#!/usr/bin/env python
 """catkin_doc helps creating documentations for catkin packages"""
 
 import catkin_doc.cmakeparser
