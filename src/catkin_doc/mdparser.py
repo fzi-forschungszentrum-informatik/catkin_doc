@@ -160,7 +160,6 @@ class MdParser(object):
                type = str(match.group(2))
                linenumber +=1
                linenumber, description = self.extract_description(linenumber, self.re_actions)
-               print(description)
                self.node.add_action(topic, type, description)
            else:
                linenumber += 1
