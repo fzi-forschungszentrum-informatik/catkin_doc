@@ -70,7 +70,7 @@ class PkgHandler:
               lines = filecontent.readlines()
           i = 0
           while i < len(lines):
-              match = re.search("(..|<!--)starting node (\S+)", lines[i])
+              match = re.search("(..|<!--) starting node (\S+)", lines[i])
               if match:
                   doculist[str(match.group(2))] = i
               i +=1

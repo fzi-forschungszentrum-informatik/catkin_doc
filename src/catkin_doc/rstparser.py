@@ -35,7 +35,7 @@ class RstParser(object):
         """
         linenumber = self.starting_line + 1
         while linenumber < len(self.lines)-1:
-            match = re.search("(..)starting node (\S+)", self.lines[linenumber])
+            match = re.search("(..) starting node (\S+)", self.lines[linenumber])
             if match:
                 return
             if "Parameter" in self.lines[linenumber]:
@@ -228,7 +228,7 @@ class RstParser(object):
         return linenumber-1
 
     def next_node(self, linenumber):
-        next_node = re.search("(..)starting node (\S+)", self.lines[linenumber])
+        next_node = re.search("(..) starting node (\S+)", self.lines[linenumber])
         return next_node
 
 

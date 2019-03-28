@@ -215,7 +215,7 @@ class NodeConverter(object):
         action_clients = self.action_clients_to_rst()
         actions = self.action_to_rst()
 
-        rst = "\n..starting node " + self.node.filename + " \n\n"
+        rst = "\n.. starting node " + self.node.filename + " \n\n"
         rst += self.node.filename + "\n===================================\n"
 
         rst += params + subs + pubs + service_clients + srvs + action_clients + actions
