@@ -60,7 +60,7 @@ class PkgHandler:
             else:
                 pkg_name = pathlist[-2]
             for filename in os.listdir(pkg_path):
-                if (pkg_name+".rst") in filename or (pkg_name + ".md") in filename:
+                if (pkg_name + ".rst") in filename or (pkg_name + ".md") in filename:
                     docu_file = pkg_path + "/" + filename
                     break
                 elif os.path.isdir(pkg_path + "/" + filename):

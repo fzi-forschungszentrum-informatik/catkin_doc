@@ -178,7 +178,7 @@ class NodeConverter(object):
         srvs = self.service_to_md()
         actions = self.action_to_md()
 
-        md = "\n<!-- starting node " + self.node.filename + "--> \n\n"
+        md = "\n<!-- starting node " + self.node.filename + " --> \n\n"
         md += "# " + self.node.filename + "\n \n "
 
         md += params + subs + pubs + action_clients + service_clients + srvs + actions

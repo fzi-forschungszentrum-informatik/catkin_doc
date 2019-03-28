@@ -7,7 +7,7 @@ import catkin_doc.node
 class MdParser(object):
     """Parser for existing markdown files generated with the catkin doc module
        to fill node representation for update"""
-    def __init__(self, nodename, filename, staring_line):
+    def __init__(self, nodename, filename, starting_line):
         self.starting_line = starting_line
 
         #regex for parsing according things
@@ -33,9 +33,9 @@ class MdParser(object):
         linenumber = self.starting_line + 1
 
         while linenumber < len(self.lines):
-            match = re.search("(<!--)starting node (\S+)", self.lines[linenumber])
+            match = re.search("(<!--) starting node (\S+)", self.lines[linenumber])
             if match:
-                break
+                return
             if "## Parameters" in self.lines[linenumber]:
                 linenumber = self.parse_params(linenumber + 1)
             elif "## Subscribed Topics" in self.lines[linenumber]:
@@ -56,7 +56,7 @@ class MdParser(object):
     def paragraph_finished(self, linenumber):
         """
         Helperfunction
-        returns true if current aragraph is finished by detecting end of file or new heading
+        returns true if current paragraph is finished by detecting end of file or new heading
         false otherwise
 
         """
@@ -70,7 +70,7 @@ class MdParser(object):
         Helperfunction for extracting the description
         """
         description = ""
-        while (not re.search(pattern, self.lines[linenumber]) and linenumber < len(self.lines)
+        while (not re.search(pattern, self.lines[linenumber]) and linenumber < len(self.lines) and not self.next_node(linenumber)
                and not self.paragraph_finished(linenumber+1)):
             if not self.lines[linenumber].strip(" ").strip("\n") == "":
                 description += self.lines[linenumber]
@@ -82,7 +82,7 @@ class MdParser(object):
         """
         Function to parse parameter from markdown file and add them to node
         """
-        while not self.paragraph_finished(linenumber):
+        while not self.paragraph_finished(linenumber) and not self.next_node(linenumber):
            #extract parameter name and default value
            match = re.search(self.re_param, self.lines[linenumber])
            if match:
@@ -101,7 +101,7 @@ class MdParser(object):
         """
         Function to parse subscriber from markdown file and add them to node
         """
-        while not self.paragraph_finished(linenumber):
+        while not self.paragraph_finished(linenumber)  and not self.next_node(linenumber):
            #extract subscriber topic and msg type
            match = re.search(self.re_subscriber, self.lines[linenumber])
            if match:
@@ -118,7 +118,7 @@ class MdParser(object):
         """
         Function to parse publisher from markdown file and add them to node
         """
-        while not self.paragraph_finished(linenumber):
+        while not self.paragraph_finished(linenumber)  and not self.next_node(linenumber):
            #extract publisher topic and msg type
            match = re.search(self.re_publisher, self.lines[linenumber])
            if match:
@@ -135,7 +135,7 @@ class MdParser(object):
         """
         Function to parse action clients from markdown file and add them to node
         """
-        while not self.paragraph_finished(linenumber):
+        while not self.paragraph_finished(linenumber)  and not self.next_node(linenumber):
            #extract action clients topic and action type
            match = re.search(self.re_action_clients, self.lines[linenumber])
            if match:
@@ -152,7 +152,7 @@ class MdParser(object):
         """
         Function to parse actions from markdown file and add them to node
         """
-        while not self.paragraph_finished(linenumber):
+        while not self.paragraph_finished(linenumber)  and not self.next_node(linenumber):
            #extract action topic and action type
            match = re.search(self.re_actions, self.lines[linenumber])
            if match:
@@ -170,7 +170,7 @@ class MdParser(object):
         """
         Function to parse service clients from markdown file and add them to node
         """
-        while not self.paragraph_finished(linenumber):
+        while not self.paragraph_finished(linenumber)  and not self.next_node(linenumber):
            #extract service clients topic and service type
            match = re.search(self.re_service_clients, self.lines[linenumber])
            if match:
@@ -187,7 +187,7 @@ class MdParser(object):
         """
         Function to parse services from markdown file and add them to node
         """
-        while not self.paragraph_finished(linenumber):
+        while not self.paragraph_finished(linenumber) and not self.next_node(linenumber):
            #extract service name and service type
            match = re.search(self.re_services, self.lines[linenumber])
            if match:
@@ -199,6 +199,10 @@ class MdParser(object):
            else:
                linenumber += 1
         return linenumber
+
+    def next_node(self, linenumber):
+        next_node = re.search("(<!--) starting node (\S+)", self.lines[linenumber])
+        return next_node
 
 
 
