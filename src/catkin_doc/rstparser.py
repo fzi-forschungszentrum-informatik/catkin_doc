@@ -7,7 +7,8 @@ import catkin_doc.node
 class RstParser(object):
     """Parser for existing rst files generated with the catkin doc module
        to fill node representation for update"""
-    def __init__(self, filename):
+    def __init__(self, nodename, filename, starting_line):
+        self.starting_line = starting_line
 
         # regex for parsing things
         self.re_param = '(\S+) \(default value: (\S+)\)'
@@ -32,8 +33,11 @@ class RstParser(object):
         """
         Parses the lines extracted from file in init method
         """
-        linenumber = 0
+        linenumber = self.starting_line + 1
         while linenumber < len(self.lines)-1:
+            match = re.search("(..)starting node (\S+)", self.lines[linenumber])
+            if match:
+                return
             if "Parameter" in self.lines[linenumber]:
                 linenumber = self.parse_params(linenumber)
             elif "Subscribed topics" in self.lines[linenumber]:
@@ -81,7 +85,7 @@ class RstParser(object):
         linenumber += 2
 
         # Parse params until next heading which we recognize by the undelining
-        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
+        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1 and not self.next_node(linenumber):
             #search for parametername and default value
             match = re.search(self.re_param, self.lines[linenumber])
             if match:
@@ -104,7 +108,7 @@ class RstParser(object):
         # As next line is the underlining of the heading jump two lines ahead
         linenumber += 2
         # Parse subscribed topics until next heading which we recognize by the underlining
-        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
+        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1 and not self.next_node(linenumber):
             #search for name of subscribed topic and message type
             match = re.search(self.re_subscriber, self.lines[linenumber])
             if match:
@@ -125,7 +129,7 @@ class RstParser(object):
         # As next line is the underlining of the heading jump two lines ahead
         linenumber += 2
         # Parse advertised topics until next heading which we recognize by the underlining
-        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
+        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1 and not self.next_node(linenumber):
             #search for name of advertised topic and message type
             match = re.search(self.re_publisher, self.lines[linenumber])
             if match:
@@ -146,7 +150,7 @@ class RstParser(object):
         # As next line is the underlining of the heading jump two lines ahead
         linenumber += 2
         # Parse service clients until next heading which we recognize by the underlining
-        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
+        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1 and not self.next_node(linenumber):
             #search for topic of the service client and message type
             match = re.search(self.re_service_clients, self.lines[linenumber])
             if match:
@@ -167,7 +171,7 @@ class RstParser(object):
         # As next line is the underlining of the heading jump two lines ahead
         linenumber += 2
         # Parse services until next heading which we recognize by the underlining
-        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
+        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1 and not self.next_node(linenumber):
             #search for the service name and message type
             match = re.search(self.re_services, self.lines[linenumber])
             if match:
@@ -188,7 +192,7 @@ class RstParser(object):
         # As next line is the underlining of the heading jump two lines ahead
         linenumber += 2
         # Parse action clients until next heading which we recognize by the underlining
-        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
+        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1 and not self.next_node(linenumber):
             #search for the action clients name and message type
             match = re.search(self.re_action_clients, self.lines[linenumber])
             if match:
@@ -209,7 +213,7 @@ class RstParser(object):
         # As next line is the underlining of the heading jump two lines ahead
         linenumber += 2
         # Parse action server until next heading which we recognize by the underlining
-        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1:
+        while not self.paragraph_finished(linenumber) and linenumber < len(self.lines)-1 and not self.next_node(linenumber):
             #search for the action clients name and message type
             match = re.search(self.re_actions, self.lines[linenumber])
             if match:
@@ -222,4 +226,9 @@ class RstParser(object):
             else:
                 linenumber +=1
         return linenumber-1
+
+    def next_node(self, linenumber):
+        next_node = re.search("(..)starting node (\S+)", self.lines[linenumber])
+        return next_node
+
 

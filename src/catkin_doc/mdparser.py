@@ -7,7 +7,8 @@ import catkin_doc.node
 class MdParser(object):
     """Parser for existing markdown files generated with the catkin doc module
        to fill node representation for update"""
-    def __init__(self, filename):
+    def __init__(self, nodename, filename, staring_line):
+        self.starting_line = starting_line
 
         #regex for parsing according things
         self.re_param = '\*\*(\S+)\*\* \(default: (\S+)\)'
@@ -29,9 +30,12 @@ class MdParser(object):
             self.node = None
 
     def parse(self):
-        linenumber = 0
+        linenumber = self.starting_line + 1
 
         while linenumber < len(self.lines):
+            match = re.search("(<!--)starting node (\S+)", self.lines[linenumber])
+            if match:
+                break
             if "## Parameters" in self.lines[linenumber]:
                 linenumber = self.parse_params(linenumber + 1)
             elif "## Subscribed Topics" in self.lines[linenumber]:

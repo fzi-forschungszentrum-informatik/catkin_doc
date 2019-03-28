@@ -5,10 +5,11 @@ class NodeConverter(object):
         self.node = None
         pass
 
-    def convert_to_file(self, node, filetype):
+    def convert_to_file(self, node, filetype, file_name):
         """
         function to convert given node to file of type filetype where filetype may be md or rst
         """
+        self.file_name = file_name
         self.node = node
         if filetype == "md":
             self.node_to_md_file()
@@ -177,7 +178,8 @@ class NodeConverter(object):
         srvs = self.service_to_md()
         actions = self.action_to_md()
 
-        md = "# " + self.node.filename + "\n \n "
+        md = "\n<!-- starting node " + self.node.filename + "--> \n\n"
+        md += "# " + self.node.filename + "\n \n "
 
         md += params + subs + pubs + action_clients + service_clients + srvs + actions
         return md
@@ -187,8 +189,7 @@ class NodeConverter(object):
         """
         Generates a  md file from noderepresentation
         """
-        filename = self.node.filename + ".md"
-        file = open(filename, "w+")
+        file = open(self.file_name, "a+")
         md = self.node_to_md()
         file.write(md)
         file.close()
@@ -197,8 +198,7 @@ class NodeConverter(object):
         """
         Generates a rst file from noderepresentation
         """
-        filename = self.node.filename + ".rst"
-        file = open(filename, "w+")
+        file = open(self.file_name, "a+")
         rst = self.node_to_rst()
         file.write(rst)
         file.close
@@ -215,7 +215,8 @@ class NodeConverter(object):
         action_clients = self.action_clients_to_rst()
         actions = self.action_to_rst()
 
-        rst = self.node.filename + "\n===================================\n"
+        rst = "\n..starting node " + self.node.filename + " \n\n"
+        rst += self.node.filename + "\n===================================\n"
 
         rst += params + subs + pubs + service_clients + srvs + action_clients + actions
         return rst

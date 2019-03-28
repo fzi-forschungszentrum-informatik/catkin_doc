@@ -50,15 +50,33 @@ class PkgHandler:
             self.parser.append(catkin_doc.python.PythonParser(file))
 
     @staticmethod
-    def find_docu(pkg_path):
-        doculist = []
-        for filename in os.listdir(pkg_path):
-            if ".rst" in filename or ".md" in filename:
-                doculist.append(pkg_path + "/" + filename)
-            elif os.path.isdir(pkg_path + "/" + filename):
-                PkgHandler.find_docu(pkg_path + "/" + filename)
+    def find_docu(pkg_path, docu_file):
+        doculist = dict()
+        lines = None
+        if docu_file=="":
+            pathlist = pkg_path.split("/")
+            if pathlist[-1] != "":
+                pkg_name = pathlist[-1]
+            else:
+                pkg_name = pathlist[-2]
+            for filename in os.listdir(pkg_path):
+                if (pkg_name+".rst") in filename or (pkg_name + ".md") in filename:
+                    docu_file = pkg_path + "/" + filename
+                    break
+                elif os.path.isdir(pkg_path + "/" + filename):
+                    PkgHandler.find_docu(pkg_path + "/" + filename, docu_file)
+        if docu_file != "":
+          with open(docu_file) as filecontent:
+              lines = filecontent.readlines()
+          i = 0
+          while i < len(lines):
+              match = re.search("(..|<!--)starting node (\S+)", lines[i])
+              if match:
+                  doculist[str(match.group(2))] = i
+              i +=1
+          filecontent.close()
 
-        return doculist
+        return doculist, docu_file
 
 
 

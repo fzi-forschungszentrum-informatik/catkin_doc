@@ -127,8 +127,6 @@ class CmakeListParser:
                 all files belonging to the node are from the same package we won't look at includes from different packages
                 if there is a Header from the same package included we assume that it location is package_name/include/package_name/name_of_class.cpp
                 the pkghandler is always used for a package not for parent- or childdirectories of one. So the packge name is the last part of the String the pkghandler is instanciated with.
-
-                TODO: actually I'm not quite sure if it may also be necessary to parse the includes in header files, but I don't think so at the moment.
             """
             #get package name
             pkg_name = self.pkg_path.split("/")[-1]
