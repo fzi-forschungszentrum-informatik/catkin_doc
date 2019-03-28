@@ -59,16 +59,17 @@ def main():
             found_docu = True
             rst_parser = catkin_doc.rstparser.RstParser(parser.node.filename, docu_file, docu_list[parser.node.filename])
             comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
-            nodeconverter.convert_to_file(comp.merged_node, file_format)
+            nodeconverter.convert_to_file(comp.merged_node, file_format, new_docu_file)
         elif parser.node.filename in docu_list and ".md" in docu_file:
             found_docu =True
             md_parser = catkin_doc.mdparser.MdParser(parser.node.filename, docu_file, docu_list[parser.node.filename])
             comp = catkin_doc.nodecomparator.NodeComparator(parser.node, md_parser.node)
-            nodeconverter.convert_to_file(comp.merged_node, file_format)
+            nodeconverter.convert_to_file(comp.merged_node, file_format, new_docu_file)
         if not found_docu:
             print("Did not found matching docu for node " + parser.node.filename)
-            nodeconverter.convert_to_file(parser.node, file_format)
-    os.rename(new_docu_file, (pkg_name + "." + file_format))
+            nodeconverter.convert_to_file(parser.node, file_format, new_docu_file)
+    if os.path.isfile(new_docu_file):
+        os.rename(new_docu_file, (pkg_name + "." + file_format))
 
 if __name__ == "__main__":
     main()
