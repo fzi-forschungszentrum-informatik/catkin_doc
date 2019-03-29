@@ -53,18 +53,12 @@ class PkgHandler:
     def find_docu(pkg_path, docu_file):
         doculist = dict()
         lines = None
-        if docu_file=="":
-            pathlist = pkg_path.split("/")
-            if pathlist[-1] != "":
-                pkg_name = pathlist[-1]
-            else:
-                pkg_name = pathlist[-2]
-            for filename in os.listdir(pkg_path):
-                if (pkg_name + ".rst") in filename or (pkg_name + ".md") in filename:
-                    docu_file = pkg_path + "/" + filename
-                    break
-                elif os.path.isdir(pkg_path + "/" + filename):
-                    PkgHandler.find_docu(pkg_path + "/" + filename, docu_file)
+        for filename in os.listdir(pkg_path):
+            if "README.rst" in filename or "README.md" in filename:
+                docu_file = pkg_path + "/" + filename
+                break
+            elif os.path.isdir(pkg_path + "/" + filename):
+                PkgHandler.find_docu(pkg_path + "/" + filename, docu_file)
         if docu_file != "":
           with open(docu_file) as filecontent:
               lines = filecontent.readlines()
