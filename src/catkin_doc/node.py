@@ -11,7 +11,7 @@ class Node(object):
         self.service_clients = dict()
         self.services = dict()
         self.actions = dict()
-        self.node_description = ""
+        self.description = ""
 
 
     def add_parameter(self, parameter_name, default_value, comment):

@@ -38,7 +38,10 @@ class RstParser(object):
             match = re.search("(..) starting node (\S+)", self.lines[linenumber])
             if match:
                 return
-            if "Parameter" in self.lines[linenumber]:
+            description = re.search(".. Please add any additional node description after this comment", self.lines[linenumber])
+            if description:
+                linenumber = self.parse_node_description(linenumber + 1)
+            elif "Parameter" in self.lines[linenumber]:
                 linenumber = self.parse_params(linenumber)
             elif "Subscribed topics" in self.lines[linenumber]:
                 linenumber = self.parse_subscribed_topics(linenumber)
@@ -76,6 +79,20 @@ class RstParser(object):
             linenumber +=1
 
         return linenumber, description
+
+
+    def parse_node_description(self, linenumber):
+        """
+        Parse node description from the rst file
+        """
+        description = ""
+        while not self.paragraph_finished(linenumber+1) and linenumber < len(self.lines)-1 and not self.next_node(linenumber):
+            description += self.lines[linenumber]
+            linenumber +=1
+        self.node.description = description.strip()
+        return linenumber-1
+
+
 
     def parse_params(self, linenumber):
         """

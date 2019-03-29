@@ -10,6 +10,7 @@ class NodeComparator(object):
         self.old_node = oldnode
         self.merged_node = catkin_doc.node.Node(self.new_node.filename)
         print("Trying to merge old docu und newly generated docu for node "+ self.new_node.filename +"... \n Default values are marked by <>\n")
+        self.merged_node.description = self.old_node.description
         self.compare_params()
         self.compare_subscriber()
         self.compare_publisher()

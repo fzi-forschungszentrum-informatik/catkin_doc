@@ -180,6 +180,9 @@ class NodeConverter(object):
 
         md = "\n<!-- starting node " + self.node.filename + " --> \n\n"
         md += "# " + self.node.filename + "\n \n "
+        md += "<!-- Please add any additional node description after this comment --> \n"
+        md += self.node.description
+        md += "\n\n"
 
         md += params + subs + pubs + action_clients + service_clients + srvs + actions
         return md
@@ -216,7 +219,11 @@ class NodeConverter(object):
         actions = self.action_to_rst()
 
         rst = "\n.. starting node " + self.node.filename + " \n\n"
-        rst += self.node.filename + "\n===================================\n"
+        rst += self.node.filename + "\n===================================\n\n"
+        rst += ".. Please add any additional node description after this comment\n"
+        rst += self.node.description
+        rst += "\n\n"
+
 
         rst += params + subs + pubs + service_clients + srvs + action_clients + actions
         return rst
