@@ -71,10 +71,10 @@ class CppParser(object):
         Check whether a line contains a parameter definition and extract parameters.
         Returns True when parameter is found, False otherwise.
         """
-        match = re.search('param(<([^>]*)>)?\(("([^"]*)", [^,]+, ([^\)]+))\)', line)
+        match = re.search('param(<([^>]*)>)?\(("([^"]*)"(, [^,)]+)?, ([^\)]+))\)', line)
         if match:
             parameter_name = str(match.group(4)).strip('\'')
-            parameter_value = str(match.group(5)).strip('\'')
+            parameter_value = str(match.group(6)).strip('\'')
             parameter_brackets = str(match.group(3))
             return True, parameter_name, parameter_value, parameter_brackets
         match = re.search('getParam\(("([^"]*)", [^,]+)\)', line)
