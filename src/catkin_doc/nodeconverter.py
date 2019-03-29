@@ -23,15 +23,15 @@ class NodeConverter(object):
         """
         Helper function to create markdown
         """
-        md = "  **" + name.strip(" ") + "** ("
+        md = "   * **" + name.strip(" ") + "** ("
         if type != "":
-            md += type + ")\n "
+            md += type + ")\n \n"
         else:
-            md += "Add type here)\n "
+            md += "Add type here)\n \n"
         if comment != "":
-            md += "    " + comment + "\n"
+            md += "      " + comment + "  \n"
         else:
-            md += "    Please add description here.\n"
+            md += "      Please add description here.\n  "
         return md
 
 
