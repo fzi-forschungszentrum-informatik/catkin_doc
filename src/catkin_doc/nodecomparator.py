@@ -40,7 +40,7 @@ class NodeComparator(object):
                 old_default, old_comment = self.old_node.parameters[key]
                 if not new_default == old_default:
                     print("Warning default-value for " + key + " changed\n" )
-                if "Please add description" in old_comment or old_comment.replace('\n', '')  == new_comment.replace('\n', ' '):
+                if "Please add description" in old_comment or old_comment.replace('\n', ' ').strip() == new_comment.replace('\n', ' ').strip():
                     self.merged_node.add_parameter(key, new_default, new_comment)
                 elif "Please add description" in new_comment:
                     self.merged_node.add_parameter(key, new_default, old_comment)
@@ -75,7 +75,7 @@ class NodeComparator(object):
                 old_msg, old_comment = self.old_node.subscriber[key]
                 if not new_msg == old_msg:
                     print("Warning! The msg type for the subscriber to topic " + key + " has changed.\n")
-                if "Please add description" in old_comment or old_comment.replace('\n', '') == new_comment.replace('\n', ''):
+                if "Please add description" in old_comment or old_comment.replace('\n', ' ').strip() == new_comment.replace('\n', ' ').strip():
                     self.merged_node.add_subscriber(key, new_msg, new_comment)
                 elif "Please add description" in new_comment:
                     self.merged_node.add_subscriber(key, new_msg, old_comment)
@@ -109,7 +109,7 @@ class NodeComparator(object):
                 old_msg, old_comment = self.old_node.publisher[key]
                 if not new_msg == old_msg:
                     print("Warning! The msg type for the publisher to topic " + key + " has changed.\n")
-                if "Please add description" in old_comment or old_comment.replace('\n', '') == new_comment.replace('\n', ''):
+                if "Please add description" in old_comment or old_comment.replace('\n', ' ').strip() == new_comment.replace('\n', ' ').strip():
                     self.merged_node.add_publisher(key, new_msg, new_comment)
                 elif "Please add description" in new_comment:
                     self.merged_node.add_publisher(key, new_msg, old_comment)
@@ -142,7 +142,7 @@ class NodeComparator(object):
                 old_msg, old_comment = self.old_node.service_clients[key]
                 if not new_msg == old_msg:
                     print("Warning! The msg type for the service client " + key + " has changed.\n")
-                if "Please add description" in old_comment or old_comment.replace('\n', '') == new_comment.replace('\n', ''):
+                if "Please add description" in old_comment or old_comment.replace('\n', ' ').strip() == new_comment.replace('\n', ' ').strip():
                     self.merged_node.add_service_client(key, new_msg, new_comment)
                 elif "Please add description" in new_comment:
                     self.merged_node.add_service_client(key, new_msg, old_comment)
@@ -175,7 +175,7 @@ class NodeComparator(object):
                 old_msg, old_comment = self.old_node.services[key]
                 if not new_msg == old_msg:
                     print("Warning! The msg type for the service" + key + " has changed.\n")
-                if "Please add description" in old_comment or old_comment.replace('\n', '') == new_comment.replace('\n', ''):
+                if "Please add description" in old_comment or old_comment.replace('\n', ' ').strip() == new_comment.replace('\n', ' ').strip():
                     self.merged_node.add_service(key, new_msg, new_comment)
                 elif "Please add description" in new_comment:
                     self.merged_node.add_service(key, new_msg, old_comment)
@@ -242,7 +242,7 @@ class NodeComparator(object):
                 old_msg, old_comment = self.old_node.actions[key]
                 if not new_msg == old_msg:
                     print("Warning! The action type for the action " + key + " has changed.\n")
-                if "Please add description" in old_comment or old_comment.replace('\n', '') == new_comment.replace('\n', ''):
+                if "Please add description" in old_comment or old_comment.replace('\n', ' ').strip() == new_comment.replace('\n', ' ').strip():
                     self.merged_node.add_action(key, new_msg, new_comment)
                 elif "Please add description" in new_comment:
                     self.merged_node.add_action(key, new_msg, old_comment)
