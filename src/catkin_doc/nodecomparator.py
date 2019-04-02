@@ -74,7 +74,11 @@ class NodeComparator(object):
             if key in self.old_node.subscriber:
                 old_msg, old_comment = self.old_node.subscriber[key]
                 if not new_msg == old_msg:
-                    print("Warning! The msg type for the subscriber to topic " + key + " has changed.\n")
+                    if new_msg == "None":
+                        new_msg = old_msg
+                    else:
+                        print("Warning! The msg type for the subscriber to topic " + key +
+                              " has changed from " + old_msg + " to " + new_msg + ".\n")
                 if "Please add description" in old_comment or old_comment.replace('\n', ' ').strip() == new_comment.replace('\n', ' ').strip():
                     self.merged_node.add_subscriber(key, new_msg, new_comment)
                 elif "Please add description" in new_comment:
