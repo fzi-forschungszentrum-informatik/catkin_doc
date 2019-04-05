@@ -54,7 +54,7 @@ class PkgHandler:
         doculist = dict()
         lines = None
         for filename in os.listdir(pkg_path):
-            if "README.rst" in filename or "README.md" in filename:
+            if "README.md" in filename:
                 docu_file = pkg_path + "/" + filename
                 break
             elif os.path.isdir(pkg_path + "/" + filename):

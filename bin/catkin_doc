@@ -4,7 +4,6 @@
 import catkin_doc.cmakeparser
 import catkin_doc.pkghandler
 import catkin_doc.nodeconverter
-import catkin_doc.rstparser
 import catkin_doc.mdparser
 import catkin_doc.nodecomparator
 import os
@@ -23,14 +22,14 @@ def main():
     """
     new_filename = "README"
     package_path = sys.argv[1]
-    file_format = sys.argv[2]
-    if len(sys.argv) > 3:
-      new_filename = sys.argv[3]
+    if len(sys.argv) > 2:
+      new_filename = sys.argv[2]
     docu_file = ""
     cpp_handler = catkin_doc.cmakeparser.CmakeListParser(package_path)
     py_handler = catkin_doc.pkghandler.PkgHandler(package_path)
     nodeconverter = catkin_doc.nodeconverter.NodeConverter()
     docu_list, docu_file = catkin_doc.pkghandler.PkgHandler.find_docu(package_path, docu_file)
+    file_format = "md"
     new_docu_file = "temp_file." + file_format
     if not file_format in new_filename:
         new_filename = new_filename + "." + file_format
@@ -38,54 +37,39 @@ def main():
     tree = ET.parse(package_path + '/package.xml').getroot()
     package_name = tree.find('name').text
 
-    if file_format == "rst":
-        overall_parser = catkin_doc.rstparser.RstParser(package_name, docu_file, docu_list['package_overall'])
-        with open(new_docu_file, "a+") as docfile:
-            docfile.write(package_name + "\n===================================\n\n")
-            docfile.write(".. Please add any additional package description after this comment\n")
-            if overall_parser.node:
-                docfile.write(overall_parser.node.description + "\n\n")
 
-    elif file_format == "md":
+    package_description = ""
+    if 'package_overall' in docu_list:
         overall_parser = catkin_doc.mdparser.MdParser(package_name, docu_file, docu_list['package_overall'])
-        with open(new_docu_file, "a+") as docfile:
-            docfile.write("# " + package_name + "\n")
-            docfile.write("<!-- Please add any additional package description after this comment --> \n")
-            if overall_parser.node:
-                docfile.write(overall_parser.node.description + "\n\n")
+        package_description = overall_parser.node.description
+
+    with open(new_docu_file, "a+") as docfile:
+        docfile.write("# " + package_name + "\n")
+        docfile.write("<!-- Please add any additional package description after this comment --> \n")
+        docfile.write(package_description + "\n\n")
 
     for parser in cpp_handler.parser:
         found_docu = False
-        if parser.node.filename in docu_list and ".rst" in docu_file :
-            found_docu = True
-            rst_parser = catkin_doc.rstparser.RstParser(parser.node.filename, docu_file, docu_list[parser.node.filename])
-            comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
-            nodeconverter.convert_to_file(comp.merged_node, file_format, new_docu_file)
-        elif parser.node.filename in docu_list and ".md" in docu_file:
+        if parser.node.filename in docu_list and ".md" in docu_file:
             found_docu = True
             md_parser = catkin_doc.mdparser.MdParser(parser.node.filename, docu_file, docu_list[parser.node.filename])
             comp = catkin_doc.nodecomparator.NodeComparator(parser.node, md_parser.node)
-            nodeconverter.convert_to_file(comp.merged_node, file_format, new_docu_file)
+            nodeconverter.convert_to_file(comp.merged_node, new_docu_file)
         if not found_docu:
             print("Did not found matching docu for node " + parser.node.filename)
-            nodeconverter.convert_to_file(parser.node, file_format, new_docu_file)
+            nodeconverter.convert_to_file(parser.node, new_docu_file)
 
 
     for parser in py_handler.parser:
         found_docu = False
-        if parser.node.filename in docu_list and ".rst" in docu_file:
-            found_docu = True
-            rst_parser = catkin_doc.rstparser.RstParser(parser.node.filename, docu_file, docu_list[parser.node.filename])
-            comp = catkin_doc.nodecomparator.NodeComparator(parser.node, rst_parser.node)
-            nodeconverter.convert_to_file(comp.merged_node, file_format, new_docu_file)
-        elif parser.node.filename in docu_list and ".md" in docu_file:
+        if parser.node.filename in docu_list and ".md" in docu_file:
             found_docu =True
             md_parser = catkin_doc.mdparser.MdParser(parser.node.filename, docu_file, docu_list[parser.node.filename])
             comp = catkin_doc.nodecomparator.NodeComparator(parser.node, md_parser.node)
-            nodeconverter.convert_to_file(comp.merged_node, file_format, new_docu_file)
+            nodeconverter.convert_to_file(comp.merged_node, new_docu_file)
         if not found_docu:
             print("Did not found matching docu for node " + parser.node.filename)
-            nodeconverter.convert_to_file(parser.node, file_format, new_docu_file)
+            nodeconverter.convert_to_file(parser.node, new_docu_file)
     if os.path.isfile(new_docu_file):
         os.rename(new_docu_file, package_path + "/" + new_filename)
 

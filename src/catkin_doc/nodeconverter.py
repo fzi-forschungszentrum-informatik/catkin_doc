@@ -4,18 +4,13 @@ class NodeConverter(object):
     def __init__(self):
         self.node = None
 
-    def convert_to_file(self, node, filetype, file_name):
+    def convert_to_file(self, node, file_name):
         """
-        function to convert given node to file of type filetype where filetype may be md or rst
+        function to convert given node to a markdown file
         """
         self.file_name = file_name
         self.node = node
-        if filetype == "md":
-            self.node_to_md_file()
-        elif filetype == "rst":
-            self.node_to_rst_file()
-        else:
-            print("Please use one of the filetypes 'md' or 'rst'!")
+        self.node_to_md_file()
 
 
     def md_definition(self, name, type, comment):
@@ -202,172 +197,6 @@ class NodeConverter(object):
         md = self.node_to_md()
         file.write(md)
         file.close()
-
-    def node_to_rst_file(self):
-        """
-        Generates a rst file from noderepresentation
-        """
-        file = open(self.file_name, "a+")
-        rst = self.node_to_rst()
-        file.write(rst)
-        file.close
-
-    def node_to_rst(self):
-        """
-        Generates struktured text from noderepresentation
-        """
-        params = self.parameters_to_rst()
-        subs = self.subscriber_to_rst()
-        pubs = self.publisher_to_rst()
-        service_clients = self.service_clients_to_rst()
-        srvs = self.service_to_rst()
-        action_clients = self.action_clients_to_rst()
-        actions = self.action_to_rst()
-
-        rst = "\n.. starting node " + self.node.filename + " \n\n"
-        rst += self.node.filename + "\n===================================\n\n"
-        rst += ".. Please add any additional node description after this comment\n"
-        rst += self.node.description
-        rst += "\n\n"
-
-
-        rst += params + subs + pubs + service_clients + srvs + action_clients + actions
-        return rst
-
-    def rst_definition(self, name, type, comment):
-        """
-        Helper function to create rst
-        """
-        rst = name.strip(' ') + " ("
-        if type != "":
-            rst += type + ")\n"
-        else:
-            rst += "Add type here)\n"
-        if comment != "":
-            rst += "    " + comment + "\n"
-        else:
-            rst += "    Please add description here\n"
-        return rst
-
-    def parameters_to_rst(self):
-        """
-        Turn params from node representation to rst
-        """
-        rst = "Parameter \n----------------------------------------------\n"
-        for param in sorted(self.node.parameters.iterkeys()):
-            default_value, comment = self.node.parameters[param]
-            if default_value is not None:
-                default_value_rst = "default value: " + default_value
-            else:
-                default_value_rst = "default value: -"
-            rst += self. rst_definition(param, default_value_rst, comment)
-        rst += "\n"
-        return rst
-
-    def subscriber_to_rst(self):
-        """
-        Turn subs from node representation to rst
-        """
-        rst = "Subscribed topics\n---------------------------------------\n"
-        for topic in sorted(self.node.subscriber.iterkeys()):
-            msg_type, comment = self.node.subscriber[topic]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   types[1] = types[1].strip('Action')
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/msg/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="`" + msg_type + " <" + url + ">`_"
-            rst += self.rst_definition(topic, msg_type, comment)
-        rst += "\n"
-        return rst
-
-    def publisher_to_rst(self):
-        """
-        Turn pubs from node representation to rst
-        """
-        rst = "Advertised topics\n----------------------------------------\n"
-        for topic in sorted(self.node.publisher.iterkeys()):
-            msg_type, comment = self.node.publisher[topic]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/msg/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="`" + msg_type + " <" + url + ">`_"
-            rst += self.rst_definition(topic, msg_type, comment)
-        rst += "\n"
-        return rst
-
-    def action_clients_to_rst(self):
-        """
-        Turn action clients from node representation to rst
-        """
-        rst = "Action clients\n----------------------------------------\n"
-        for action_server in sorted(self.node.action_clients.iterkeys()):
-            msg_type, comment = self.node.action_clients[action_server]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   types[1] = types[1].strip('Action')
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="`" + msg_type + " <" + url + ">`_"
-            rst += self.rst_definition(action_server, msg_type, comment)
-        rst += "\n"
-        return rst
-
-    def action_to_rst(self):
-        """
-        Turn action from node representation to rst
-        """
-        rst = "Action server\n----------------------------------------\n"
-        for action in sorted(self.node.actions.iterkeys()):
-            msg_type, comment = self.node.actions[action]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   types[1] = types[1].strip('Action')
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="`" + msg_type + " <" + url + ">`_"
-            rst += self.rst_definition(action, msg_type, comment)
-        rst += "\n"
-        return rst
-
-    def service_clients_to_rst(self):
-        """
-        Turn service clients from node representation to rst
-        """
-        rst =  "Service clients\n----------------------------------------\n"
-        for service in sorted(self.node.service_clients.iterkeys()):
-            msg_type, comment = self.node.service_clients[service]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="`" + msg_type + " <" + url + ">`_"
-            rst += self.rst_definition(service, msg_type, comment)
-        rst += "\n"
-        return rst
-
-    def service_to_rst(self):
-        """
-        Turn services from node representation to rst
-        """
-        rst =  "Advertised services\n----------------------------------------\n"
-        for service in sorted(self.node.services.iterkeys()):
-            msg_type, comment = self.node.services[service]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="`" + msg_type + " <" + url + ">`_"
-            rst += self.rst_definition(service, msg_type, comment)
-        rst += "\n"
-        return rst
 
     def check_url(self, url):
         """
