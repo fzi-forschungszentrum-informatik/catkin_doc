@@ -39,131 +39,138 @@ class NodeConverter(object):
         """
         Generates a markdowntext from parameters
         """
-        md = "## Parameters\n"
-        md += ""
-        for param in sorted(self.node.parameters.iterkeys()):
-            default_value, comment = self.node.parameters[param]
-            if default_value is not None:
-                value = "default: " + default_value
-            else:
-                value = "default: -"
-            md += self.md_definition(param, value, comment)
+        md = ""
+        if self.node.parameters:
+            md += "## Parameters\n"
+            for param in sorted(self.node.parameters.iterkeys()):
+                default_value, comment = self.node.parameters[param]
+                if default_value is not None:
+                    value = "default: " + default_value
+                else:
+                    value = "default: -"
+                md += self.md_definition(param, value, comment)
 
-        md += "\n \n"
+            md += "\n \n"
         return md
 
     def subscriber_to_md(self):
         """
         Generates a markdown text from subscribers
         """
-        md = "## Subscribed Topics\n"
-        md += ""
-        for topic in sorted(self.node.subscriber.iterkeys()):
-            msg_type, comment = self.node.subscriber[topic]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   types[1] = types[1].strip('Action')
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/msg/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="[" + msg_type + "](" + url + ")"
-            md += self.md_definition(topic, msg_type, comment)
-        md += "\n \n"
+        md = ""
+        if self.node.subscriber:
+            md += "## Subscribed Topics\n"
+            for topic in sorted(self.node.subscriber.iterkeys()):
+                msg_type, comment = self.node.subscriber[topic]
+                if not 'fzi' in msg_type:
+                   types = msg_type.split('::')
+                   if len(types) >= 2:
+                       types[1] = types[1].strip('Action')
+                       url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/msg/" + types[1] + ".html"
+                       if self.check_url(url):
+                          msg_type ="[" + msg_type + "](" + url + ")"
+                md += self.md_definition(topic, msg_type, comment)
+            md += "\n \n"
         return md
 
     def publisher_to_md(self):
         """
         Generates a markdown text from publishers
         """
-        md = "## Advertised Topics\n"
-        md += ""
-        for topic in sorted(self.node.publisher.iterkeys()):
-            msg_type, comment = self.node.publisher[topic]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   types[1] = types[1].strip('Action')
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/msg/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="[" + msg_type + "](" + url + ")"
-            md += self.md_definition(topic, msg_type, comment)
-        md += "\n \n"
+        md = ""
+        if self.node.publisher:
+            md += "## Advertised Topics\n"
+            for topic in sorted(self.node.publisher.iterkeys()):
+                msg_type, comment = self.node.publisher[topic]
+                if not 'fzi' in msg_type:
+                   types = msg_type.split('::')
+                   if len(types) >= 2:
+                       types[1] = types[1].strip('Action')
+                       url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/msg/" + types[1] + ".html"
+                       if self.check_url(url):
+                          msg_type ="[" + msg_type + "](" + url + ")"
+                md += self.md_definition(topic, msg_type, comment)
+            md += "\n \n"
         return md
 
     def action_clients_to_md(self):
         """
         Generates a markdowntext from action clients
         """
-        md = "## Action clients\n"
-        md += ""
-        for action_server in sorted(self.node.action_clients.iterkeys()):
-            msg_type, comment = self.node.action_clients[action_server]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   types[1] = types[1].strip('Action')
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="[" + msg_type + "](" + url + ")"
-            md += self.md_definition(action_server, msg_type, comment)
-        md += "\n \n"
+        md = ""
+        if self.node.action_clients:
+            md += "## Action clients\n"
+            for action_server in sorted(self.node.action_clients.iterkeys()):
+                msg_type, comment = self.node.action_clients[action_server]
+                if not 'fzi' in msg_type:
+                   types = msg_type.split('::')
+                   if len(types) >= 2:
+                       types[1] = types[1].strip('Action')
+                       url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
+                       if self.check_url(url):
+                          msg_type ="[" + msg_type + "](" + url + ")"
+                md += self.md_definition(action_server, msg_type, comment)
+            md += "\n \n"
         return md
 
     def action_to_md(self):
         """
         Generates a markdowntext from actions
         """
-        md = "## Action servers\n"
-        md += ""
-        for action in sorted(self.node.actions.iterkeys()):
-            msg_type, comment = self.node.actions[action]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   types[1] = types[1].strip('Action')
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="[" + msg_type + "](" + url + ")"
-            md += self.md_definition(action, msg_type, comment)
-        md += "\n \n"
+        md = ""
+        if self.node.actions:
+            md += "## Action servers\n"
+            for action in sorted(self.node.actions.iterkeys()):
+                msg_type, comment = self.node.actions[action]
+                if not 'fzi' in msg_type:
+                   types = msg_type.split('::')
+                   if len(types) >= 2:
+                       types[1] = types[1].strip('Action')
+                       url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/action/" + types[1] + ".html"
+                       if self.check_url(url):
+                          msg_type ="[" + msg_type + "](" + url + ")"
+                md += self.md_definition(action, msg_type, comment)
+            md += "\n \n"
         return md
 
     def service_clients_to_md(self):
         """
         Generates a markdowntext from service clients
         """
-        md = "## Service Clients\n"
-        md += ""
-        for service in sorted(self.node.service_clients.iterkeys()):
-            msg_type, comment = self.node.service_clients[service]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   types[1] = types[1].strip('Action')
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="[" + msg_type + "](" + url + ")"
-            md += self.md_definition(service, msg_type, comment)
-        md += "\n \n"
+        md = ""
+        if self.node.action_clients:
+            md = "## Service Clients\n"
+            for service in sorted(self.node.service_clients.iterkeys()):
+                msg_type, comment = self.node.service_clients[service]
+                if not 'fzi' in msg_type:
+                   types = msg_type.split('::')
+                   if len(types) >= 2:
+                       types[1] = types[1].strip('Action')
+                       url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
+                       if self.check_url(url):
+                          msg_type ="[" + msg_type + "](" + url + ")"
+                md += self.md_definition(service, msg_type, comment)
+            md += "\n \n"
         return md
 
     def service_to_md(self):
         """
         Generates a markdowntext from services
         """
-        md = "## Advertised services\n"
-        md += ""
-        for service in sorted(self.node.services.iterkeys()):
-            msg_type, comment = self.node.services[service]
-            if not 'fzi' in msg_type:
-               types = msg_type.split('::')
-               if len(types) >= 2:
-                   types[1] = types[1].strip('Action')
-                   url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
-                   if self.check_url(url):
-                      msg_type ="[" + msg_type + "](" + url + ")"
-            md += self.md_definition(service, msg_type, comment)
-        md += "\n \n"
+        md = ""
+        if self.node.services:
+            md += "## Advertised services\n"
+            for service in sorted(self.node.services.iterkeys()):
+                msg_type, comment = self.node.services[service]
+                if not 'fzi' in msg_type:
+                   types = msg_type.split('::')
+                   if len(types) >= 2:
+                       types[1] = types[1].strip('Action')
+                       url = "http://docs.ros.org/kinetic/api/" + types[0] +"/html/srv/" + types[1] + ".html"
+                       if self.check_url(url):
+                          msg_type ="[" + msg_type + "](" + url + ")"
+                md += self.md_definition(service, msg_type, comment)
+            md += "\n \n"
         return md
 
     def node_to_md(self):
