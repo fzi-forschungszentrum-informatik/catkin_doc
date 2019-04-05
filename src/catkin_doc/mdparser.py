@@ -39,19 +39,19 @@ class MdParser(object):
             description = re.search("<!-- Please add any additional node description after this comment -->", self.lines[linenumber])
             if description:
                 linenumber = self.parse_node_description(linenumber + 1)
-            elif "## Parameters" in self.lines[linenumber]:
+            elif "### Parameters" in self.lines[linenumber]:
                 linenumber = self.parse_params(linenumber + 1)
-            elif "## Subscribed Topics" in self.lines[linenumber]:
+            elif "### Subscribed Topics" in self.lines[linenumber]:
                 linenumber = self.parse_subscriber(linenumber + 1)
-            elif "## Advertised Topics" in self.lines[linenumber]:
+            elif "### Advertised Topics" in self.lines[linenumber]:
                 linenumber = self.parse_publisher(linenumber + 1)
-            elif "## Action clients" in self.lines[linenumber]:
+            elif "### Action clients" in self.lines[linenumber]:
                 linenumber = self.parse_action_clients(linenumber + 1)
-            elif "## Action servers" in self.lines[linenumber]:
+            elif "### Action servers" in self.lines[linenumber]:
                 linenumber = self.parse_actions(linenumber + 1)
-            elif "## ## Service Clients" in self.lines[linenumber]:
+            elif "### Service Clients" in self.lines[linenumber]:
                 linenumber = self.parse_service_clients(linenumber + 1)
-            elif "## Advertised services" in self.lines[linenumber]:
+            elif "### Advertised services" in self.lines[linenumber]:
                 linenumber = self.parse_services(linenumber + 1)
             else:
                 linenumber += 1

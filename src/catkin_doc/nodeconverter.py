@@ -3,7 +3,6 @@ import urllib2
 class NodeConverter(object):
     def __init__(self):
         self.node = None
-        pass
 
     def convert_to_file(self, node, filetype, file_name):
         """
@@ -41,7 +40,7 @@ class NodeConverter(object):
         """
         md = ""
         if self.node.parameters:
-            md += "## Parameters\n"
+            md += "### Parameters\n"
             for param in sorted(self.node.parameters.iterkeys()):
                 default_value, comment = self.node.parameters[param]
                 if default_value is not None:
@@ -59,7 +58,7 @@ class NodeConverter(object):
         """
         md = ""
         if self.node.subscriber:
-            md += "## Subscribed Topics\n"
+            md += "### Subscribed Topics\n"
             for topic in sorted(self.node.subscriber.iterkeys()):
                 msg_type, comment = self.node.subscriber[topic]
                 if not 'fzi' in msg_type:
@@ -79,7 +78,7 @@ class NodeConverter(object):
         """
         md = ""
         if self.node.publisher:
-            md += "## Advertised Topics\n"
+            md += "### Advertised Topics\n"
             for topic in sorted(self.node.publisher.iterkeys()):
                 msg_type, comment = self.node.publisher[topic]
                 if not 'fzi' in msg_type:
@@ -99,7 +98,7 @@ class NodeConverter(object):
         """
         md = ""
         if self.node.action_clients:
-            md += "## Action clients\n"
+            md += "### Action clients\n"
             for action_server in sorted(self.node.action_clients.iterkeys()):
                 msg_type, comment = self.node.action_clients[action_server]
                 if not 'fzi' in msg_type:
@@ -119,7 +118,7 @@ class NodeConverter(object):
         """
         md = ""
         if self.node.actions:
-            md += "## Action servers\n"
+            md += "### Action servers\n"
             for action in sorted(self.node.actions.iterkeys()):
                 msg_type, comment = self.node.actions[action]
                 if not 'fzi' in msg_type:
@@ -139,7 +138,7 @@ class NodeConverter(object):
         """
         md = ""
         if self.node.action_clients:
-            md = "## Service Clients\n"
+            md = "### Service Clients\n"
             for service in sorted(self.node.service_clients.iterkeys()):
                 msg_type, comment = self.node.service_clients[service]
                 if not 'fzi' in msg_type:
@@ -159,7 +158,7 @@ class NodeConverter(object):
         """
         md = ""
         if self.node.services:
-            md += "## Advertised services\n"
+            md += "### Advertised services\n"
             for service in sorted(self.node.services.iterkeys()):
                 msg_type, comment = self.node.services[service]
                 if not 'fzi' in msg_type:
@@ -186,7 +185,7 @@ class NodeConverter(object):
         actions = self.action_to_md()
 
         md = "\n<!-- starting node " + self.node.filename + " --> \n\n"
-        md += "# " + self.node.filename + "\n \n "
+        md += "## " + self.node.filename + "\n \n "
         md += "<!-- Please add any additional node description after this comment --> \n"
         md += self.node.description
         md += "\n\n"
