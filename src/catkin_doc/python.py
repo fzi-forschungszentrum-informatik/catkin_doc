@@ -73,11 +73,11 @@ class PythonParser(object):
         Returns True when parameter is found, False otherwise. Parameter name and value will be
         saved in members.
         """
-        match = re.search("get_param\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))?)\)", line)
+        match = re.search("get_param\(\ ?(\S+)(,\ ?(\S+)?)?\)", line)
         if match:
-            parameter_name = str(match.group(3)).strip('\'')
-            parameter_value = str(match.group(6)).strip('\'')
-            brackets = str(match.group(1))
+            parameter_name = str(match.group(1)).replace('\'', '\"')
+            parameter_value = str(match.group(3)).replace('\'', '\"')
+            brackets = str(match.group(0))
             return True, parameter_name, parameter_value, brackets
         return False, None, None, None
 
@@ -92,12 +92,12 @@ class PythonParser(object):
         Check whether a line contains a Subscriber to a topic.
         Returns True if line contains a subscriber and False otherwise.
         """
-        match = re.search("Subscriber\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+)))\)", line)
+        match = re.search("Subscriber\(\ ?(\S+)(, ?(\S+))(, ?(\S+))\)", line)
         if match:
-            topic = str(match.group(3))
+            topic = str(match.group(1)).replace('\'', '\"')
 
-            topic_type = str(match.group(6))
-            brackets = str(match.group(1))
+            topic_type = str(match.group(3)).strip('\'').strip('\"')
+            brackets = str(match.group(0))
             return True, topic, topic_type, brackets
         return False, None, None, None
 
@@ -113,11 +113,11 @@ class PythonParser(object):
         Check whether a line contains a Publisher to a topic.
         Returns True if line contains a Publisher and False otherwise.
         """
-        match = re.search("Publisher\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+)\)", line)
+        match = re.search("Publisher\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)", line)
         if match:
-            topic = str(match.group(3))
-            topic_type = str(match.group(6))
-            brackets = str(match.group(1))
+            topic = str(match.group(1)).replace('\'', '\"')
+            topic_type = str(match.group(3))
+            brackets = str(match.group(0))
             return True, topic, topic_type, brackets
         return False, None, None, None
 
@@ -132,11 +132,11 @@ class PythonParser(object):
         Check whether a line contains an action client.
         Returns True if line contains an action client and False otherwise.
         """
-        match = re.search("SimpleActionClient\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+)))\)", line)
+        match = re.search("SimpleActionClient\(\ ?(\S+)(, ?(\S+))\)", line)
         if match:
-            topic = str(match.group(3))
-            action = str(match.group(6))
-            brackets = str(match.group(1))
+            topic = str(match.group(1)).replace('\'', '\"')
+            action = str(match.group(3))
+            brackets = str(match.group(0))
             return True, topic, action, brackets
         return False, None, None, None
 
@@ -152,11 +152,11 @@ class PythonParser(object):
         Check whether a line contains an service client.
         Returns True if line contains an service client and False otherwise.
         """
-        match = re.search("ServiceProxy\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+)))\)", line)
+        match = re.search("ServiceProxy\(\ ?(\S+)(, ?(\S+))\)", line)
         if match:
-            topic = str(match.group(3))
-            type = str(match.group(6))
-            brackets = str(match.group(1))
+            topic = str(match.group(1)).replace('\'', '\"')
+            type = str(match.group(3))
+            brackets = str(match.group(0))
             return True, topic, type, brackets
         return False, None, None, None
 
@@ -172,11 +172,11 @@ class PythonParser(object):
         Check whether a line contains an service.
         Returns True if line contains an service and False otherwise.
         """
-        match = re.search("Service\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+)\)", line)
+        match = re.search("Service\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)", line)
         if match:
-            name = str(match.group(3))
-            type = str(match.group(6))
-            brackets = str(match.group(1))
+            name = str(match.group(1)).replace('\'', '\"')
+            type = str(match.group(3))
+            brackets = str(match.group(0))
 
             return True, name, type, brackets
         return False, None, None, None
@@ -192,11 +192,11 @@ class PythonParser(object):
         Check whether a line contains an action.
         Returns True if line contains an action and False otherwise.
         """
-        match = re.search("SimpleActionServer\((\ ?(\'|\")?(\S+)(\'|\")?(, (\S+))(, (\S+))+)\)", line)
+        match = re.search("SimpleActionServer\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)", line)
         if match:
-            name = str(match.group(3))
-            type = str(match.group(6))
-            brackets = str(match.group(1))
+            name = str(match.group(1)).replace('\'', '\"')
+            type = str(match.group(3))
+            brackets = str(match.group(0))
 
             return True, name, type, brackets
         return False, None, None, None
