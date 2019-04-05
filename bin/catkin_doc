@@ -9,6 +9,8 @@ import catkin_doc.mdparser
 import catkin_doc.nodecomparator
 import os
 import sys
+import xml.etree.ElementTree as ET
+
 
 
 def main():
@@ -32,6 +34,25 @@ def main():
     new_docu_file = "temp_file." + file_format
     if not file_format in new_filename:
         new_filename = new_filename + "." + file_format
+
+    tree = ET.parse(package_path + '/package.xml').getroot()
+    package_name = tree.find('name').text
+
+    if file_format == "rst":
+        overall_parser = catkin_doc.rstparser.RstParser(package_name, docu_file, docu_list['package_overall'])
+        with open(new_docu_file, "a+") as docfile:
+            docfile.write(package_name + "\n===================================\n\n")
+            docfile.write(".. Please add any additional package description after this comment\n")
+            if overall_parser.node:
+                docfile.write(overall_parser.node.description + "\n\n")
+
+    elif file_format == "md":
+        overall_parser = catkin_doc.mdparser.MdParser(package_name, docu_file, docu_list['package_overall'])
+        with open(new_docu_file, "a+") as docfile:
+            docfile.write("# " + package_name + "\n")
+            docfile.write("<!-- Please add any additional package description after this comment --> \n")
+            if overall_parser.node:
+                docfile.write(overall_parser.node.description + "\n\n")
 
     for parser in cpp_handler.parser:
         found_docu = False

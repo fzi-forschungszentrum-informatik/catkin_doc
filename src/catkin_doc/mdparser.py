@@ -21,7 +21,8 @@ class MdParser(object):
 
         if ".md" in filename:
             node_name = filename.split(".")[0]
-            self.node = catkin_doc.node.Node(node_name)
+            self.node = catkin_doc.node.Node(nodename)
+
             with open(filename) as filecontent:
                 self.lines = filecontent.readlines()
             self.parse()
@@ -36,7 +37,7 @@ class MdParser(object):
             match = re.search("(<!--) starting node (\S+)", self.lines[linenumber])
             if match:
                 return
-            description = re.search("<!-- Please add any additional node description after this comment -->", self.lines[linenumber])
+            description = re.search("<!-- Please add any additional (node|package) description after this comment -->", self.lines[linenumber])
             if description:
                 linenumber = self.parse_node_description(linenumber + 1)
             elif "### Parameters" in self.lines[linenumber]:

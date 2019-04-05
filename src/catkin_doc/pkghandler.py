@@ -60,15 +60,16 @@ class PkgHandler:
             elif os.path.isdir(pkg_path + "/" + filename):
                 PkgHandler.find_docu(pkg_path + "/" + filename, docu_file)
         if docu_file != "":
-          with open(docu_file) as filecontent:
-              lines = filecontent.readlines()
-          i = 0
-          while i < len(lines):
-              match = re.search("(..|<!--) starting node (\S+)", lines[i])
-              if match:
-                  doculist[str(match.group(2))] = i
-              i +=1
-          filecontent.close()
+            with open(docu_file) as filecontent:
+                lines = filecontent.readlines()
+            i = 0
+            doculist['package_overall'] = 0
+            while i < len(lines):
+                match = re.search("(..|<!--) starting node (\S+)", lines[i])
+                if match:
+                    doculist[str(match.group(2))] = i
+                i +=1
+            filecontent.close()
 
         return doculist, docu_file
 
