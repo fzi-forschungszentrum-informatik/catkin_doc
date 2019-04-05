@@ -3,6 +3,18 @@
 Generally this package generates some documentation for ros nodes. For
 each ros node declared in the package python nodes as well as cpp nodes
 the project generates a documentation file.
+
+## Installation
+It's easiest to use pip to install this on a per-user basis:
+```bash
+# clone it somewhere where you want to store sources
+cd local_install/src
+git clone git@ids-git.fzi.de:mauch/catkin_doc.git
+pip install --user -e catkin_doc
+```
+As `pip --user` installs to your local space, you might have to add `~/.local/bin` to your path. If
+you're using robot_folders already, this should however already be the case.
+
 ## How to use:
 
 Please consider that the generated files are currently put in the
