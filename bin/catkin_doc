@@ -50,7 +50,7 @@ def main():
 
     for parser in cpp_handler.parser:
         found_docu = False
-        if parser.node.filename in docu_list and ".md" in docu_file:
+        if parser.node.filename in docu_list:
             found_docu = True
             md_parser = catkin_doc.mdparser.MdParser(parser.node.filename, docu_file, docu_list[parser.node.filename])
             comp = catkin_doc.nodecomparator.NodeComparator(parser.node, md_parser.node)
@@ -62,7 +62,7 @@ def main():
 
     for parser in py_handler.parser:
         found_docu = False
-        if parser.node.filename in docu_list and ".md" in docu_file:
+        if parser.node.filename in docu_list:
             found_docu =True
             md_parser = catkin_doc.mdparser.MdParser(parser.node.filename, docu_file, docu_list[parser.node.filename])
             comp = catkin_doc.nodecomparator.NodeComparator(parser.node, md_parser.node)

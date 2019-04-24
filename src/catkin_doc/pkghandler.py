@@ -51,6 +51,12 @@ class PkgHandler:
 
     @staticmethod
     def find_docu(pkg_path, docu_file):
+        """
+        Method checking package for file README.md.
+        If file is found starting point opt package description and
+        starting point for each node are added to dict doculist.
+        Returns dict with entries for starting points of all nodes and docu_file name.
+        """
         doculist = dict()
         lines = None
         for filename in os.listdir(pkg_path):
@@ -65,9 +71,9 @@ class PkgHandler:
             i = 0
             doculist['package_overall'] = 0
             while i < len(lines):
-                match = re.search("(..|<!--) starting node (\S+)", lines[i])
+                match = re.search("<!-- starting node (\S+)", lines[i])
                 if match:
-                    doculist[str(match.group(2))] = i
+                    doculist[str(match.group(1))] = i
                 i +=1
             filecontent.close()
 
