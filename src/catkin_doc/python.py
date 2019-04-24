@@ -14,6 +14,16 @@ class PythonParser(object):
         node_name = filename.split('/')[-1].strip(".py")
         self.node = catkin_doc.node.Node(node_name)
         self.filename = filename.split('/')[-1]
+
+        # regex for parsing python files
+        self.re_param = "get_param\(\ ?(\S+)(,\ ?(\S+)?)?\)"
+        self.re_subscriber = "Subscriber\(\ ?(\S+)(, ?(\S+))(, ?(\S+))\)"
+        self.re_publisher = "Publisher\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
+        self.re_action_client = "SimpleActionClient\(\ ?(\S+)(, ?(\S+))\)"
+        self.re_service_client = "ServiceProxy\(\ ?(\S+)(, ?(\S+))\)"
+        self.re_action = "SimpleActionServer\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
+        self.re_service = "Service\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
+
         self.parser_fcts = [(self.extract_param, self.add_param),
                             (self.extract_sub, self.add_sub),
                             (self.extract_pub, self.add_pub),
@@ -73,7 +83,7 @@ class PythonParser(object):
         Returns True when parameter is found, False otherwise. Parameter name and value will be
         saved in members.
         """
-        match = re.search("get_param\(\ ?(\S+)(,\ ?(\S+)?)?\)", line)
+        match = re.search(self.re_param, line)
         if match:
             parameter_name = str(match.group(1)).replace('\'', '\"')
             parameter_value = str(match.group(3)).replace('\'', '\"')
@@ -92,7 +102,7 @@ class PythonParser(object):
         Check whether a line contains a Subscriber to a topic.
         Returns True if line contains a subscriber and False otherwise.
         """
-        match = re.search("Subscriber\(\ ?(\S+)(, ?(\S+))(, ?(\S+))\)", line)
+        match = re.search(self.re_subscriber, line)
         if match:
             topic = str(match.group(1)).replace('\'', '\"')
 
@@ -113,7 +123,7 @@ class PythonParser(object):
         Check whether a line contains a Publisher to a topic.
         Returns True if line contains a Publisher and False otherwise.
         """
-        match = re.search("Publisher\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)", line)
+        match = re.search(self.re_publisher, line)
         if match:
             topic = str(match.group(1)).replace('\'', '\"')
             topic_type = str(match.group(3))
@@ -132,7 +142,7 @@ class PythonParser(object):
         Check whether a line contains an action client.
         Returns True if line contains an action client and False otherwise.
         """
-        match = re.search("SimpleActionClient\(\ ?(\S+)(, ?(\S+))\)", line)
+        match = re.search(self.re_action_client, line)
         if match:
             topic = str(match.group(1)).replace('\'', '\"')
             action = str(match.group(3))
@@ -152,7 +162,7 @@ class PythonParser(object):
         Check whether a line contains an service client.
         Returns True if line contains an service client and False otherwise.
         """
-        match = re.search("ServiceProxy\(\ ?(\S+)(, ?(\S+))\)", line)
+        match = re.search(self.re_service_client, line)
         if match:
             topic = str(match.group(1)).replace('\'', '\"')
             type = str(match.group(3))
@@ -172,7 +182,7 @@ class PythonParser(object):
         Check whether a line contains an service.
         Returns True if line contains an service and False otherwise.
         """
-        match = re.search("Service\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)", line)
+        match = re.search(self.re_service, line)
         if match:
             name = str(match.group(1)).replace('\'', '\"')
             type = str(match.group(3))
@@ -192,7 +202,7 @@ class PythonParser(object):
         Check whether a line contains an action.
         Returns True if line contains an action and False otherwise.
         """
-        match = re.search("SimpleActionServer\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)", line)
+        match = re.search(self.re_action, line)
         if match:
             name = str(match.group(1)).replace('\'', '\"')
             type = str(match.group(3))
