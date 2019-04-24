@@ -10,6 +10,22 @@ class CppParser(object):
     def __init__(self, node_name, files):
         self.node = catkin_doc.node.Node(node_name)
         self.files = files
+
+        # regex for parsing node attributes
+        self.re_nh_param = 'param(<([^>]*)>)?\((([^,]+)(, [^,)]+), ([^\)]+))\)'
+        self.re_nh_get_param = 'getParam\((([^,]+), [^,]+)\)'
+        self.re_param_get = 'param::get\((([^,]*), [^,]+)\)'
+        self.re_subscriber = 'subscribe(<([^>]*)>)?\((([^,]*), [^)]*)\)'
+        self.re_publisher = 'advertise(<([^>]*)>)?\((([^,]*),[^)]*)\)'
+        self.re_action_client = 'actionlib::SimpleActionClient<([^>]*)>\((\s*([^,^)^(]*)?,?\s*([^,^)]*)?,([^,^)]*))\)'
+        self.re_service_client = 'serviceClient(<([^>]*)>)?\((([^,)]*)[^)]*)\)'
+        self.re_service_call = 'service::call\((([^,)]*), ([^,)]+))\)'
+        self.re_action = 'actionlib::SimpleActionServer<([^>]*)>\((\s*([^,]*),\s*([^,]*)[^)]*)\)'
+        self.re_service = 'advertiseService(<([^>]*)>)?\((\s?([^,]*),\s?([^\(]*)[^)]*)\)'
+        self.re_comment = '( )*(//)(.*)'
+
+
+
         self.parser_fcts = [(self.extract_param, self.add_param),
                             (self.extract_sub, self.add_sub),
                             (self.extract_pub, self.add_pub),
@@ -36,8 +52,13 @@ class CppParser(object):
         #TODO: find out if there is a nicer way to handel statements over more lines than concatenating lines
         linenumber = 0
         while linenumber < len(self.lines) - 2:
-            if not (self.lines[linenumber].lstrip(' ').startswith("//")):
-              line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +  self.lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + self.lines[linenumber+2].lstrip(' ')
+            if not (self.lines[linenumber].strip().startswith("//")):
+              line = self.lines[linenumber].strip().strip('\n')
+              if not (self.lines[linenumber+1].strip().startswith("//")):
+                  line +=' ' +  self.lines[linenumber+1].strip().strip('\n')
+                  if not (self.lines[linenumber+2].strip().startswith("//")):
+                      line += ' ' + self.lines[linenumber+2].strip()
+
               self.extract_boost_bind(line)
               for extract,add in self.parser_fcts:
                   success, key, value, brackets = extract(line)
@@ -71,19 +92,19 @@ class CppParser(object):
         Check whether a line contains a parameter definition and extract parameters.
         Returns True when parameter is found, False otherwise.
         """
-        match = re.search('param(<([^>]*)>)?\(("([^"]*)"(, [^,)]+)?, ([^\)]+))\)', line)
+        match = re.search(self.re_nh_param, line)
         if match:
             parameter_name = str(match.group(4)).strip('\'')
             parameter_value = str(match.group(6)).strip('\'')
             parameter_brackets = str(match.group(3))
             return True, parameter_name, parameter_value, parameter_brackets
-        match = re.search('getParam\(("([^"]*)", [^,]+)\)', line)
+        match = re.search(self.re_nh_get_param, line)
         if match:
             parameter_name = str(match.group(2)).strip('\'')
             parameter_brackets = str(match.group(1))
             parameter_value = None
             return True, parameter_name, parameter_value, parameter_brackets
-        match = re.search('param::get\(("([^"]*)", [^,]+)\)', line)
+        match = re.search(self.re_param_get, line)
         if match:
             parameter_name = str(match.group(2)).strip('\'')
             parameter_brackets = str(match.group(1))
@@ -103,7 +124,7 @@ class CppParser(object):
         Check wheter given line contains a subscriber
         Returns (True, topic, msg_type) if subscriber is found, (False, None, None) otherwise.
         """
-        match = re.search('subscribe(<([^>]*)>)?\(("([^"]*)", [^)]*)\)', line)
+        match = re.search(self.re_subscriber, line)
         if match:
             subscribed_topic = str(match.group(4))
             msg_type = str(match.group(2))
@@ -122,7 +143,7 @@ class CppParser(object):
         Check wheter given line contains a publisher
         Returns (True, topic, msg_type) if publisher is found, (False, None, None) otherwise.
         """
-        match = re.search('advertise(<([^>]*)>)?\(("([^"]*)",[^)]*)\)', line)
+        match = re.search(self.re_publisher, line)
         if match:
             published_topic = str(match.group(4))
             msg_type = str(match.group(2))
@@ -141,7 +162,7 @@ class CppParser(object):
         Check wheter a given line contains a Service advertisement
         Returns (True, name, type) if service is found (False, None, None) otherwise.
         """
-        match = re.search('advertiseService(<([^>]*)>)?\((\s?"([^"]*)",\s?([^\(]*)[^)]*)\)', line)
+        match = re.search(self.re_service, line)
         if match:
             service_name = str(match.group(4))
             service_type = str(match.group(2))
@@ -163,14 +184,14 @@ class CppParser(object):
         Check whether a given line contains a service client.
         Returns (True, service_topic, type) if service client is found, (False, None, None) otherwise.
         """
-        match = re.search('serviceClient(<([^>]*)>)?\(("([^"]*)"[^)]*)\)', line)
+        match = re.search(self.re_service_client, line)
         if match:
             service_topic = str(match.group(4))
             service_type = str(match.group(2))
             brackets = str(match.group(3))
             return True, service_topic, service_type, brackets
 
-        match = re.search('service::call\(("([^"]*)", ([^,]+))\)', line)
+        match = re.search(self.re_service_call, line)
         if match:
             service_topic = str(match.group(2))
             service_type = str(match.group(3))
@@ -190,10 +211,10 @@ class CppParser(object):
         Function to extract action clients from given line.
         Returns(True, None,  action_type) if client is found (False, None, None) otherwise
         """
-        match = re.search('actionlib::SimpleActionClient<([^>]*)>\((\s*([^,^)^(]*)?,?\s*([^,^)]*)?,([^,^)]*))\)', line)
+        match = re.search(self.re_action_client, line)
         if match:
             action_type = str(match.group(1)).strip(' ')
-            topic = str(match.group(3)).strip('"') + " " + str(match.group(4).strip('"'))
+            topic = str(match.group(3)) + " " + str(match.group(4))
             brackets = str(match.group(2))
             return True, topic, action_type, brackets
         return False, None, None, None
@@ -209,7 +230,7 @@ class CppParser(object):
         Function to extract action server from given line.
         Returns (True, None, action_type) if server is found, (False, None, None) otherwise.
         """
-        match = re.search('actionlib::SimpleActionServer<([^>]*)>\((\s*([^,]*),\s*([^,]*)[^)]*)\)', line)
+        match = re.search(self.re_action, line)
         if match:
             action_type = str(match.group(1))
             topic = str(match.group(3)) + " " + str(match.group(4))
@@ -229,7 +250,7 @@ class CppParser(object):
         If so method returns comment, None otherwise
         """
         comment = None
-        match = re.match("( )*(//)(.*)", line)
+        match = re.match(self.re_comment, line)
         if match:
             comment = str(match.group(3))
         return comment
