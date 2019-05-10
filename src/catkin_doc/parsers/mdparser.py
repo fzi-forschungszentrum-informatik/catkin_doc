@@ -2,13 +2,37 @@
 
 import os
 import re
-import catkin_doc.node
+from catkin_doc.datastructures.doc_object import DocObject
+from catkin_doc.datastructures.node import Node
+
+class DocSection(object):
+    """Small helper class representing a hierarchy level inside a doc file"""
+    def __init__(self, lines, doc_object, level=0):
+        self.lines = lines
+        self.level = level
+        self.doc_object = doc_object
+        self.children = dict()
+
+    def parse(self):
+        for line in self.lines:
+            match = re.search("^#{" + str(self.level+1) + "} ?([^#].*)", line)
+            if match:
+                package_name = match.group(1)
+                if not self.doc_object.name:
+                    self.doc_object.name = package_name
+                elif self.doc_object.name != package_name:
+                    print("ERROR: Package name as read from file is not the same as set before")
+
+            elif not self.doc_object.name:
+                continue
 
 class MdParser(object):
     """Parser for existing markdown files generated with the catkin doc module
        to fill node representation for update"""
-    def __init__(self, nodename, filename, starting_line):
+    def __init__(self, filename, starting_line=0):
         self.starting_line = starting_line
+        self.current_level = 0
+        self.doc_object = DocObject("")
 
         #regex for parsing according things
         self.re_param = '\*\*(\S+)\*\* \(default: (\S+)\)'
@@ -20,42 +44,19 @@ class MdParser(object):
         self.re_actions = '\*\*(\S+\s?\S*)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
 
         if ".md" in filename:
-            node_name = filename.split(".")[0]
-            self.node = catkin_doc.node.Node(nodename)
-
             with open(filename) as filecontent:
-                self.lines = filecontent.readlines()
-            self.parse()
+                lines = filecontent.readlines()
+            for linenumber in len(lines):
+                match = re.search("^# ?([^#].*)", lines[linenumber])
+                if match:
+                    package_name = match.group(1)
+                    self.doc_object.name = package_name
+                    self.doc = DocSection(lines[linenumber:], self.doc_object, level=1)
+                    break
+            self.doc.parse()
         else:
             print("This is not a markdown file.")
-            self.node = None
 
-    def parse(self):
-        linenumber = self.starting_line + 1
-
-        while linenumber < len(self.lines):
-            match = re.search("(<!--) starting node (\S+)", self.lines[linenumber])
-            if match:
-                return
-            description = re.search("<!-- Please add any additional (node|package) description after this comment -->", self.lines[linenumber])
-            if description:
-                linenumber = self.parse_node_description(linenumber + 1)
-            elif "### Parameters" in self.lines[linenumber]:
-                linenumber = self.parse_params(linenumber + 1)
-            elif "### Subscribed Topics" in self.lines[linenumber]:
-                linenumber = self.parse_subscriber(linenumber + 1)
-            elif "### Advertised Topics" in self.lines[linenumber]:
-                linenumber = self.parse_publisher(linenumber + 1)
-            elif "### Action clients" in self.lines[linenumber]:
-                linenumber = self.parse_action_clients(linenumber + 1)
-            elif "### Action servers" in self.lines[linenumber]:
-                linenumber = self.parse_actions(linenumber + 1)
-            elif "### Service Clients" in self.lines[linenumber]:
-                linenumber = self.parse_service_clients(linenumber + 1)
-            elif "### Advertised services" in self.lines[linenumber]:
-                linenumber = self.parse_services(linenumber + 1)
-            else:
-                linenumber += 1
 
     def paragraph_finished(self, linenumber):
         """
