@@ -38,7 +38,7 @@ class DocObject(object):
         derived from DocObject
         """
         if key in self.children:
-            if self.children[key] != list:
+            if type(self.children[key]) != list:
                 raise TypeError("Not a list")
             self.children[key].append(child_object)
         else:
