@@ -26,9 +26,10 @@ class Package(DocObject):
         out_str = formatter.heading(level, self.name) + formatter.new_line()
         out_str += formatter.text(self.description) + formatter.new_line()
 
-        out_str += formatter.heading(level + 1, self.nodes_key)
+        if self.nodes_key in self.children:
+            out_str += formatter.heading(level + 1, self.nodes_key)
 
-        for item in self.children[self.nodes_key]:
-            out_str += item.to_string(level + 2, formatter)
+            for item in self.children[self.nodes_key]:
+                out_str += item.to_string(level + 2, formatter)
 
         return out_str
