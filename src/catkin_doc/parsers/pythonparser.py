@@ -10,89 +10,19 @@ from catkin_doc.datastructures.parameter import Parameter
 from catkin_doc.datastructures.topic import Topic
 
 
-def extract_param(line):
-    """
-    Check whether a line contains a parameter definition and extract parameters.
-    Returns True when parameter is found, False otherwise. Parameter name and value will be
-    saved in members.
-    """
-    match = re.search("get_param\(\ ?(\S+)(,\ ?(\S+)?)?\)", line)
-    if match:
-        name = str(match.group(1)).replace('\'', '\"')
-
-        datatype = str(match.group(3)).strip('\'').strip('\"')
-        brackets = str(match.group(0))
-        return Parameter(name, datatype=datatype), brackets
-    return None, None
-
-
-def extract_topic_info(line, regex):
+def extract_info(line, as_type, regex):
     """
     Check whether a line contains a topic item matching the given regex
     Returns True if line contains a corresponding item and False otherwise.
     """
     match = re.search(regex, line)
     if match:
-        topic = str(match.group(1)).replace('\'', '\"')
+        name = str(match.group(1)).replace('\'', '\"')
 
-        topic_type = str(match.group(3)).strip('\'').strip('\"')
+        datatype = str(match.group(3)).strip('\'').strip('\"')
         brackets = str(match.group(0))
-        return Topic(topic, datatype=topic_type), brackets
+        return as_type(name, datatype=datatype), brackets
     return None, None
-
-
-def extract_sub(line):
-    """
-    Check whether a line contains a Subscriber to a topic.
-    Returns True if line contains a subscriber and False otherwise.
-    """
-    regex = "Subscriber\(\ ?(\S+)(, ?(\S+))(, ?(\S+))\)"
-    return extract_topic_info(line, regex)
-
-
-def extract_pub(line):
-    """
-    Check whether a line contains a Publisher to a topic.
-    Returns True if line contains a Publisher and False otherwise.
-    """
-    regex = "Publisher\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
-    return extract_topic_info(line, regex)
-
-
-def extract_action_client(line):
-    """
-    Check whether a line contains an action client.
-    Returns True if line contains an action client and False otherwise.
-    """
-    regex = "SimpleActionClient\(\ ?(\S+)(, ?(\S+))\)"
-    return extract_topic_info(line, regex)
-
-
-def extract_service_client(line):
-    """
-    Check whether a line contains an service client.
-    Returns True if line contains an service client and False otherwise.
-    """
-    regex = "ServiceProxy\(\ ?(\S+)(, ?(\S+))\)"
-    return extract_topic_info(line, regex)
-
-
-def extract_service(line):
-    """
-    Check whether a line contains an service.
-    Returns True if line contains an service and False otherwise.
-    """
-    regex = "Service\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
-    return extract_topic_info(line, regex)
-
-
-def extract_action(line):
-    """
-    Check whether a line contains an action.
-    Returns True if line contains an action and False otherwise.
-    """
-    regex = "SimpleActionServer\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
-    return extract_topic_info(line, regex)
 
 
 def extract_comment(line):
@@ -110,17 +40,26 @@ def extract_comment(line):
 class PythonParser(object):
     """Parser for python nodes which fills the node representation"""
 
+    param_regex = "get_param\(\ ?(\S+)(,\ ?(\S+)?)?\)"
+    subscriber_regex = "Subscriber\(\ ?(\S+)(, ?(\S+))(, ?(\S+))\)"
+    publisher_regex = "Publisher\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
+    action_client_regex = "SimpleActionClient\(\ ?(\S+)(, ?(\S+))\)"
+    service_client_regex = "ServiceProxy\(\ ?(\S+)(, ?(\S+))\)"
+    service_regex = "Service\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
+    action_regex = "SimpleActionServer\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
+
     def __init__(self, filename):
         node_name = filename.split('/')[-1].strip(".py")
         self.node = Node(node_name)
         self.filename = filename.split('/')[-1]
-        self.parser_fcts = [(extract_param, self.node.add_parameter),
-                            (extract_sub, self.node.add_subscriber),
-                            (extract_pub, self.node.add_publisher),
-                            (extract_action_client, self.node.add_action_client),
-                            (extract_service_client, self.node.add_service_client),
-                            (extract_service, self.node.add_service),
-                            (extract_action, self.node.add_action)]
+        #                    regex        as_type    add_function
+        self.parser_fcts = [(self.param_regex, Parameter, self.node.add_parameter),
+                            (self.subscriber_regex, Topic, self.node.add_subscriber),
+                            (self.publisher_regex, Topic, self.node.add_publisher),
+                            (self.action_client_regex, Topic, self.node.add_action_client),
+                            (self.service_client_regex, Topic, self.node.add_service_client),
+                            (self.service_regex, Topic, self.node.add_service),
+                            (self.action_regex, Topic, self.node.add_action)]
         with open(filename) as filecontent:
             self.lines = filecontent.readlines()
         self.parse()
@@ -137,8 +76,8 @@ class PythonParser(object):
                 self.lines[linenumber + 1].lstrip(' ').strip('\n') + ' ' +\
                 self.lines[linenumber + 2].lstrip(' ')
 
-            for extract, add in self.parser_fcts:
-                item, brackets = extract(line)
+            for regex, as_type, add in self.parser_fcts:
+                item, brackets = extract_info(line, as_type, regex)
                 if item:
                     comment = self.search_for_comment(linenumber)
                     if comment == '':
