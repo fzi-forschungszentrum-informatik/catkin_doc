@@ -5,14 +5,16 @@ from __future__ import print_function
 import re
 import os
 
-import catkin_doc.node
+from catkin_doc.datastructures.node import Node
+from catkin_doc.datastructures.parameter import Parameter
 
 
 class PythonParser(object):
     """Parser for python nodes which fills the node representation"""
+
     def __init__(self, filename):
         node_name = filename.split('/')[-1].strip(".py")
-        self.node = catkin_doc.node.Node(node_name)
+        self.node = Node(node_name)
         self.filename = filename.split('/')[-1]
         self.parser_fcts = [(self.extract_param, self.add_param),
                             (self.extract_sub, self.add_sub),
@@ -25,29 +27,29 @@ class PythonParser(object):
             self.lines = filecontent.readlines()
         self.parse()
 
-
-
     def parse(self):
         """
         Parses the lines extracted from file in init method.
         Therefore extract and add all relevant features from python node including comments on them.
         """
-        #TODO: find out if there is a nicer way to handel statements over more lines than concatenating lines
+        # TODO: find out if there is a nicer way to handel statements over more lines than concatenating lines
         linenumber = 0
         while linenumber < len(self.lines) - 2:
-            line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +  self.lines[linenumber+1].lstrip(' ').strip('\n') + ' ' + self.lines[linenumber+2].lstrip(' ')
+            line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +\
+                self.lines[linenumber + 1].lstrip(' ').strip('\n') + ' ' +\
+                self.lines[linenumber + 2].lstrip(' ')
 
-            for extract,add in self.parser_fcts:
+            for extract, add in self.parser_fcts:
                 success, key, value, brackets = extract(line)
                 if success:
                     comment = self.search_for_comment(linenumber)
                     if comment == '':
                         filename = self.filename.split("/")[-1]
-                        comment = 'Please add description. See ' + filename + ' line number: ' + str(linenumber+1) + "\n    Constructor input : " + brackets
+                        comment = 'Please add description. See ' + filename + ' line number: ' + \
+                            str(linenumber + 1) + "\n    Constructor input : " + brackets
                     add(key, value, comment)
 
             linenumber += 1
-
 
     def search_for_comment(self, linenumber):
         """
@@ -55,17 +57,15 @@ class PythonParser(object):
         """
         still_comment = True
         comment = ''
-        line_of_comment = linenumber -1
+        line_of_comment = linenumber - 1
         while still_comment:
             comm_line = self.extract_comment(self.lines[line_of_comment])
             if comm_line:
-                comment = comm_line + " "  + comment
+                comment = comm_line + " " + comment
                 line_of_comment -= 1
             else:
                 still_comment = False
         return comment
-
-
 
     def extract_param(self, line):
         """
@@ -85,7 +85,8 @@ class PythonParser(object):
         """
         Add given param + value + comment to node
         """
-        self.node.add_parameter(name, value, comment)
+        param = Parameter(name, default_value=value, description=comment)
+        self.node.add_parameter(param)
 
     def extract_sub(self, line):
         """
@@ -105,8 +106,8 @@ class PythonParser(object):
         """
         Add given subscriber + msg_type + comment to node
         """
-        self.node.add_subscriber(topic, msg_type, comment)
-
+        pass #TODO: Implement
+        # self.node.add_subscriber(topic, msg_type, comment)
 
     def extract_pub(self, line):
         """
@@ -125,7 +126,8 @@ class PythonParser(object):
         """
         Add given publisher + msg_type + comment to node
         """
-        self.node.add_publisher(topic, msg_type, comment)
+        pass #TODO: Implement
+        # self.node.add_publisher(topic, msg_type, comment)
 
     def extract_action_client(self, line):
         """
@@ -144,8 +146,8 @@ class PythonParser(object):
         """
         Add given topic + action + comment to node
         """
-        self.node.add_action_client(topic, action, comment)
-
+        pass #TODO: Implement
+        # self.node.add_action_client(topic, action, comment)
 
     def extract_service_client(self, line):
         """
@@ -164,8 +166,8 @@ class PythonParser(object):
         """
         Adds service client to node with given topic + type + comment
         """
-        self.node.add_service_client(topic, type, comment)
-
+        pass #TODO: Implement
+        # self.node.add_service_client(topic, type, comment)
 
     def extract_service(self, line):
         """
@@ -185,7 +187,8 @@ class PythonParser(object):
         """
         Adds service to node with given name, type and comment
         """
-        self.node.add_service(name, type, comment)
+        pass #TODO: Implement
+        # self.node.add_service(name, type, comment)
 
     def extract_action(self, line):
         """
@@ -205,7 +208,8 @@ class PythonParser(object):
         """
         Add action to node with given name, type and comment
         """
-        self.node.add_action(name, type, comment)
+        pass #TODO: Implement
+        # self.node.add_action(name, type, comment)
 
     def extract_comment(self, line):
         """
