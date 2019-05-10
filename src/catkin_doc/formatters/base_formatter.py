@@ -5,6 +5,7 @@ This is the base formatter for DocObjects
 
 class BaseFormatter(object):
     """Abstract base class for formatting DocObjects"""
+
     def heading(self, level, text):
         """
         Formats a text as a heading given a certain level
@@ -51,3 +52,15 @@ class BaseFormatter(object):
 
         raise NotImplementedError("new_line(): This is not implemented for {}"
                                   .format(self.__class__.__name__))
+
+    def as_list_item(self, level, formatted_text):
+        """Turns the given text into a list item. Note: The text has to be formatted in advance,
+        this is not done in this function.
+
+        :param int level: List indentation level (lowest is 0)
+        :param str text: Preformatted text
+        :return: Formatted text
+        :rtype: str
+        """
+        raise NotImplementedError(
+            "as_list_item(): This is not implemented for {}" .format(self.__class__))

@@ -22,4 +22,7 @@ class MarkdownFormatter(BaseFormatter):
     def bold(self, text):
         return markdown_strings.bold(text)
 
-
+    def as_list_item(self, level, formatted_text):
+        new_newline = "\n"+level*"  " + "    "
+        new_text =  new_newline.join(formatted_text.split("\n"))
+        return " ".join([level * "  ", "*", new_text])

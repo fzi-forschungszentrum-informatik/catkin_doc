@@ -2,13 +2,22 @@
 This class serves as a base class for all documentation objects
 '''
 
+
 class DocObject(object):
     """Base class for a doc object"""
+
     def __init__(self, name, description=""):
         self.name = name
         self.description = description
 
+        self.filename = ""
+        self.line_number = None
+        self.code = ""
+
         self.children = dict()
+
+    def __eq__(self, other):
+        return self.name == other.name
 
     def to_string(self, level, formatter):
         """
@@ -25,7 +34,7 @@ class DocObject(object):
 
         for key in self.children:
             for item in self.children[key]:
-                out_str += item.to_string(level+1, formatter)
+                out_str += item.to_string(level + 1, formatter)
 
         return out_str
 
@@ -40,6 +49,34 @@ class DocObject(object):
         if key in self.children:
             if type(self.children[key]) != list:
                 raise TypeError("Not a list")
-            self.children[key].append(child_object)
+            if child_object not in self.children[key]:
+                self.children[key].append(child_object)
+            else:
+                self.update_child(key, child_object)
         else:
             self.children[key] = [child_object]
+
+    def update_child(self, key, child_object):
+        """Updates a doc item. If description is empty, it will set it, otherwise print a warning"""
+
+        if key in self.children:
+            if child_object not in self.children[key]:
+                raise KeyError("Cannot find item {} inside {}[{}]"
+                               .format(child_object.name, self.name, key))
+            for child in self.children[key]:
+                if child.name == child_object.name:
+                    if not child.description:
+                        child.description = child_object.description
+                    else:
+                        print "WARNING: Requested to update item {} inside {}[{}]"\
+                              .format(child_object.name, self.name, key)\
+                              + " which is non-empty. This is not yet supported."
+
+    def get_description(self):
+        """Returns the description or a hint if possible"""
+        if self.description:
+            return self.description
+
+        if self.line_number:
+            return "Please add description. See {} line number: {}\n    Code: {}"\
+                .format(self.filename, self.line_number, self.code)
