@@ -2,11 +2,13 @@
 DocObject formatter for markdown
 """
 
-from catkin_doc.formatters.base_formatter import BaseFormatter
 import markdown_strings
+from catkin_doc.formatters.base_formatter import BaseFormatter
+
 
 class MarkdownFormatter(BaseFormatter):
     """Formats to markdown"""
+
     def heading(self, level, text):
         return markdown_strings.header(text, level) + "\n"
 
@@ -23,6 +25,6 @@ class MarkdownFormatter(BaseFormatter):
         return markdown_strings.bold(text)
 
     def as_list_item(self, level, formatted_text):
-        new_newline = "\n"+level*"  " + "    "
-        new_text =  new_newline.join(formatted_text.split("\n"))
+        new_newline = "\n" + level * "  " + "    "
+        new_text = new_newline.join(formatted_text.split("\n"))
         return " ".join([level * "  ", "*", new_text])
