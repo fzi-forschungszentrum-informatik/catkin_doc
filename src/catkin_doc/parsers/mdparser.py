@@ -2,29 +2,49 @@
 
 import os
 import re
-from catkin_doc.datastructures.doc_object import DocObject
-from catkin_doc.datastructures.node import Node
+
+import catkin_doc.datastructures as ds
 
 class DocSection(object):
     """Small helper class representing a hierarchy level inside a doc file"""
-    def __init__(self, lines, doc_object, level=0):
+    def __init__(self, lines, doc_object_type=ds.DocObject, level=0):
         self.lines = lines
         self.level = level
-        self.doc_object = doc_object
+        self.package_t = doc_object_type
+        self.doc_object = None
         self.children = dict()
 
+        self.parse()
+
     def parse(self):
+        sub_lines = None
+        current_title = None
         for line in self.lines:
             match = re.search("^#{" + str(self.level+1) + "} ?([^#].*)", line)
             if match:
-                package_name = match.group(1)
-                if not self.doc_object.name:
-                    self.doc_object.name = package_name
-                elif self.doc_object.name != package_name:
-                    print("ERROR: Package name as read from file is not the same as set before")
-
-            elif not self.doc_object.name:
+                print("{}Found current level's title: {}".format(self.level*" ", match.group(1)))
+                self.doc_object = self.package_t(match.group(1))
+            elif not self.doc_object:
+                # If we haven't found a name, continue until we do
                 continue
+
+            match = re.search("^#{" + str(self.level+2) + "} ?([^#].*)", line)
+            if match:
+                print("{}Found child: {}".format(self.level*" ", match.group(1)))
+                if sub_lines:
+                    # children_type = create_doc_object(match.group(1))
+                    self.children[current_title] = DocSection(
+                        sub_lines, level=self.level+1)
+                current_title = match.group(1)
+                sub_lines = [line]
+            elif sub_lines:
+                # add line to currently creating section
+                sub_lines.append(line)
+            else:
+                continue
+        if sub_lines:
+            self.children[current_title] = DocSection( sub_lines, level=self.level+1)
+
 
 class MdParser(object):
     """Parser for existing markdown files generated with the catkin doc module
@@ -32,7 +52,8 @@ class MdParser(object):
     def __init__(self, filename, starting_line=0):
         self.starting_line = starting_line
         self.current_level = 0
-        self.doc_object = DocObject("")
+        self.doc_object = ds.DocObject("")
+        self.doc = None
 
         #regex for parsing according things
         self.re_param = '\*\*(\S+)\*\* \(default: (\S+)\)'
@@ -46,14 +67,13 @@ class MdParser(object):
         if ".md" in filename:
             with open(filename) as filecontent:
                 lines = filecontent.readlines()
-            for linenumber in len(lines):
+            for linenumber in range(len(lines)):
                 match = re.search("^# ?([^#].*)", lines[linenumber])
                 if match:
                     package_name = match.group(1)
                     self.doc_object.name = package_name
-                    self.doc = DocSection(lines[linenumber:], self.doc_object, level=1)
+                    self.doc = DocSection(lines[linenumber:], ds.Package, level=0)
                     break
-            self.doc.parse()
         else:
             print("This is not a markdown file.")
 

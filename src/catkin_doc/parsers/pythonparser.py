@@ -5,9 +5,7 @@ from __future__ import print_function
 import re
 import os
 
-from catkin_doc.datastructures.node import Node
-from catkin_doc.datastructures.parameter import Parameter
-from catkin_doc.datastructures.topic import Topic
+import catkin_doc.datastructures as ds
 
 
 def extract_info(line, as_type, regex):
@@ -50,16 +48,16 @@ class PythonParser(object):
 
     def __init__(self, filename):
         node_name = filename.split('/')[-1].strip(".py")
-        self.node = Node(node_name)
+        self.node = ds.Node(node_name)
         self.filename = filename.split('/')[-1]
         #                    regex        as_type    add_function
-        self.parser_fcts = [(self.param_regex, Parameter, self.node.add_parameter),
-                            (self.subscriber_regex, Topic, self.node.add_subscriber),
-                            (self.publisher_regex, Topic, self.node.add_publisher),
-                            (self.action_client_regex, Topic, self.node.add_action_client),
-                            (self.service_client_regex, Topic, self.node.add_service_client),
-                            (self.service_regex, Topic, self.node.add_service),
-                            (self.action_regex, Topic, self.node.add_action)]
+        self.parser_fcts = [(self.param_regex, ds.Parameter, self.node.add_parameter),
+                            (self.subscriber_regex, ds.Subscriber, self.node.add_subscriber),
+                            (self.publisher_regex, ds.Publisher, self.node.add_publisher),
+                            (self.action_client_regex, ds.ActionClient, self.node.add_action_client),
+                            (self.service_client_regex, ds.ServiceClient, self.node.add_service_client),
+                            (self.service_regex, ds.Service, self.node.add_service),
+                            (self.action_regex, ds.Action, self.node.add_action)]
         with open(filename) as filecontent:
             self.lines = filecontent.readlines()
         self.parse()

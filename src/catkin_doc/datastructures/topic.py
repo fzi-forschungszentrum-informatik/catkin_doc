@@ -29,3 +29,8 @@ class Topic(DocObject):
         out_str += formatter.text(self.get_description())
 
         return out_str
+
+class Subscriber(Topic):
+    """Datastructure representing a Subscriber"""
+class Publisher(Topic):
+    """Datastructure representing a Publisher"""

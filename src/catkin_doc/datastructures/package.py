@@ -2,16 +2,13 @@
 Package datastructure
 """
 
-from catkin_doc.datastructures.doc_object import DocObject
+import catkin_doc.datastructures as ds
 
-
-class Package(DocObject):
+class Package(ds.DocObject):
     """Datastructure representing a package"""
 
-    nodes_key = "Nodes"
-
     def add_node(self, node):
-        self.add_child(self.nodes_key, node)
+        self.add_child(ds.KEYS[ds.Node], node)
 
     def to_string(self, level, formatter):
         """
@@ -26,10 +23,10 @@ class Package(DocObject):
         out_str = formatter.heading(level, self.name) + formatter.new_line()
         out_str += formatter.text(self.description) + formatter.new_line()
 
-        if self.nodes_key in self.children:
-            out_str += formatter.heading(level + 1, self.nodes_key)
+        if ds.KEYS[ds.Node] in self.children:
+            out_str += formatter.heading(level + 1, ds.KEYS[ds.Node])
 
-            for item in self.children[self.nodes_key]:
+            for item in self.children[ds.KEYS[ds.Node]]:
                 out_str += item.to_string(level + 2, formatter)
 
         return out_str
