@@ -68,9 +68,9 @@ class DocObject(object):
                     if not child.description:
                         child.description = child_object.description
                     else:
-                        print "WARNING: Requested to update item {} inside {}[{}]"\
-                              .format(child_object.name, self.name, key)\
-                              + " which is non-empty. This is not yet supported."
+                        print("WARNING: Requested to update item {} inside {}[{}]"
+                              .format(child_object.name, self.name, key)
+                              + " which is non-empty. This is not yet supported.")
 
     def get_description(self):
         """Returns the description or a hint if possible"""
