@@ -3,31 +3,32 @@ Node datastructure
 """
 
 import catkin_doc.datastructures as ds
+from catkin_doc.datastructures.doc_object import DocObject
 
 
-class Node(ds.DocObject):
+class Node(DocObject):
     """Datastructure representing a node"""
 
     def add_parameter(self, parameter):
-        self.add_child(ds.KEYS[ds.Parameter], parameter)
+        self.add_child(ds.KEYS["parameter"], parameter)
 
     def add_subscriber(self, subscriber):
-        self.add_child(ds.KEYS[ds.Subscriber], subscriber)
+        self.add_child(ds.KEYS["subscriber"], subscriber)
 
     def add_publisher(self, publisher):
-        self.add_child(ds.KEYS[ds.Publisher], publisher)
+        self.add_child(ds.KEYS["publisher"], publisher)
 
     def add_service(self, service):
-        self.add_child(ds.KEYS[ds.Service], service)
+        self.add_child(ds.KEYS["service"], service)
 
     def add_service_client(self, service_client):
-        self.add_child(ds.KEYS[ds.ServiceClient], service_client)
+        self.add_child(ds.KEYS["service_client"], service_client)
 
     def add_action(self, action):
-        self.add_child(ds.KEYS[ds.Action], action)
+        self.add_child(ds.KEYS["action"], action)
 
     def add_action_client(self, action_client):
-        self.add_child(ds.KEYS[ds.ActionClient], action_client)
+        self.add_child(ds.KEYS["action_client"], action_client)
 
     def to_string(self, level, formatter):
         """

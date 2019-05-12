@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import catkin_doc.datastructures as ds
+from catkin_doc.datastructures.package import Package
 
 from catkin_doc.formatters.markdown_formatter import MarkdownFormatter
 
@@ -9,7 +10,7 @@ from catkin_doc.parsers.mdparser import MdParser
 
 
 def main():
-    main_object = ds.Package("my_package")
+    main_object = Package("my_package")
 
     # child_object = DocObject("component1", "This is the first component")
     # main_object.add_child("components", child_object)
@@ -29,8 +30,8 @@ def main():
     markdown_string = main_object.to_string(1, formatter)
 
 
-    # with open("output.md", "w") as f:
-        # f.write(markdown_string)
+    with open("output.md", "w") as f:
+        f.write(markdown_string)
 
     mdparser = MdParser(filename="output.md")
 

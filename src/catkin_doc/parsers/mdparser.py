@@ -4,10 +4,17 @@ import os
 import re
 
 import catkin_doc.datastructures as ds
+from catkin_doc.datastructures.doc_object import DocObject
+from catkin_doc.datastructures.parameter import Parameter
+from catkin_doc.datastructures.package import Package
+from catkin_doc.datastructures.topic import Publisher, Subscriber
+from catkin_doc.datastructures.node import Node
+from catkin_doc.datastructures.action import Action, ActionClient
+from catkin_doc.datastructures.service import Service, ServiceClient
 
 class DocSection(object):
     """Small helper class representing a hierarchy level inside a doc file"""
-    def __init__(self, lines, doc_object_type=ds.DocObject, level=0):
+    def __init__(self, lines, doc_object_type=DocObject, level=0):
         self.lines = lines
         self.level = level
         self.package_t = doc_object_type
@@ -16,8 +23,8 @@ class DocSection(object):
 
         self.line_iterator = enumerate(self.lines)
 
-        parameter_style_types = [ds.Parameter, ds.Publisher, ds.Subscriber, ds.Service,
-                ds.ServiceClient, ds.Action, ds.ActionClient]
+        parameter_style_types = [Parameter, Publisher, Subscriber, Service,
+                ServiceClient, Action, ActionClient]
 
         # Only needed for some types
         self.type_info = None
@@ -32,7 +39,7 @@ class DocSection(object):
 
         self.sub_regex = "^#{" + str(level+2) + "} ?([^#].*)"
 
-        if self.children_t is ds.Node:
+        if self.children_t is Node:
             pass
         elif self.children_t in parameter_style_types:
             self.sub_regex = "^\s*\*\s*\*\*(.*)\*\*"
@@ -93,7 +100,7 @@ class DocSection(object):
         prefix = self.level * " "
         out_str += prefix + "Name: " + self.name + "\n"
         out_str += prefix + "Description: " + self.description + "\n"
-        out_str += prefix + "Type: " + ds.KEYS[self.package_t] + "\n"
+        out_str += prefix + "Type: " + ds.get_identifier_for_type(self.package_t) + "\n"
         if self.type_info:
             out_str += prefix + "msg_type: " + self.type_info + "\n"
         if self.default_value:
@@ -112,6 +119,6 @@ class MdParser(object):
         if ".md" in filename:
             with open(filename) as filecontent:
                 lines = filecontent.readlines()
-                self.doc = DocSection(lines, ds.Package, level=0)
+                self.doc = DocSection(lines, Package, level=0)
         else:
             print("This is not a markdown file.")
