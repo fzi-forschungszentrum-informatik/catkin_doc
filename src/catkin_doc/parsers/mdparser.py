@@ -11,235 +11,107 @@ class DocSection(object):
         self.lines = lines
         self.level = level
         self.package_t = doc_object_type
-        self.doc_object = None
+        self.children_t = doc_object_type
         self.children = dict()
 
-        self.parse()
+        self.line_iterator = enumerate(self.lines)
 
-    def parse(self):
+        parameter_style_types = [ds.Parameter, ds.Publisher, ds.Subscriber, ds.Service,
+                ds.ServiceClient, ds.Action, ds.ActionClient]
+
+        # Only needed for some types
+        self.type_info = None
+        self.default_value = None
+
+        self.title_regex = "^#{" + str(level+1) + "} ?([^#].*)"
+        if self.package_t in parameter_style_types:
+            self.title_regex = "^\s*\*\s*\*\*(.*)\*\*\s*(\(default:\s*(.*)\))?(\((.*)\))?$"
+        self.parse_title()
+        self.description = ""
+
+
+        self.sub_regex = "^#{" + str(level+2) + "} ?([^#].*)"
+
+        if self.children_t is ds.Node:
+            pass
+        elif self.children_t in parameter_style_types:
+            self.sub_regex = "^\s*\*\s*\*\*(.*)\*\*"
+        self.parse_children()
+
+    def parse_title(self):
         sub_lines = None
-        current_title = None
-        for line in self.lines:
-            match = re.search("^#{" + str(self.level+1) + "} ?([^#].*)", line)
+        for line_number, line in self.line_iterator:
+            match = re.search(self.title_regex, line)
             if match:
                 print("{}Found current level's title: {}".format(self.level*" ", match.group(1)))
-                self.doc_object = self.package_t(match.group(1))
-            elif not self.doc_object:
+                self.name = match.group(1)
+                self.children_t = ds.create_doc_object(match.group(1))
+                try:
+                    self.default_value = match.group(3)
+                    print(match.group(3))
+                    self.type_info = match.group(5)
+                    print(match.group(5))
+                except IndexError:
+                    # If our regex doesn't contain these groups, ignore
+                    pass
+                return match.group(1)
+            else:
                 # If we haven't found a name, continue until we do
                 continue
 
-            match = re.search("^#{" + str(self.level+2) + "} ?([^#].*)", line)
+    def parse_children(self):
+        sub_lines = None
+        for line_number, line in self.line_iterator:
+            match = re.search(self.sub_regex, line)
             if match:
-                print("{}Found child: {}".format(self.level*" ", match.group(1)))
+                name = match.group(1)
+                print("{}Found child: {}".format(self.level*" ", name))
+                sub_lines, end_line = self.get_sub_lines()
                 if sub_lines:
-                    # children_type = create_doc_object(match.group(1))
-                    self.children[current_title] = DocSection(
-                        sub_lines, level=self.level+1)
-                current_title = match.group(1)
-                sub_lines = [line]
-            elif sub_lines:
-                # add line to currently creating section
-                sub_lines.append(line)
+                    self.children[name] = DocSection(
+                        [line] + sub_lines, doc_object_type=self.children_t, level=self.level+1)
             else:
-                continue
-        if sub_lines:
-            self.children[current_title] = DocSection( sub_lines, level=self.level+1)
+                self.description += line.strip("\n ")
+
+    def get_sub_lines(self):
+        sub_lines = list()
+        end_line = len(self.lines) - 1
+        for line_number, line in self.line_iterator:
+            sub_lines.append(line)
+            if line_number < len(self.lines) - 1:
+                next_line = self.lines[line_number + 1]
+
+                match = re.search(self.sub_regex, next_line)
+                if match:
+                    end_line = line_number
+                    break
+
+        return sub_lines, end_line
+
+    def __str__(self):
+        out_str = ""
+        prefix = self.level * " "
+        out_str += prefix + "Name: " + self.name + "\n"
+        out_str += prefix + "Description: " + self.description + "\n"
+        out_str += prefix + "Type: " + ds.KEYS[self.package_t] + "\n"
+        if self.type_info:
+            out_str += prefix + "msg_type: " + self.type_info + "\n"
+        if self.default_value:
+            out_str += prefix + "default_value: " + self.default_value + "\n"
+        for key in self.children:
+            out_str += prefix + key + ":\n" + str(self.children[key])
+        return out_str
 
 
 class MdParser(object):
     """Parser for existing markdown files generated with the catkin doc module
        to fill node representation for update"""
-    def __init__(self, filename, starting_line=0):
-        self.starting_line = starting_line
-        self.current_level = 0
-        self.doc_object = ds.DocObject("")
+    def __init__(self, filename):
         self.doc = None
-
-        #regex for parsing according things
-        self.re_param = '\*\*(\S+)\*\* \(default: (\S+)\)'
-        self.re_subscriber = '\*\*(\S+)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
-        self.re_publisher = '\*\*(\S+)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
-        self.re_service_clients = '\*\*(\S+)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
-        self.re_services = '\*\*(\S+)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
-        self.re_action_clients = '\*\*(\S+)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
-        self.re_actions = '\*\*(\S+\s?\S*)\*\* \(\[?([^\]^\)]*)\]?[^]^\s]*\)'
 
         if ".md" in filename:
             with open(filename) as filecontent:
                 lines = filecontent.readlines()
-            for linenumber in range(len(lines)):
-                match = re.search("^# ?([^#].*)", lines[linenumber])
-                if match:
-                    package_name = match.group(1)
-                    self.doc_object.name = package_name
-                    self.doc = DocSection(lines[linenumber:], ds.Package, level=0)
-                    break
+                self.doc = DocSection(lines, ds.Package, level=0)
         else:
             print("This is not a markdown file.")
-
-
-    def paragraph_finished(self, linenumber):
-        """
-        Helperfunction
-        returns true if current paragraph is finished by detecting end of file or new heading
-        false otherwise
-
-        """
-        if linenumber >= len(self.lines) or "##" in self.lines[linenumber]:
-            return True
-        else:
-            return False
-
-    def extract_description(self, linenumber, pattern):
-        """
-        Helperfunction for extracting the description
-        """
-        description = ""
-        while (not re.search(pattern, self.lines[linenumber]) and linenumber < len(self.lines) and not self.next_node(linenumber)
-               and not self.paragraph_finished(linenumber+1)):
-            if not self.lines[linenumber].strip(" ").strip("\n") == "":
-                description += self.lines[linenumber]
-            linenumber +=1
-
-        return linenumber, description
-
-    def parse_node_description(self, linenumber):
-        """
-        Function to parse node description from markdown file and add them to node
-        """
-        description = ""
-        while not self.paragraph_finished(linenumber) and not self.next_node(linenumber):
-           description += self.lines[linenumber]
-           linenumber += 1
-        self.node.description = description.strip()
-
-        return linenumber
-
-    def parse_params(self, linenumber):
-        """
-        Function to parse parameter from markdown file and add them to node
-        """
-        while not self.paragraph_finished(linenumber) and not self.next_node(linenumber):
-           #extract parameter name and default value
-           match = re.search(self.re_param, self.lines[linenumber])
-           if match:
-               name = str(match.group(1))
-               value = None
-               if str(match.group(2)) != "-":
-                   value = str(match.group(2))
-               linenumber +=1
-               linenumber, description = self.extract_description(linenumber, self.re_param)
-               self.node.add_parameter(name, value,description)
-           else:
-               linenumber += 1
-        return linenumber
-
-    def parse_subscriber(self, linenumber):
-        """
-        Function to parse subscriber from markdown file and add them to node
-        """
-        while not self.paragraph_finished(linenumber)  and not self.next_node(linenumber):
-           #extract subscriber topic and msg type
-           match = re.search(self.re_subscriber, self.lines[linenumber])
-           if match:
-               topic = str(match.group(1))
-               type = str(match.group(2))
-               linenumber +=1
-               linenumber, description = self.extract_description(linenumber, self.re_subscriber)
-               self.node.add_subscriber(topic, type, description)
-           else:
-               linenumber += 1
-        return linenumber
-
-    def parse_publisher(self, linenumber):
-        """
-        Function to parse publisher from markdown file and add them to node
-        """
-        while not self.paragraph_finished(linenumber)  and not self.next_node(linenumber):
-           #extract publisher topic and msg type
-           match = re.search(self.re_publisher, self.lines[linenumber])
-           if match:
-               topic = str(match.group(1))
-               type = str(match.group(2))
-               linenumber +=1
-               linenumber, description = self.extract_description(linenumber, self.re_publisher)
-               self.node.add_publisher(topic, type, description)
-           else:
-               linenumber += 1
-        return linenumber
-
-    def parse_action_clients(self, linenumber):
-        """
-        Function to parse action clients from markdown file and add them to node
-        """
-        while not self.paragraph_finished(linenumber)  and not self.next_node(linenumber):
-           #extract action clients topic and action type
-           match = re.search(self.re_action_clients, self.lines[linenumber])
-           if match:
-               topic = str(match.group(1))
-               type = str(match.group(2))
-               linenumber +=1
-               linenumber, description = self.extract_description(linenumber, self.re_action_clients)
-               self.node.add_action_client(topic, type, description)
-           else:
-               linenumber += 1
-        return linenumber
-
-    def parse_actions(self, linenumber):
-        """
-        Function to parse actions from markdown file and add them to node
-        """
-        while not self.paragraph_finished(linenumber)  and not self.next_node(linenumber):
-           #extract action topic and action type
-           match = re.search(self.re_actions, self.lines[linenumber])
-           if match:
-               topic = str(match.group(1))
-               type = str(match.group(2))
-               linenumber +=1
-               linenumber, description = self.extract_description(linenumber, self.re_actions)
-               self.node.add_action(topic, type, description)
-           else:
-               linenumber += 1
-        return linenumber
-
-    def parse_service_clients(self, linenumber):
-        """
-        Function to parse service clients from markdown file and add them to node
-        """
-        while not self.paragraph_finished(linenumber)  and not self.next_node(linenumber):
-           #extract service clients topic and service type
-           match = re.search(self.re_service_clients, self.lines[linenumber])
-           if match:
-               topic = str(match.group(1))
-               type = str(match.group(2))
-               linenumber +=1
-               linenumber, description = self.extract_description(linenumber, self.re_service_clients)
-               self.node.add_service_client(topic, type, description)
-           else:
-               linenumber += 1
-        return linenumber
-
-    def parse_services(self, linenumber):
-        """
-        Function to parse services from markdown file and add them to node
-        """
-        while not self.paragraph_finished(linenumber) and not self.next_node(linenumber):
-           #extract service name and service type
-           match = re.search(self.re_services, self.lines[linenumber])
-           if match:
-               name = str(match.group(1))
-               type = str(match.group(2))
-               linenumber +=1
-               linenumber, description = self.extract_description(linenumber, self.re_services)
-               self.node.add_service(name, type, description)
-           else:
-               linenumber += 1
-        return linenumber
-
-    def next_node(self, linenumber):
-        next_node = re.search("(<!--) starting node (\S+)", self.lines[linenumber])
-        return next_node
-
-
-
-

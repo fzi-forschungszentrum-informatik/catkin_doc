@@ -29,13 +29,13 @@ def main():
     markdown_string = main_object.to_string(1, formatter)
 
 
-    with open("output.md", "w") as f:
-        f.write(markdown_string)
+    # with open("output.md", "w") as f:
+        # f.write(markdown_string)
 
     mdparser = MdParser(filename="output.md")
-    markdown_string = mdparser.doc_object.to_string(1, formatter)
 
-    print(mdparser.doc.children)
+    print("-----")
+    print(mdparser.doc)
     # print (markdown_string)
 
 

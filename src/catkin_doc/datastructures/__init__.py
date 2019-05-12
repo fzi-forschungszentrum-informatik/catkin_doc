@@ -19,7 +19,8 @@ KEYS = {Package: "Packages",
         Publisher: "Published topics",
         Subscriber: "Subscribed topics",
         Action: "Actions",
-        ActionClient: "Action Clients"
+        ActionClient: "Action Clients",
+        DocObject: "unknown"
         }
 
 def create_doc_object(key):
