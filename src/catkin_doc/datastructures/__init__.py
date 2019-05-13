@@ -13,7 +13,6 @@ KEYS = {"package": "Packages",
         "subscriber": "Subscribed topics",
         "action": "Actions",
         "action_client": "Action Clients",
-        "unknown": "unknown"
         }
 
 

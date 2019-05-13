@@ -95,6 +95,20 @@ class DocSection(object):
 
         return sub_lines, end_line
 
+    def to_doc_object(self):
+        if ds.get_identifier_for_type(self.package_t) in ds.KEYS:
+            print("DocObject for {}".format(self.name))
+            doc_object = self.package_t(name=self.name, description=self.description)
+            if self.package_t is Parameter:
+                doc_object.datatype = self.type_info
+                doc_object.default_value = self.default_value
+            for child in self.children:
+                doc_object.children[child] = self.children[child].to_doc_object()
+            return doc_object
+        else:
+            print(self.name)
+            return [c.to_doc_object() for c in self.children.values()]
+
     def __str__(self):
         out_str = ""
         prefix = self.level * " "

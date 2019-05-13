@@ -37,7 +37,14 @@ def main():
 
     print("-----")
     print(mdparser.doc)
-    # print (markdown_string)
+    print("-----")
+    mdparser.doc.to_doc_object()
+    md_docobj = mdparser.doc.to_doc_object()
+
+    markdown_string = md_docobj.to_string(1, formatter)
+    print (markdown_string)
+    with open("output_new.md", "w") as f:
+        f.write(markdown_string)
 
 
 if __name__ == "__main__":
