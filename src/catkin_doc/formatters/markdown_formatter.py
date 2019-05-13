@@ -1,5 +1,5 @@
 """
-DocObject formatter for markdown
+docobject formatter for markdown
 """
 
 import markdown_strings
@@ -28,3 +28,6 @@ class MarkdownFormatter(BaseFormatter):
         new_newline = "\n" + level * "  " + "    "
         new_text = new_newline.join(formatted_text.split("\n"))
         return " ".join([level * "  ", "*", new_text])
+
+    def link(self, url, text=""):
+        return markdown_strings.link(text, url)

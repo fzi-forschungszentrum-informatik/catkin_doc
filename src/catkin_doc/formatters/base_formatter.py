@@ -64,3 +64,14 @@ class BaseFormatter(object):
         """
         raise NotImplementedError(
             "as_list_item(): This is not implemented for {}" .format(self.__class__))
+
+    def link(self, url, text=""):
+        """Formats a link properly
+
+        :param str url: The link's URL
+        :param str text: The text shown for the link. If empty, the url will be shown instead
+        :return: Formatted text
+        :rtype: str
+        """
+        raise NotImplementedError(
+            "link(): This is not implemented for {}" .format(self.__class__))
