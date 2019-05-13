@@ -62,7 +62,7 @@ def get_identifier_for_type(typeid):
     elif typeid == Node:
         return "node"
     elif typeid == Parameter:
-        return "paramter"
+        return "parameter"
     elif typeid == Service:
         return "service"
     elif typeid == ServiceClient:
