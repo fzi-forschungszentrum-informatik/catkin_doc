@@ -38,7 +38,6 @@ def main():
     print("-----")
     print(mdparser.doc)
     print("-----")
-    mdparser.doc.to_doc_object()
     md_docobj = mdparser.doc.to_doc_object()
 
     markdown_string = md_docobj.to_string(1, formatter)

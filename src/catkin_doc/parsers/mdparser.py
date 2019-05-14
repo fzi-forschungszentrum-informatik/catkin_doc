@@ -77,8 +77,11 @@ class DocSection(object):
                 if sub_lines:
                     self.children[name] = DocSection(
                         [line] + sub_lines, doc_object_type=self.children_t, level=self.level+1)
-            else:
-                self.description += line.strip("\n ")
+            elif line.strip():
+                if self.description:
+                    self.description = "\n".join([self.description, line.strip()])
+                else:
+                    self.description = line.strip()
 
     def get_sub_lines(self):
         sub_lines = list()

@@ -1,20 +1,26 @@
 '''
 This class serves as a base class for all documentation objects
 '''
+import re
 
 
 class DocObject(object):
     """Base class for a doc object"""
 
     def __init__(self, name, description=""):
-        self.name = name
-        self.description = description
+        self.default_description = "Please add description. See {} line number: {}\n\tCode: {}"
+        self.default_desc_regex = "\s+".join(
+            self.default_description.format("(.*)", "(\d+)", "(.*)").split())
 
+        self.name = name
+        # This is neede for the default description
         self.filename = ""
         self.line_number = None
         self.code = ""
+        self.description = self.set_description(description)
 
         self.children = dict()
+
 
     def __eq__(self, other):
         return self.name == other.name
@@ -78,5 +84,25 @@ class DocObject(object):
             return self.description
 
         if self.line_number:
-            return "Please add description. See {} line number: {}\n    Code: {}"\
-                .format(self.filename, self.line_number, self.code)
+            return self.default_description.format(self.filename, self.line_number, self.code)
+
+    def set_description(self, description):
+        """
+        Checks wheter the given description matches the default description and sets it to this
+        object's description otherwise.
+        If the description matches the default description, this object's description is set empty
+        and information is extracted from the given description.
+        """
+
+        match = re.search(self.default_desc_regex, " ".join(description.split()))
+        if match:
+            print self.default_desc_regex
+            print " ".join(description.split())
+            print "''" + match.group(1) + "''"
+            print "''" + match.group(2) + "''"
+            print "''" + match.group(3) + "''"
+            self.filename = match.group(1)
+            self.line_number = match.group(2)
+            self.code = match.group(3)
+            return ""
+        return description
