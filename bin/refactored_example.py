@@ -6,6 +6,7 @@ from catkin_doc.datastructures.package import Package
 from catkin_doc.formatters.markdown_formatter import MarkdownFormatter
 
 from catkin_doc.parsers.pythonparser import PythonParser
+from catkin_doc.parsers.cppparser import CppParser
 from catkin_doc.parsers.mdparser import MdParser
 
 
@@ -25,6 +26,9 @@ def main():
 
     pyparser = PythonParser("test_node.py")
     main_object.add_node(pyparser.node)
+
+    cppparser = CppParser("test_cpp_node",["test.cpp"])
+    main_object.add_node(cppparser.node)
 
     formatter = MarkdownFormatter()
     markdown_string = main_object.to_string(1, formatter)
