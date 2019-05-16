@@ -28,16 +28,16 @@ def extract_comment(line):
 class CppParser(object):
 
     # regex for parsing node attributes
-    param_regex = 'param(<([^>]*)>)?\((?P<brackets>(?P<name>[^,]*), ?([^,)]+), ?(?P<type>[^\)]+))(?P<bind>)\)'
-    param_regex_alt1 = 'getParam\((?P<brackets>(?P<name>[^,]+), ?[^)]+)(?P<bind>)(?P<type>)\)'
-    param_regex_alt2 = 'param::get\(((?P<brackets>(?P<name>[^,]+), ?[^)]+))(?P<bind>)(?P<type>)\)'
-    subscriber_regex = 'subscribe(<(?P<type>[^>]*)>)?\((?P<brackets>(?P<name>[^,]*), [^)]*)(?P<bind>)\)'
-    publisher_regex = 'advertise(<(?P<type>[^>]*)>)?\((?P<brackets>(?P<name>[^,]*),[^)]*)(?P<bind>)\)'
-    action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((?P<brackets>\s*(?P<name>[^,^)^(]*)?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)\)'
-    service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\((?P<brackets>(?P<name>[^,)]*)[^)]*)(?P<bind>)\)'
-    service_client_regex_alt = 'service::call\((?P<brackets>(?P<name>[^,)]*), (?P<type>[^,)]+))(?P<bind>)\)'
-    action_regex = 'actionlib::SimpleActionServer<(?P<type>[^>]*)>\((?P<brackets>\s*(?P<name>[^,]*, ?([^,]*))[^)]*)(?P<bind>)\)'
-    service_regex = 'advertiseService(<(?P<type>[^>]*)>)?\((?P<brackets>\s?(?P<name>[^,]*),\s?(?P<bind>[^\(]*)[^)]*)\)'
+    param_regex = 'param(<(?P<type>[^>]*)>)?\((?P<brackets>(?P<name>[^,]*), ?([^,)]+), ?(?P<default>[^\)]+))(?P<bind>)\)'
+    param_regex_alt1 = 'getParam\((?P<brackets>(?P<name>[^,]+), ?[^)]+)(?P<bind>)(?P<type>)(?P<default>)\)'
+    param_regex_alt2 = 'param::get\(((?P<brackets>(?P<name>[^,]+), ?[^)]+))(?P<bind>)(?P<type>)(?P<default>)\)'
+    subscriber_regex = 'subscribe(<(?P<type>[^>]*)>)?\((?P<brackets>(?P<name>[^,]*), [^)]*)(?P<bind>)(?P<default>)\)'
+    publisher_regex = 'advertise(<(?P<type>[^>]*)>)?\((?P<brackets>(?P<name>[^,]*),[^)]*)(?P<bind>)(?P<default>)\)'
+    action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((?P<brackets>\s*(?P<name>[^,^)^(]*)?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)(?P<default>)\)'
+    service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\((?P<brackets>(?P<name>[^,)]*)[^)]*)(?P<bind>)(?P<default>)\)'
+    service_client_regex_alt = 'service::call\((?P<brackets>(?P<name>[^,)]*), (?P<type>[^,)]+))(?P<bind>)(?P<default>)\)'
+    action_regex = 'actionlib::SimpleActionServer<(?P<type>[^>]*)>\((?P<brackets>\s*(?P<name>[^,]*, ?([^,]*))[^)]*)(?P<bind>)(?P<default>)\)'
+    service_regex = 'advertiseService(<(?P<type>[^>]*)>)?\((?P<brackets>\s?(?P<name>[^,]*),\s?(?P<bind>[^\(]*)[^)]*)(?P<default>)\)'
 
 
     def __init__(self, node_name, files):
@@ -95,12 +95,14 @@ class CppParser(object):
         match = re.search(regex, line)
         if match:
             name = str(match.group('name'))
-
+            default_value = str(match.group('default')).replace('\'', '\"')
             datatype = str(match.group('type')).strip('"').replace(",", "")
             brackets = str(match.group('brackets'))
             bind = str(match.group('bind'))
             if bind and bind in self.boost_binds:
                 datatype = self.boost_binds[bind]
+            if as_type == Parameter:
+                return as_type(name, default_value=default_value), brackets
             return as_type(name, datatype=datatype), brackets
         return None, None
 
