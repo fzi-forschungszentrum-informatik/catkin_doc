@@ -19,10 +19,12 @@ def extract_info(line, as_type, regex):
     """
     match = re.search(regex, line)
     if match:
-        name = str(match.group(1)).replace('\'', '\"')
-
-        datatype = str(match.group(3)).strip('\'').strip('\"')
+        name = str(match.group('name')).replace('\'', '\"')
+        default_value = str(match.group('default')).replace('\'', '\"')
+        datatype = str(match.group('type')).strip('\'').strip('\"')
         brackets = str(match.group(0))
+        if as_type == Parameter:
+            return as_type(name, default_value=default_value), brackets
         return as_type(name, datatype=datatype), brackets
     return None, None
 
@@ -42,13 +44,13 @@ def extract_comment(line):
 class PythonParser(object):
     """Parser for python nodes which fills the node representation"""
 
-    param_regex = "get_param\(\ ?(\S+)(,\ ?(\S+)?)?\)"
-    subscriber_regex = "Subscriber\(\ ?(\S+)(, ?(\S+))(, ?(\S+))\)"
-    publisher_regex = "Publisher\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
-    action_client_regex = "SimpleActionClient\(\ ?(\S+)(, ?(\S+))\)"
-    service_client_regex = "ServiceProxy\(\ ?(\S+)(, ?(\S+))\)"
-    service_regex = "Service\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
-    action_regex = "SimpleActionServer\(\ ?(\S+)(, ?(\S+))(, ?(\S+))+\)"
+    param_regex = "get_param\(\ ?(?P<name>\S+)(,\ ?(?P<default>\S+)?)?(?P<type>)\)"
+    subscriber_regex = "Subscriber\(\ ?(?P<name>\S+)(, ?(?P<type>\S+))(, ?(\S+))(?P<default>)\)"
+    publisher_regex = "Publisher\(\ ?(?P<name>\S+)(, ?(?P<type>\S+))(, ?(\S+))+(?P<default>)\)"
+    action_client_regex = "SimpleActionClient\(\ ?(?P<name>\S+)(, ?(?P<type>\S+))(?P<default>)\)"
+    service_client_regex = "ServiceProxy\(\ ?(?P<name>\S+)(, ?(?P<type>\S+))(?P<default>)\)"
+    service_regex = "Service\(\ ?(?P<name>\S+)(, ?(\S+))(, ?(?P<type>\S+))+(?P<default>)\)"
+    action_regex = "SimpleActionServer\(\ ?(?P<name>\S+)(, ?(?P<type>\S+))(, ?(\S+))+(?P<default>)\)"
 
     def __init__(self, filename):
         node_name = filename.split('/')[-1].strip(".py")
