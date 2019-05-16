@@ -1,6 +1,6 @@
 import os
 import re
-class CmakeListParser:
+class CmakeParser:
     def __init__(self, pkg_path):
         self.exec_name = None
         self.pkg_path = pkg_path
