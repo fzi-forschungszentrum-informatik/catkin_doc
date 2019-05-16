@@ -23,7 +23,7 @@ class DocSection(object):
 
         self.line_iterator = enumerate(self.lines)
 
-        parameter_style_types = [Parameter, Publisher, Subscriber, Service,
+        self.parameter_style_types = [Parameter, Publisher, Subscriber, Service,
                 ServiceClient, Action, ActionClient]
 
         # Only needed for some types
@@ -31,8 +31,8 @@ class DocSection(object):
         self.default_value = None
 
         self.title_regex = "^#{" + str(level+1) + "} ?([^#].*)"
-        if self.package_t in parameter_style_types:
-            self.title_regex = "^\s*\*\s*\*\*(.*)\*\*\s*(\(default:\s*(.*)\))?(\((.*)\))?$"
+        if self.package_t in self.parameter_style_types:
+            self.title_regex = "^\s*\*\s*\*\*(.*)\*\*\s*(\(default:\s*(.*)\))?(\(\[([^\]]*)\]\(.*\)\))?(\((.*)\))?$"
         self.parse_title()
         self.description = ""
 
@@ -41,7 +41,7 @@ class DocSection(object):
 
         if self.children_t is Node:
             pass
-        elif self.children_t in parameter_style_types:
+        elif self.children_t in self.parameter_style_types:
             self.sub_regex = "^\s*\*\s*\*\*(.*)\*\*"
         self.parse_children()
 
@@ -56,8 +56,13 @@ class DocSection(object):
                 try:
                     self.default_value = match.group(3)
                     print(match.group(3))
-                    self.type_info = match.group(5)
-                    print(match.group(5))
+                    if match.group(5):
+                        self.type_info = match.group(5)
+                        print(match.group(5))
+                    else:
+                        self.type_info = match.group(7)
+                        print(match.group(7))
+
                 except IndexError:
                     # If our regex doesn't contain these groups, ignore
                     pass
@@ -101,10 +106,14 @@ class DocSection(object):
     def to_doc_object(self):
         if ds.get_identifier_for_type(self.package_t) in ds.KEYS:
             print("DocObject for {}".format(self.name))
-            doc_object = self.package_t(name=self.name, description=self.description)
-            if self.package_t is Parameter:
-                doc_object.datatype = self.type_info
-                doc_object.default_value = self.default_value
+            if self.package_t in self.parameter_style_types and not self.package_t is Parameter:
+                doc_object = self.package_t(name=self.name, description=self.description, datatype = self.type_info)
+            elif self.package_t is Parameter:
+                doc_object = self.package_t(name=self.name, description=self.description, default_value = self.default_value, datatype = self.type_info)
+            else:
+                doc_object = self.package_t(name=self.name, description=self.description)
+
+
             for child in self.children:
                 doc_object.children[child] = self.children[child].to_doc_object()
             return doc_object
