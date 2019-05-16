@@ -1,6 +1,5 @@
 import os
 import re
-import catkin_doc.cpp
 class CmakeListParser:
     def __init__(self, pkg_path):
         self.exec_name = None
@@ -9,8 +8,8 @@ class CmakeListParser:
         self.search_for_cpp_node()
         self.parser = list()
         for node in self.executables:
-            print(node)
-            self.parser.append(catkin_doc.cpp.CppParser(node, self.executables[node]))
+            print("Found node " + node)
+
 
     def search_for_cpp_node(self):
         """
@@ -123,10 +122,10 @@ class CmakeListParser:
     def find_more_files(self):
             """
             Method to find included files belonging to the node and which aren't in the CMakeList
-            As this ins't trivial there are some assumptions made:
+            As this isn't trivial there are some assumptions made:
                 all files belonging to the node are from the same package we won't look at includes from different packages
-                if there is a Header from the same package included we assume that it location is package_name/include/package_name/name_of_class.cpp
-                the pkghandler is always used for a package not for parent- or childdirectories of one. So the packge name is the last part of the String the pkghandler is instanciated with.
+                if there is a Header from the same package included we assume that its location is package_name/include/package_name/name_of_class.cpp
+                the pkghandler is always used for a package not for parent- or childdirectories of one. So the package name is the last part of the String the pkghandler is instanciated with.
             """
             #get package name
             pkg_name = self.pkg_path.split("/")[-1]
