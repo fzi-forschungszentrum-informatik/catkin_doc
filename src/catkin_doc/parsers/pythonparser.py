@@ -110,9 +110,3 @@ class PythonParser(object):
             else:
                 still_comment = False
         return comment
-
-    def get_node(self):
-        """
-        Returns the Node Object
-        """
-        return self.node
