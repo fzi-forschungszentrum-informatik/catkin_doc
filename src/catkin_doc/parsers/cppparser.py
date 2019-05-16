@@ -36,8 +36,8 @@ class CppParser(object):
     action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((?P<brackets>\s*(?P<name>[^,^)^(]*)?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)\)'
     service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\((?P<brackets>(?P<name>[^,)]*)[^)]*)(?P<bind>)\)'
     service_client_regex_alt = 'service::call\((?P<brackets>(?P<name>[^,)]*), (?P<type>[^,)]+))(?P<bind>)\)'
-    service_regex = 'actionlib::SimpleActionServer<(?P<type>[^>]*)>\((?P<brackets>\s*(?P<name>[^,]*, ?([^,]*))[^)]*)(?P<bind>)\)'
-    action_regex = 'advertiseService(<(?P<type>[^>]*)>)?\((?P<brackets>\s?(?P<name>[^,]*),\s?(?P<bind>[^\(]*)[^)]*)\)'
+    action_regex = 'actionlib::SimpleActionServer<(?P<type>[^>]*)>\((?P<brackets>\s*(?P<name>[^,]*, ?([^,]*))[^)]*)(?P<bind>)\)'
+    service_regex = 'advertiseService(<(?P<type>[^>]*)>)?\((?P<brackets>\s?(?P<name>[^,]*),\s?(?P<bind>[^\(]*)[^)]*)\)'
 
 
     def __init__(self, node_name, files):
