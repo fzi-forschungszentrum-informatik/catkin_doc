@@ -2,7 +2,6 @@
 import os
 import re
 import magic
-import catkin_doc.python
 
 class PkgHandler:
     def __init__(self, pkg_path):
@@ -11,7 +10,6 @@ class PkgHandler:
         self.project_name = None
         self.pkg_path = pkg_path
         self.search_for_python(self.pkg_path)
-        self.create_parser()
 
 
 
@@ -41,13 +39,6 @@ class PkgHandler:
             print(filename)
             return True
         return False
-
-    def create_parser(self):
-        """
-        Function which creates a parser for each found python file
-        """
-        for file in self.executables:
-            self.parser.append(catkin_doc.python.PythonParser(file))
 
     @staticmethod
     def find_docu(pkg_path, docu_file):
