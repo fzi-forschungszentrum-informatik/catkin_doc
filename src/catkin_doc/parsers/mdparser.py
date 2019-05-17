@@ -50,18 +50,18 @@ class DocSection(object):
         for line_number, line in self.line_iterator:
             match = re.search(self.title_regex, line)
             if match:
-                print("{}Found current level's title: {}".format(self.level*" ", match.group(1)))
+                # print("{}Found current level's title: {}".format(self.level*" ", match.group(1)))
                 self.name = match.group(1)
                 self.children_t = ds.create_doc_object(match.group(1))
                 try:
                     self.default_value = match.group(3)
-                    print(match.group(3))
+                    # print(match.group(3))
                     if match.group(5):
                         self.type_info = match.group(5)
-                        print(match.group(5))
+                        # print(match.group(5))
                     else:
                         self.type_info = match.group(7)
-                        print(match.group(7))
+                        # print(match.group(7))
 
                 except IndexError:
                     # If our regex doesn't contain these groups, ignore
@@ -77,7 +77,7 @@ class DocSection(object):
             match = re.search(self.sub_regex, line)
             if match:
                 name = match.group(1)
-                print("{}Found child: {}".format(self.level*" ", name))
+                # print("{}Found child: {}".format(self.level*" ", name))
                 sub_lines, end_line = self.get_sub_lines()
                 if sub_lines:
                     self.children[name] = DocSection(
@@ -105,7 +105,7 @@ class DocSection(object):
 
     def to_doc_object(self):
         if ds.get_identifier_for_type(self.package_t) in ds.KEYS:
-            print("DocObject for {}".format(self.name))
+            # print("DocObject for {}".format(self.name))
             if self.package_t in self.parameter_style_types and not self.package_t is Parameter:
                 doc_object = self.package_t(name=self.name, description=self.description, datatype = self.type_info)
             elif self.package_t is Parameter:
@@ -118,7 +118,7 @@ class DocSection(object):
                 doc_object.children[child] = self.children[child].to_doc_object()
             return doc_object
         else:
-            print(self.name)
+            # print(self.name)
             return [c.to_doc_object() for c in self.children.values()]
 
     def __str__(self):

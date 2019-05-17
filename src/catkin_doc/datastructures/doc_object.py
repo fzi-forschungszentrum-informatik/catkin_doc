@@ -98,11 +98,6 @@ class DocObject(object):
 
         match = re.search(self.default_desc_regex, " ".join(description.split()))
         if match:
-            print self.default_desc_regex
-            print " ".join(description.split())
-            print "''" + match.group(1) + "''"
-            print "''" + match.group(2) + "''"
-            print "''" + match.group(3) + "''"
             self.filename = match.group(1)
             self.line_number = match.group(2)
             self.code = match.group(3)
