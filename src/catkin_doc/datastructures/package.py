@@ -9,6 +9,7 @@ class Package(DocObject):
     """Datastructure representing a package"""
 
     def add_node(self, node):
+        """Adds a node as child"""
         self.add_child(ds.KEYS["node"], node)
 
     def to_string(self, level, formatter):

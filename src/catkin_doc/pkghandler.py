@@ -1,7 +1,9 @@
+"""
+Toplevel instance for parsing a package and its contents.
+"""
 
 from __future__ import print_function
 import os
-import re
 
 
 import xml.etree.ElementTree as ET
@@ -15,7 +17,10 @@ from catkin_doc.parsers.cppparser import CppParser
 from catkin_doc.parsers.mdparser import MdParser
 
 
-class PkgHandler:
+class PkgHandler(object):
+    """
+    Toplevel instance for parsing a package and its contents.
+    """
     def __init__(self, pkg_path):
         self.pkg_path = pkg_path
 
@@ -75,8 +80,8 @@ class PkgHandler:
         as this is a good clue that this file may be a python ros node.
         Returns True if stri8ng is containes False otherwise
         """
-        file = open(filename, "r")
-        if "rospy.init_node" in file.read():
+        filecontent = open(filename, "r")
+        if "rospy.init_node" in filecontent.read():
             print(filename)
             return True
         return False
@@ -94,7 +99,7 @@ class PkgHandler:
 
         if not docufile:
             print("Didn't find an existing documentation")
-            return
+            return None
 
         mdparser = MdParser(filename=docufile)
 

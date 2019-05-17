@@ -2,8 +2,8 @@
 Topic datastructure
 """
 
-from catkin_doc.datastructures.doc_object import DocObject
 import urllib2
+from catkin_doc.datastructures.doc_object import DocObject
 
 
 class Topic(DocObject):
@@ -56,7 +56,7 @@ class Topic(DocObject):
 
                 if website.code != 200:
                     return False
-            except urllib2.URLError, e:
+            except urllib2.URLError:
                 # print "Could not validate link: ", url
                 # print e
                 # print "Skipping url"

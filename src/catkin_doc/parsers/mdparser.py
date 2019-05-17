@@ -1,6 +1,5 @@
 """Module to parse an existing mark down documentation"""
 
-import os
 import re
 
 import catkin_doc.datastructures as ds
@@ -12,8 +11,10 @@ from catkin_doc.datastructures.node import Node
 from catkin_doc.datastructures.action import Action, ActionClient
 from catkin_doc.datastructures.service import Service, ServiceClient
 
+
 class DocSection(object):
     """Small helper class representing a hierarchy level inside a doc file"""
+
     def __init__(self, lines, doc_object_type=DocObject, level=0):
         self.lines = lines
         self.level = level
@@ -24,20 +25,19 @@ class DocSection(object):
         self.line_iterator = enumerate(self.lines)
 
         self.parameter_style_types = [Parameter, Publisher, Subscriber, Service,
-                ServiceClient, Action, ActionClient]
+                                      ServiceClient, Action, ActionClient]
 
         # Only needed for some types
         self.type_info = None
         self.default_value = None
 
-        self.title_regex = "^#{" + str(level+1) + "} ?([^#].*)"
+        self.title_regex = "^#{" + str(level + 1) + "} ?([^#].*)"
         if self.package_t in self.parameter_style_types:
             self.title_regex = "^\s*\*\s*\*\*(.*)\*\*\s*(\(default:\s*(.*)\))?(\(\[([^\]]*)\]\(.*\)\))?(\((.*)\))?$"
         self.parse_title()
         self.description = ""
 
-
-        self.sub_regex = "^#{" + str(level+2) + "} ?([^#].*)"
+        self.sub_regex = "^#{" + str(level + 2) + "} ?([^#].*)"
 
         if self.children_t is Node:
             pass
@@ -46,8 +46,11 @@ class DocSection(object):
         self.parse_children()
 
     def parse_title(self):
-        sub_lines = None
-        for line_number, line in self.line_iterator:
+        """
+        Parses the headline of the current section. Note that in case of parameter_style_types this
+        is just an enumeration item.
+        """
+        for _, line in self.line_iterator:
             match = re.search(self.title_regex, line)
             if match:
                 # print("{}Found current level's title: {}".format(self.level*" ", match.group(1)))
@@ -70,18 +73,23 @@ class DocSection(object):
             else:
                 # If we haven't found a name, continue until we do
                 continue
+        return None
 
     def parse_children(self):
+        """
+        Parse the current section's text for children and recursively creates a new DocSection for
+        each.
+        """
         sub_lines = None
-        for line_number, line in self.line_iterator:
+        for _, line in self.line_iterator:
             match = re.search(self.sub_regex, line)
             if match:
                 name = match.group(1)
                 # print("{}Found child: {}".format(self.level*" ", name))
-                sub_lines, end_line = self.get_sub_lines()
+                sub_lines, _ = self.get_sub_lines()
                 if sub_lines:
                     self.children[name] = DocSection(
-                        [line] + sub_lines, doc_object_type=self.children_t, level=self.level+1)
+                        [line] + sub_lines, doc_object_type=self.children_t, level=self.level + 1)
             elif line.strip():
                 if self.description:
                     self.description = "\n".join([self.description, line.strip()])
@@ -89,6 +97,10 @@ class DocSection(object):
                     self.description = line.strip()
 
     def get_sub_lines(self):
+        """
+        Step forward in lines until the next section is found. With this we know which lines belong
+        to the current section.
+        """
         sub_lines = list()
         end_line = len(self.lines) - 1
         for line_number, line in self.line_iterator:
@@ -104,15 +116,22 @@ class DocSection(object):
         return sub_lines, end_line
 
     def to_doc_object(self):
+        """
+        Converts a DocSection into a general DocObject structure
+        """
         if ds.get_identifier_for_type(self.package_t) in ds.KEYS:
             # print("DocObject for {}".format(self.name))
-            if self.package_t in self.parameter_style_types and not self.package_t is Parameter:
-                doc_object = self.package_t(name=self.name, description=self.description, datatype = self.type_info)
+            if self.package_t in self.parameter_style_types and self.package_t is not Parameter:
+                doc_object = self.package_t(
+                    name=self.name, description=self.description, datatype=self.type_info)
             elif self.package_t is Parameter:
-                doc_object = self.package_t(name=self.name, description=self.description, default_value = self.default_value, datatype = self.type_info)
+                doc_object = self.package_t(
+                    name=self.name,
+                    description=self.description,
+                    default_value=self.default_value,
+                    datatype=self.type_info)
             else:
                 doc_object = self.package_t(name=self.name, description=self.description)
-
 
             for child in self.children:
                 doc_object.children[child] = self.children[child].to_doc_object()
@@ -139,6 +158,7 @@ class DocSection(object):
 class MdParser(object):
     """Parser for existing markdown files generated with the catkin doc module
        to fill node representation for update"""
+
     def __init__(self, filename):
         self.doc = None
 
@@ -147,4 +167,4 @@ class MdParser(object):
                 lines = filecontent.readlines()
                 self.doc = DocSection(lines, Package, level=0)
         else:
-            print("This is not a markdown file.")
+            print "This is not a markdown file."

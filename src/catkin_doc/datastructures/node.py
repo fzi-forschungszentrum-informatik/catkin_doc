@@ -10,24 +10,31 @@ class Node(DocObject):
     """Datastructure representing a node"""
 
     def add_parameter(self, parameter):
+        """Adds a parameter as child"""
         self.add_child(ds.KEYS["parameter"], parameter)
 
     def add_subscriber(self, subscriber):
+        """Adds a subscriber as child"""
         self.add_child(ds.KEYS["subscriber"], subscriber)
 
     def add_publisher(self, publisher):
+        """Adds a publisher as child"""
         self.add_child(ds.KEYS["publisher"], publisher)
 
     def add_service(self, service):
+        """Adds a service as child"""
         self.add_child(ds.KEYS["service"], service)
 
     def add_service_client(self, service_client):
+        """Adds a service client as child"""
         self.add_child(ds.KEYS["service_client"], service_client)
 
     def add_action(self, action):
+        """Adds an action as child"""
         self.add_child(ds.KEYS["action"], action)
 
     def add_action_client(self, action_client):
+        """Adds an action_client as child"""
         self.add_child(ds.KEYS["action_client"], action_client)
 
     def to_string(self, level, formatter):

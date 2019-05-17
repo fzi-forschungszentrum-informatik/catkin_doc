@@ -3,7 +3,6 @@
 from __future__ import print_function
 
 import re
-import os
 
 from catkin_doc.datastructures.node import Node
 from catkin_doc.datastructures.parameter import Parameter

@@ -25,7 +25,7 @@ class DocObject(object):
         self.children = dict()
 
     def __eq__(self, other):
-        return self.name == other.name and type(self) == type(other)
+        return self.name == other.name and isinstance(other, type(self))
 
     def __lt__(self, other):
         return self.name.lower() < other.name.lower()
@@ -99,6 +99,8 @@ class DocObject(object):
 
         if self.line_number:
             return self.default_description.format(self.filename, self.line_number, self.code)
+
+        raise RuntimeError
 
     def set_description(self, description):
         """

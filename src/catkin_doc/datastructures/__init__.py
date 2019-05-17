@@ -3,7 +3,6 @@ Factory for creating DocObjects from a string
 """
 
 
-
 KEYS = {"package": "Packages",
         "node": "Nodes",
         "parameter": "Parameters",
@@ -13,7 +12,7 @@ KEYS = {"package": "Packages",
         "subscriber": "Subscribed topics",
         "action": "Actions",
         "action_client": "Action Clients",
-        }
+       }
 
 
 def create_doc_object(key):
@@ -45,17 +44,18 @@ def create_doc_object(key):
     if key == "Action Clients":
         from catkin_doc.datastructures.action import ActionClient
         return ActionClient
-    else:
-        from catkin_doc.datastructures.doc_object import DocObject
-        return DocObject
+    from catkin_doc.datastructures.doc_object import DocObject
+    return DocObject
+
 
 def get_identifier_for_type(typeid):
+    """Get the name key for a given datatype"""
     from catkin_doc.datastructures.node import Node
     from catkin_doc.datastructures.parameter import Parameter
     from catkin_doc.datastructures.package import Package
     from catkin_doc.datastructures.service import Service, ServiceClient
     from catkin_doc.datastructures.action import Action, ActionClient
-    from catkin_doc.datastructures.topic import Topic, Subscriber, Publisher
+    from catkin_doc.datastructures.topic import Subscriber, Publisher
     if typeid == Package:
         return "package"
     elif typeid == Node:
@@ -74,5 +74,4 @@ def get_identifier_for_type(typeid):
         return "action"
     elif typeid == ActionClient:
         return "action_client"
-    else:
-        return "unknown"
+    return "unknown"

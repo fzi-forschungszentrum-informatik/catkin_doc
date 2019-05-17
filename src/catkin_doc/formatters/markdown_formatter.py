@@ -15,8 +15,7 @@ class MarkdownFormatter(BaseFormatter):
     def text(self, text, newline=True):
         if newline:
             return "{}\n".format(text)
-        else:
-            return "{}".format(text)
+        return "{}".format(text)
 
     def new_line(self):
         return "\n"
