@@ -35,8 +35,8 @@ def main():
     markdown_string = main_object.to_string(1, formatter)
 
 
-    # with open("output.md", "w") as f:
-        # f.write(markdown_string)
+    with open("output.md", "w") as f:
+        f.write(markdown_string)
 
     print("Parsing existing documentation")
     mdparser = MdParser(filename="output.md")
