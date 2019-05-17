@@ -109,4 +109,4 @@ class PythonParser(object):
                 line_of_comment -= 1
             else:
                 still_comment = False
-        return comment
+        return comment.strip()
