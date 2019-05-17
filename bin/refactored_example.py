@@ -24,29 +24,37 @@ def main():
     # node_object.add_parameter(parameter2)
     # # main_object.add_node(node_object)
 
+    print("Parsing source code")
     pyparser = PythonParser("test_node.py")
     main_object.add_node(pyparser.node)
 
-    cppparser = CppParser("test_cpp_node",["test.cpp"])
-    main_object.add_node(cppparser.node)
+    # cppparser = CppParser("test_cpp_node",["test.cpp"])
+    # main_object.add_node(cppparser.node)
 
     formatter = MarkdownFormatter()
     markdown_string = main_object.to_string(1, formatter)
 
 
-    with open("output.md", "w") as f:
-        f.write(markdown_string)
+    # with open("output.md", "w") as f:
+        # f.write(markdown_string)
 
+    print("Parsing existing documentation")
     mdparser = MdParser(filename="output.md")
 
-    print("-----")
-    print(mdparser.doc)
-    print("-----")
+    # print("-----")
+    # print(mdparser.doc)
+    # print("-----")
     md_docobj = mdparser.doc.to_doc_object()
 
     markdown_string = md_docobj.to_string(1, formatter)
-    print (markdown_string)
-    with open("output_new.md", "w") as f:
+    # print (markdown_string)
+    # with open("output_new.md", "w") as f:
+        # f.write(markdown_string)
+
+    print("Merging documentations")
+    main_object.merge_with(md_docobj)
+    markdown_string = main_object.to_string(1, formatter)
+    with open("output_merged.md", "w") as f:
         f.write(markdown_string)
 
 

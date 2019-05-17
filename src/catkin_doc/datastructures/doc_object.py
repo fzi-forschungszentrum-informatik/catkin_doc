@@ -1,7 +1,10 @@
 '''
 This class serves as a base class for all documentation objects
 '''
+from __future__ import print_function
+
 import re
+import copy
 
 
 class DocObject(object):
@@ -21,9 +24,8 @@ class DocObject(object):
 
         self.children = dict()
 
-
     def __eq__(self, other):
-        return self.name == other.name
+        return self.name == other.name and type(self) == type(other)
 
     def to_string(self, level, formatter):
         """
@@ -106,3 +108,49 @@ class DocObject(object):
             self.code = match.group(3)
             return ""
         return description
+
+    def merge_with(self, other):
+        """
+        Merges in another DocObject
+
+        The merging has a couple of principles:
+         * If entries in this are empty, but filled in other, use the entry from other
+         * If entries do exist in both and they are not the same, ask the user which one to pick.
+         * If children don't exist in this, but in other, we should ignore those entries.
+         * If children exist in this, but not in other, we should keep them.
+        """
+
+        assert self == other, "For merging, both objects have to have the same name"
+
+        self.merge_field(other, "description")
+
+        for child_key in self.children:
+            if child_key in other.children:
+                for child in self.children[child_key]:
+                    other_child = None
+                    for other_c in other.children[child_key]:
+                        if other_c == child:
+                            other_child = other_c
+                    if other_child:
+                        child.merge_with(other_child)
+
+    def merge_field(self, other, field_name):
+        """
+        Merges a single field from other with self. Applies the general rules from merge_with()
+        """
+        if self.__getattribute__(field_name):
+            # check, whether other's description differs and ask user which one to pick
+            if other.__getattribute__(field_name) != self.__getattribute__(field_name)\
+                    and other.__getattribute__(field_name):
+                print("{}: Description of both versions differ.".format(self.name))
+                answer = raw_input("Please choose the version that should be included into the"
+                                   "resulting documentation by typing <1> or 2. Choices:\n"
+                                   "1: {}\n"
+                                   "2: {}\n"
+                                   "choice: "
+                                   .format(self.__getattribute__(field_name),
+                                           other.__getattribute__(field_name)))
+                if str(answer) == "2":
+                    self.__setattr__(field_name, copy.copy(other.__getattribute__(field_name)))
+        elif other.__getattribute__(field_name):
+            self.__setattr__(field_name, copy.copy(other.__getattribute__(field_name)))
