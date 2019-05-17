@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 """catkin_doc helps creating documentations for catkin packages"""
 
+from catkin_doc.pkghandler import PkgHandler
+
 import catkin_doc.datastructures as ds
 from catkin_doc.datastructures.package import Package
 
-from catkin_doc.parsers.cmakeparser import CmakeParser
+from catkin_doc.parsers.cmakeparser import CMakeParser
 from catkin_doc.parsers.mdparser import MdParser
 from catkin_doc.parsers.pythonparser import PythonParser
 from catkin_doc.parsers.cppparser import CppParser
@@ -17,7 +19,6 @@ import sys
 import xml.etree.ElementTree as ET
 
 
-
 def main():
     """
     This function will search for python and cpp nodes.
@@ -26,33 +27,17 @@ def main():
     than parse each docu file and compare to previously generated nodes
     at last the merged nodes are written to given file format
     """
-    new_filename = "README.md"
-    docu_file = ""
+
     package_path = sys.argv[1]
-    if len(sys.argv) > 2:
-      new_filename = sys.argv[2]
 
-    tree = ET.parse(package_path + '/package.xml').getroot()
-    package_name = tree.find('name').text
-
-    main_object = Package(package_name)
-
-    cpp_handler = CmakeParser(package_path)
-    py_handler = catkin_doc.pkghandler.PkgHandler(package_path)
-
-    docu_list, docu_file = catkin_doc.pkghandler.PkgHandler.find_docu(package_path, docu_file)
-
-
-    for node in cpp_handler.executables:
-        cppparser = CppParser(node,cpp_handler.executables[node])
-        main_object.add_node(cppparser.node)
+    pkg_handler = PkgHandler(package_path)
 
     formatter = MarkdownFormatter()
-    markdown_string = main_object.to_string(1, formatter)
+    markdown_string = pkg_handler.doc.to_string(1, formatter)
 
+    new_filename = os.path.join(package_path, "README.md")
     with open(new_filename, "w") as f:
         f.write(markdown_string)
-
 
 
 if __name__ == "__main__":
