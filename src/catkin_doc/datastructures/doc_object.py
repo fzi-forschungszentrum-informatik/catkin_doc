@@ -55,7 +55,7 @@ class DocObject(object):
         derived from DocObject
         """
         if key in self.children:
-            if type(self.children[key]) != list:
+            if not isinstance(self.children[key], list):
                 raise TypeError("Not a list")
             if child_object not in self.children[key]:
                 self.children[key].append(child_object)
