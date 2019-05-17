@@ -27,7 +27,11 @@ class MarkdownFormatter(BaseFormatter):
     def as_list_item(self, level, formatted_text):
         new_newline = "\n" + level * "  " + "    "
         new_text = new_newline.join(formatted_text.split("\n"))
-        return " ".join([level * "  ", "*", new_text])
+        result_lines = [line.rstrip() for line in new_text.split("\n")]
+        result = " ".join([level * "  ", "*", "\n".join(result_lines)])
+        # print result.split("\n")
+
+        return result
 
     def link(self, url, text=""):
         return markdown_strings.link(text, url)
