@@ -27,6 +27,18 @@ class DocObject(object):
     def __eq__(self, other):
         return self.name == other.name and type(self) == type(other)
 
+    def __lt__(self, other):
+        return self.name.lower() < other.name.lower()
+
+    def __le__(self, other):
+        return self.name.lower() <= other.name.lower()
+
+    def __gt__(self, other):
+        return self.name.lower() > other.name.lower()
+
+    def __ge__(self, other):
+        return self.name.lower() >= other.name.lower()
+
     def to_string(self, level, formatter):
         """
         Formats the object as markdown text
@@ -40,7 +52,7 @@ class DocObject(object):
         out_str = formatter.heading(level, self.name)
         out_str += formatter.text(self.description)
 
-        for key in self.children:
+        for key in sorted(self.children.keys()):
             for item in self.children[key]:
                 out_str += item.to_string(level + 1, formatter)
 
