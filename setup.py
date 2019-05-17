@@ -22,7 +22,7 @@ setup(
     package_dir={"": "src"},
     scripts=["bin/catkin_doc"],
     version=0.1,
-    install_requires=["markdown-strings", "magic"],
+    install_requires=["markdown-strings", "python-magic"],
     # test_suite    = "nose.collector",
     # classifiers   = [
     # "Development Status :: 5 - Production/Stable",
