@@ -28,7 +28,7 @@ def extract_comment(line):
 class CppParser(object):
 
     # regex for parsing node attributes
-    param_regex = 'param(<(?P<type>[^>]*)>)?\(((?P<name>[^,]*), ?([^,)]+), ?(?P<default>[^\)]+))(?P<bind>)\)'
+    param_regex = 'param(<(?P<type>[^>]*)>)?\(((?P<name>[^,]*), ?(([^,)]+),\s*)?(?P<default>[^\)]+))(?P<bind>)\)'
     param_regex_alt1 = 'getParam\(((?P<name>[^,]+), ?[^)]+)(?P<bind>)(?P<type>)(?P<default>)\)'
     param_regex_alt2 = 'param::get\((((?P<name>[^,]+), ?[^)]+))(?P<bind>)(?P<type>)(?P<default>)\)'
     subscriber_regex = 'subscribe(<(?P<type>[^>]*)>)?\(((?P<name>[^,]*), [^)]*)(?P<bind>)(?P<default>)\)'
