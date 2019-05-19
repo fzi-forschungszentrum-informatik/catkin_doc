@@ -1,108 +1,134 @@
 #!/usr/bin/env python
 
 import unittest
-import catkin_doc.parsers.pythonparser
-from catkin_doc.parsers.pythonparser import PythonParser
-import os.path
+import ast
+import tokenize
+from StringIO import StringIO
+# import os.path
 
-from catkin_doc.datastructures.parameter import Parameter
-from catkin_doc.datastructures.service import Service, ServiceClient
-from catkin_doc.datastructures.action import Action, ActionClient
-from catkin_doc.datastructures.topic import Subscriber, Publisher
+# import catkin_doc.datastructures as ds
+import catkin_doc.parsers.pythonparser as pythonparser
+# from catkin_doc.datastructures.parameter import Parameter
+# from catkin_doc.datastructures.service import Service, ServiceClient
+# from catkin_doc.datastructures.action import Action, ActionClient
+# from catkin_doc.datastructures.topic import Subscriber, Publisher
+
 
 class TestPython(unittest.TestCase):
     """Test basic functionality of the python doc module"""
-    def test_extract_params(self):
-        node = PythonParser("setup.py")
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                "self.stop_robot_topic = rospy.get_param('~stop_robot_topic', '/hello')", Parameter, node.param_regex)[0])
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                "self.stop_robot_topic = rospy.get_param('~stop_robot_topic')", Parameter, node.param_regex)[0])
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                'global_name = rospy.get_param("/global_name")', Parameter, node.param_regex)[0])
 
-    def test_extract_params_false(self):
-        node = PythonParser("setup.py")
-        self.assertFalse(
-            catkin_doc.parsers.pythonparser.extract_info( "rospy.loginfo('~stop_robot_topic')", Parameter, node.param_regex)[0])
+    def test_parsing(self):
+        source_code = r'''from std_msgs.msg import String
+from std_srvs.srv import Trigger as Trigg
+self.pub = rospy.Publisher("pub_topic", String, queue_size=1)
+self.pub = rospy.Subscriber("sub_topic", String)
+self.service = rospy.Service('service_name', Trigg, trigger_cb)
+self.param = rospy.get_param('param_name', "default_value")
+param_name = "my_param"
+self.param2 = rospy.get_param(param_name, 1.0)
+self.param3 = rospy.get_param("param_name3")
+self.param4 = rospy.get_param("param_name4", param_name)
+self.param_list = rospy.get_param("param_list", [1, 2, 3])
+self.param_dict = rospy.get_param("~param_dict", {'a': 1, 'b': 2, 'c': 3})
+self.param_tuple = rospy.get_param("~param_tuple", (1, 2)) # illegal
+import actionlib_tutorials
+action_name = "example_action"
+self.action = actionlib.SimpleActionServer(action_name, actionlib_tutorials.msg.FibonacciAction, execute_cb=self.execute_cb, auto_start = False)
+client = actionlib.SimpleActionClient('fibonacci', actionlib_tutorials.msg.FibonacciAction)
+from beginner_tutorials.srv import *
+# AddTwoInts is unknown due to wildcard export
+add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
+'''
 
-    def test_extract_subs(self):
-        parser = PythonParser("setup.py")
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                'rospy.Subscriber("chatter", String, callback)', Subscriber, parser.subscriber_regex)[0])
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                'self.joint_state_sub = rospy.Subscriber("pathloader/reordered_joint_states", JointState, self.joint_status_changed)', Subscriber, parser.subscriber_regex)[0])
+        tree = ast.parse(source_code)
+        tokens = list()
+        for five_tuple in tokenize.generate_tokens(StringIO(source_code).readline):
+            tokens.append(five_tuple)
 
-    def test_extract_subs_false(self):
-        parser = PythonParser("setup.py")
-        self.assertFalse(
-            catkin_doc.parsers.pythonparser.extract_info( "rospy.loginfo('~stop_robot_topic')", Subscriber, parser.subscriber_regex)[0])
+        analyzer = pythonparser.Analyzer(tokens)
+        analyzer.visit(tree)
 
-    def test_extract_pubs(self):
-        parser = PythonParser("setup.py")
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                "pub = rospy.Publisher('chatter', String, queue_size=10)", Publisher, parser.publisher_regex)[0])
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                "pub = rospy.Publisher('chatter', String, queue_size=10, latch=True)", Publisher, parser.publisher_regex)[0])
+        expected = {'Publisher': [{'comment': '',
+                                   'lineno': 3,
+                                   'topic': 'pub_topic',
+                                   'type': 'std_msgs/String'}],
+                    'Subscriber': [{'comment': '',
+                                    'lineno': 4,
+                                    'topic': 'sub_topic',
+                                    'type': 'std_msgs/String'}],
+                    'Service': [{'comment': '',
+                                 'lineno': 5,
+                                 'topic': 'service_name',
+                                 'type': 'std_srvs/Trigger'}],
+                    'get_param': [{'comment': '',
+                                   'lineno': 6,
+                                   'name': 'param_name',
+                                   'default': 'default_value'},
+                                  {'comment': '',
+                                   'lineno': 8,
+                                   'name': "id: param_name",
+                                   'default': 1.0},
+                                  {'comment': '',
+                                   'lineno': 9,
+                                   'name': "param_name3",
+                                   'default': ''},
+                                  {'comment': '',
+                                   'lineno': 10,
+                                   'name': "param_name4",
+                                   'default': 'id: param_name'},
+                                  {'comment': '',
+                                   'lineno': 11,
+                                   'name': "param_list",
+                                   'default': [1, 2, 3]},
+                                  {'comment': '',
+                                   'lineno': 12,
+                                   'name': "~param_dict",
+                                   'default': {'a': 1, 'b': 2, 'c': 3}},
+                                  {'comment': '',
+                                   'lineno': 13,
+                                   'name': "~param_tuple",
+                                   'default': "UNKNOWN_TYPE"}],
+                    'SimpleActionServer': [{'comment': '',
+                                            'lineno': 16,
+                                            'topic': 'id: action_name',
+                                            'type': 'actionlib_tutorials/FibonacciAction'}],
+                    'SimpleActionClient': [{'comment': '',
+                                            'lineno': 17,
+                                            'topic': 'fibonacci',
+                                            'type': 'actionlib_tutorials/FibonacciAction'}],
+                    'ServiceProxy': [{'comment': 'AddTwoInts is unknown due to wildcard export',
+                                      'lineno': 20,
+                                      'topic': 'add_two_ints',
+                                      'type': 'id: AddTwoInts'}],
+                    }
 
-    def test_extract_pubs_false(self):
-        parser = PythonParser("setup.py")
-        self.assertFalse(
-            catkin_doc.parsers.pythonparser.extract_info( "rospy.loginfo('~stop_robot_topic')", Publisher, parser.publisher_regex)[0])
+        self.assertDictContainsSubset(expected, analyzer.stats)
 
-    def test_action_clients(self):
-        parser = PythonParser("setup.py")
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                "self.action_client = actionlib.SimpleActionClient('pathloader', PlayTrajectoryAction)", ActionClient, parser.action_client_regex)[0])
+    def test_comment_search(self):
+        source_code = r'''from std_msgs.msg import String
+# no comment
 
-    def test_action_clients_false(self):
-        parser = PythonParser("setup.py")
-        self.assertFalse(
-            catkin_doc.parsers.pythonparser.extract_info( "rospy.loginfo('~stop_robot_topic')", ActionClient, parser.action_client_regex)[0])
+# Comment for subscriber1
+# Comment for subscriber2
+self.pub = rospy.Subscriber("sub_topic", String)
+'''
 
-    def test_service_clients(self):
-        parser = PythonParser("setup.py")
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                "append_points = rospy.ServiceProxy('pathloader/appendPoints', ChangePath)", ServiceClient, parser.service_client_regex)[0])
+        tree = ast.parse(source_code)
+        tokens = list()
+        for five_tuple in tokenize.generate_tokens(StringIO(source_code).readline):
+            tokens.append(five_tuple)
 
-    def test_service_clients_false(self):
-        parser = PythonParser("setup.py")
-        self.assertFalse(
-            catkin_doc.parsers.pythonparser.extract_info( "rospy.loginfo('~stop_robot_topic')", ServiceClient, parser.service_client_regex)[0])
+        analyzer = pythonparser.Analyzer(tokens)
+        analyzer.visit(tree)
 
-    def test_service(self):
-        parser = PythonParser("setup.py")
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                "s = rospy.Service('add_two_ints', AddTwoInts, handle_add_two_ints)", Service, parser.service_regex)[0])
+        expected = {'Subscriber': [{'comment': 'Comment for subscriber1 Comment for subscriber2',
+                                    'lineno': 6,
+                                    'topic': 'sub_topic',
+                                    'type': 'std_msgs/String'}],
+                    }
 
-    def test_service_false(self):
-        parser = PythonParser("setup.py")
-        self.assertFalse(
-            catkin_doc.parsers.pythonparser.extract_info( "rospy.loginfo('~stop_robot_topic')", Service, parser.service_regex)[0])
+        self.assertDictContainsSubset(expected, analyzer.stats)
 
-    def test_action(self):
-        parser = PythonParser("setup.py")
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_info(
-                "self._as = actionlib.SimpleActionServer(self._action_name, actionlib_tutorials.msg.FibonacciAction, execute_cb=self.execute_cb, auto_start=False)", Action, parser.action_regex)[0])
 
-    def test_action_false(self):
-        parser = PythonParser("setup.py")
-        self.assertFalse(
-            catkin_doc.parsers.pythonparser.extract_info( "rospy.loginfo('~stop_robot_topic')", Action, parser.action_regex)[0])
-
-    def test_comment(self):
-        self.assertTrue(
-            catkin_doc.parsers.pythonparser.extract_comment(
-                "#This should be recognized as comment") == "This should be recognized as comment")
-
+if __name__ == '__main__':
+    unittest.main()
