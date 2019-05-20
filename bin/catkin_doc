@@ -3,20 +3,11 @@
 
 from catkin_doc.pkghandler import PkgHandler
 
-import catkin_doc.datastructures as ds
-from catkin_doc.datastructures.package import Package
-
-from catkin_doc.parsers.cmakeparser import CMakeParser
-from catkin_doc.parsers.mdparser import MdParser
-from catkin_doc.parsers.pythonparser import PythonParser
-from catkin_doc.parsers.cppparser import CppParser
-
 from catkin_doc.formatters.markdown_formatter import MarkdownFormatter
 
 import catkin_doc.pkghandler
 import os
 import sys
-import xml.etree.ElementTree as ET
 
 
 def main():
