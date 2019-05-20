@@ -12,6 +12,8 @@ KEYS = {"package": "Packages",
         "subscriber": "Subscribed topics",
         "action": "Actions",
         "action_client": "Action Clients",
+        "launchfile": "Lauchfiles",
+        "launch_argument": "Arguments"
        }
 
 
@@ -44,6 +46,12 @@ def create_doc_object(key):
     if key == "Action Clients":
         from catkin_doc.datastructures.action import ActionClient
         return ActionClient
+    if key == "Arguments":
+        from catkin_doc.datastructures.parameter import LaunchArgument
+        return LaunchArgument
+    if key == "Launchfiles":
+        from catkin_doc.datastructures.launchfile import LaunchFile
+        return LaunchFile
     from catkin_doc.datastructures.doc_object import DocObject
     return DocObject
 
@@ -51,11 +59,12 @@ def create_doc_object(key):
 def get_identifier_for_type(typeid):
     """Get the name key for a given datatype"""
     from catkin_doc.datastructures.node import Node
-    from catkin_doc.datastructures.parameter import Parameter
+    from catkin_doc.datastructures.parameter import Parameter, LaunchArgument
     from catkin_doc.datastructures.package import Package
     from catkin_doc.datastructures.service import Service, ServiceClient
     from catkin_doc.datastructures.action import Action, ActionClient
     from catkin_doc.datastructures.topic import Subscriber, Publisher
+    from catkin_doc.datastructures.launchfile import LaunchFile
     if typeid == Package:
         return "package"
     elif typeid == Node:
@@ -74,4 +83,8 @@ def get_identifier_for_type(typeid):
         return "action"
     elif typeid == ActionClient:
         return "action_client"
+    elif typeid == LaunchArgument:
+        return "launch_argument"
+    elif typeid == LaunchFile:
+        return "launchfile"
     return "unknown"

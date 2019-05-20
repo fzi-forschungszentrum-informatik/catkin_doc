@@ -33,3 +33,6 @@ class Parameter(DocObject):
         out_str += formatter.text(self.get_description())
 
         return out_str
+
+class LaunchArgument(Parameter):
+    """Datastructure representing argument of a launchfile"""
