@@ -15,12 +15,14 @@ from catkin_doc.parsers.cmakeparser import CMakeParser
 from catkin_doc.parsers.pythonparser import PythonParser
 from catkin_doc.parsers.cppparser import CppParser
 from catkin_doc.parsers.mdparser import MdParser
+from catkin_doc.parsers.launchparser import LaunchParser
 
 
 class PkgHandler(object):
     """
     Toplevel instance for parsing a package and its contents.
     """
+
     def __init__(self, pkg_path):
         self.pkg_path = pkg_path
 
@@ -30,6 +32,13 @@ class PkgHandler(object):
 
         # Create package's DocObject
         self.doc = Package(package_name, description=description)
+
+        # Find and parse launch files
+        self.launch_files = list()
+        self.find_launchfiles(self.pkg_path)
+        for file in self.launch_files:
+            launchparser = LaunchParser(file)
+            self.doc.add_launchfile(launchparser.launchfile)
 
         # Find and parse c++ nodes
         self._cmake_handler = CMakeParser(self.pkg_path)
@@ -72,6 +81,19 @@ class PkgHandler(object):
                     if PkgHandler.check_if_ros_node(pkg_path + "/" + filename):
                         print("Adding node " + filename)
                         self.python_nodes.append(pkg_path + "/" + filename)
+
+    def find_launchfiles(self, pkg_path):
+        """
+        Method which searches through a whole package for launchfiles
+        """
+
+        for filename in os.listdir(pkg_path):
+            if os.path.isdir(pkg_path + "/" + filename):
+                self.find_launchfiles((pkg_path + "/" + filename))
+            elif os.path.isfile(pkg_path + "/" + filename):
+                filetype = magic.from_file(pkg_path + "/" + filename)
+                if ("launch" in filename) and ("XML" in filetype):
+                    self.launch_files.append(pkg_path + "/" + filename)
 
     @staticmethod
     def check_if_ros_node(filename):
