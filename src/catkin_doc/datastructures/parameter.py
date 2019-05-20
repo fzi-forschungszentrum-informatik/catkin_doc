@@ -34,8 +34,10 @@ class Parameter(DocObject):
 
         return out_str
 
+
 class LaunchArgument(Parameter):
     """Datastructure representing argument of a launchfile"""
+
     def __init__(self, name, description="", datatype="", default_value=""):
         super(LaunchArgument, self).__init__(name, description, datatype, default_value)
         self.default_description = "Please add description. See file {}.  \n\tCode: {}"

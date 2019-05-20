@@ -14,7 +14,7 @@ KEYS = {"package": "Packages",
         "action_client": "Action Clients",
         "launchfile": "Launchfiles",
         "launch_argument": "Arguments"
-       }
+        }
 
 
 def create_doc_object(key):

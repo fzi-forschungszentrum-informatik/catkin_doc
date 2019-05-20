@@ -4,6 +4,7 @@ Launchfile datastructure
 import catkin_doc.datastructures as ds
 from catkin_doc.datastructures.doc_object import DocObject
 
+
 class LaunchFile(DocObject):
 
     def add_argument(self, argument):

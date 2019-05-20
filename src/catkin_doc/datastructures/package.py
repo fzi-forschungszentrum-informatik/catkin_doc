@@ -5,6 +5,7 @@ Package datastructure
 import catkin_doc.datastructures as ds
 from catkin_doc.datastructures.doc_object import DocObject
 
+
 class Package(DocObject):
     """Datastructure representing a package"""
 
