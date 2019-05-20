@@ -12,7 +12,7 @@ KEYS = {"package": "Packages",
         "subscriber": "Subscribed topics",
         "action": "Actions",
         "action_client": "Action Clients",
-        "launchfile": "Lauchfiles",
+        "launchfile": "Launchfiles",
         "launch_argument": "Arguments"
        }
 

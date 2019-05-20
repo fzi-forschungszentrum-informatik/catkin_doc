@@ -8,6 +8,7 @@ from catkin_doc.formatters.markdown_formatter import MarkdownFormatter
 from catkin_doc.parsers.pythonparser import PythonParser
 from catkin_doc.parsers.cppparser import CppParser
 from catkin_doc.parsers.mdparser import MdParser
+from catkin_doc.parsers.launchparser import LaunchParser
 
 
 def main():
@@ -23,6 +24,10 @@ def main():
                            # default_value=0.5)
     # node_object.add_parameter(parameter2)
     # # main_object.add_node(node_object)
+
+    print("Parsing launch files")
+    launchparser  = LaunchParser('test.launch')
+    main_object.add_launchfile(launchparser.launchfile)
 
     print("Parsing source code")
     pyparser = PythonParser("test_node.py")
@@ -42,14 +47,14 @@ def main():
     mdparser = MdParser(filename="output.md")
 
     # print("-----")
-    # print(mdparser.doc)
+    #print(mdparser.doc)
     # print("-----")
     md_docobj = mdparser.doc.to_doc_object()
 
     markdown_string = md_docobj.to_string(1, formatter)
     # print (markdown_string)
-    # with open("output_new.md", "w") as f:
-        # f.write(markdown_string)
+    with open("output_new.md", "w") as f:
+         f.write(markdown_string)
 
     print("Merging documentations")
     main_object.merge_with(md_docobj)

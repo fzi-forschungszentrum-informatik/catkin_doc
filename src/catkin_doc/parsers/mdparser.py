@@ -4,12 +4,13 @@ import re
 
 import catkin_doc.datastructures as ds
 from catkin_doc.datastructures.doc_object import DocObject
-from catkin_doc.datastructures.parameter import Parameter
+from catkin_doc.datastructures.parameter import Parameter, LaunchArgument
 from catkin_doc.datastructures.package import Package
 from catkin_doc.datastructures.topic import Publisher, Subscriber
 from catkin_doc.datastructures.node import Node
 from catkin_doc.datastructures.action import Action, ActionClient
 from catkin_doc.datastructures.service import Service, ServiceClient
+from catkin_doc.datastructures.launchfile import LaunchFile
 
 
 class DocSection(object):
@@ -25,7 +26,7 @@ class DocSection(object):
         self.line_iterator = enumerate(self.lines)
 
         self.parameter_style_types = [Parameter, Publisher, Subscriber, Service,
-                                      ServiceClient, Action, ActionClient]
+                                      ServiceClient, Action, ActionClient, LaunchArgument]
 
         # Only needed for some types
         self.type_info = None
@@ -39,7 +40,7 @@ class DocSection(object):
 
         self.sub_regex = "^#{" + str(level + 2) + "} ?([^#].*)"
 
-        if self.children_t is Node:
+        if self.children_t is Node or self.children_t is LaunchFile:
             pass
         elif self.children_t in self.parameter_style_types:
             self.sub_regex = "^\s*\*\s*\*\*(.*)\*\*"

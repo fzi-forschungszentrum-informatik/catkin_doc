@@ -8,6 +8,10 @@ from catkin_doc.datastructures.doc_object import DocObject
 class Package(DocObject):
     """Datastructure representing a package"""
 
+    def add_launchfile(self, launchfile):
+        """Adds a launchfile as child"""
+        self.add_child(ds.KEYS["launchfile"], launchfile)
+
     def add_node(self, node):
         """Adds a node as child"""
         self.add_child(ds.KEYS["node"], node)
@@ -24,6 +28,13 @@ class Package(DocObject):
 
         out_str = formatter.heading(level, self.name) + formatter.new_line()
         out_str += formatter.text(self.description) + formatter.new_line()
+
+        if ds.KEYS["launchfile"] in self.children:
+            out_str += formatter.heading(level + 1, ds.KEYS["launchfile"])
+
+            for item in self.children[ds.KEYS["launchfile"]]:
+                print(item)
+                out_str += item.to_string(level + 2, formatter)
 
         if ds.KEYS["node"] in self.children:
             out_str += formatter.heading(level + 1, ds.KEYS["node"])

@@ -36,3 +36,18 @@ class Parameter(DocObject):
 
 class LaunchArgument(Parameter):
     """Datastructure representing argument of a launchfile"""
+    def __init__(self, name, description="", datatype="", default_value=""):
+        super(LaunchArgument, self).__init__(name, description, datatype, default_value)
+        self.default_description = "Please add description. See file {}.  \n\tCode: {}"
+        self.default_desc_regex = "\s+".join(
+            self.default_description.format("(.*)", "(.*)").split())
+
+    def get_description(self):
+        """Returns the description or a hint if possible"""
+        if self.description:
+            return self.description
+
+        if self.line_number:
+            return self.default_description.format(self.filename, self.code)
+
+        raise RuntimeError
