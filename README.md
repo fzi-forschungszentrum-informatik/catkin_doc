@@ -1,3 +1,6 @@
+[![pipeline status](https://ids-git.fzi.de/mauch/catkin_doc/badges/master/pipeline.svg)](https://ids-git.fzi.de/mauch/catkin_doc/commits/master)
+[![coverage report](https://ids-git.fzi.de/mauch/catkin_doc/badges/master/coverage.svg)](https://ids-git.fzi.de/mauch/catkin_doc/commits/master)
+
 # The catkin\_doc project
 
 Generally this package is for automatically generating documentation for ros nodes. Documentation is
