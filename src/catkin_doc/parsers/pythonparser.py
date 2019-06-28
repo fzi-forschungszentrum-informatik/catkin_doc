@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 
+import ast
+import tokenize
 import re
 
 from catkin_doc.datastructures.node import Node
@@ -11,60 +13,168 @@ from catkin_doc.datastructures.action import Action, ActionClient
 from catkin_doc.datastructures.topic import Subscriber, Publisher
 
 
-def extract_info(line, as_type, regex):
-    """
-    Check whether a line contains a topic item matching the given regex
-    Returns True if line contains a corresponding item and False otherwise.
-    """
-    match = re.search(regex, line)
-    if match:
-        name = str(match.group('name')).replace('\'', '\"')
-        default_value = str(match.group('default')).replace('\'', '\"')
-        datatype = str(match.group('type')).strip('\'').strip('\"')
-        brackets = str(match.group(0))
-        if as_type == Parameter:
-            return as_type(name, default_value=default_value), brackets
-        return as_type(name, datatype=datatype), brackets
-    return None, None
+class Analyzer(ast.NodeVisitor):
+    func_names = ["Publisher", "Subscriber", "Service", "ServiceProxy", "SimpleActionClient",
+                  "Parameter", "SimpleActionServer", "get_param"]
 
+    def __init__(self, tokens):
+        self.stats = {"import": []}
+        for name in self.func_names:
+            self.stats[name] = list()
 
-def extract_comment(line):
-    """
-    Checks whether the line contains an comment
-    If so method returns comment, None otherwise
-    """
-    comment = None
-    match = re.match("( )*(#)(.*)", line)
-    if match:
-        comment = str(match.group(3))
-    return comment
+        self.tokens = tokens
+        self.from_imports = dict()
+
+    def search_comment(self, line_begin):
+        comments = list()
+        for token in reversed(self.tokens):
+            token_line = token[2][0]
+            if token_line >= line_begin:
+                continue
+
+            if token[0] == tokenize.NL and token[4] != "\n":
+                continue
+            if token[0] == tokenize.COMMENT:
+                comments.append(re.sub(r"^\s*#\s*", "", token[1]))
+            else:
+                break
+        return " ".join(reversed(comments))
+
+    @staticmethod
+    def parse_datatype(datatype_string):
+        """
+        Extracts package/Datatype from package.msg/Datatype strings
+        """
+        # print("Datatype: " + datatype_string)
+        try:
+            package, msg_type = datatype_string.split("/")
+        except ValueError:
+            return datatype_string
+        return "/".join([re.sub(r'\.(msg|srv|action)', '', package), msg_type])
+
+    def ast_to_python(self, ast_type):
+        """Tries to convert an ast datatype to a standard python type"""
+        if isinstance(ast_type, ast.Str):
+            python_type = ast_type.s
+        elif isinstance(ast_type, ast.Name):
+            python_type = "id: " + ast_type.id
+        elif isinstance(ast_type, ast.Num):
+            python_type = ast_type.n
+        elif isinstance(ast_type, ast.List):
+            python_type = [self.ast_to_python(x) for x in ast_type.elts]
+        elif isinstance(ast_type, ast.Dict):
+            python_type = dict()
+            for pair in zip(ast_type.keys, ast_type.values):
+                python_type[self.ast_to_python(pair[0])] = self.ast_to_python(pair[1])
+        else:
+            python_type = "UNKNOWN_TYPE"
+
+        return python_type
+
+    def visit_Call(self, node):
+        if isinstance(node.func, ast.Attribute):
+            func_name = node.func.attr
+            if func_name == "get_param":
+                param_name = ""
+                default_value = ""
+                if len(node.args) >= 1:
+                    if isinstance(node.args[0], ast.Str):
+                        param_name = node.args[0].s
+                    elif isinstance(node.args[0], ast.Name):
+                        param_name = "id: " + node.args[0].id
+
+                if len(node.args) >= 2:
+                    default_value = self.ast_to_python(node.args[1])
+
+                # Search for comment
+                comment = self.search_comment(node.lineno)
+                self.stats["get_param"].append(
+                    {"name": param_name,
+                     "lineno": node.lineno,
+                     "default": default_value,
+                     "comment": comment})
+            elif func_name in self.func_names:
+                topic_name = ""
+                msg_type = ""
+                if len(node.args) >= 2:
+                    topic_name = self.ast_to_python(node.args[0])
+
+                    if isinstance(node.args[1], ast.Name):
+                        if node.args[1].id in self.from_imports:
+                            msg_type = self.from_imports[node.args[1].id]
+                        else:
+                            msg_type = "id: " + node.args[1].id
+                    elif isinstance(node.args[1], ast.Attribute):
+                        def parse(candidate):
+                            if isinstance(candidate, ast.Attribute):
+                                return ".".join([parse(candidate.value), candidate.attr])
+                            return candidate.id
+                        msg_type = "/".join([parse(node.args[1].value), node.args[1].attr])
+                        # print(msg_type)
+                    else:
+                        # I currently see no way of getting here
+                        raise RuntimeError("Cannot parse message type type of call {}('{}')"
+                                           .format(func_name, topic_name))
+
+                    # Search for comment
+                    comment = self.search_comment(node.lineno)
+
+                    self.stats[func_name].append(
+                        {"topic": topic_name,
+                         "lineno": node.lineno,
+                         "type": self.parse_datatype(msg_type),
+                         "comment": comment})
+
+    def visit_Import(self, node):
+        for alias in node.names:
+            self.stats["import"].append(alias.name)
+        self.generic_visit(node)
+
+    def visit_ImportFrom(self, node):
+        if isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                asname = alias.name
+                if alias.asname:
+                    asname = alias.asname
+                # print "Imported ID {}: {}/{}".format(asname, node.module, alias.name)
+
+                self.from_imports[asname] = "{}/{}".format(node.module, alias.name)
+
+        self.generic_visit(node)
+
+    # def visit_Assign(self, node):
+        # for target in node.targets:
+        # if isinstance(target, ast.Name):
+        # print "{}: {}".format(target.id, node.value)
+        # elif isinstance(target, ast.Attribute):
+        # print "{}.{}: {}".format(target.value.id, target.attr, node.value)
+        # self.generic_visit(node)
 
 
 class PythonParser(object):
     """Parser for python nodes which fills the node representation"""
-
-    param_regex = "get_param\(\ ?(?P<name>\S+)(,\ ?(?P<default>\S+)?)?(?P<type>)\)"
-    subscriber_regex = "Subscriber\(\ ?(?P<name>\S+)(, ?(?P<type>\S+))(, ?(\S+))(?P<default>)\)"
-    publisher_regex = "Publisher\(\ ?(?P<name>\S+)(, ?(?P<type>\S+))(, ?(\S+))+(?P<default>)\)"
-    action_client_regex = "SimpleActionClient\(\ ?(?P<name>\S+)(, ?(?P<type>\S+))(?P<default>)\)"
-    service_client_regex = "ServiceProxy\(\ ?(?P<name>\S+)(, ?(?P<type>\S+))(?P<default>)\)"
-    service_regex = "Service\(\ ?(?P<name>\S+)(, ?(\S+))(, ?(?P<type>\S+))+(?P<default>)\)"
-    action_regex = "SimpleActionServer\(\ ?(?P<name>\S+)(, ?(?P<type>\S+))(, ?(\S+))+(?P<default>)\)"
 
     def __init__(self, filename):
         node_name = filename.split('/')[-1].strip(".py")
         self.node = Node(node_name)
         self.filename = filename.split('/')[-1]
         #                    regex        as_type    add_function
-        self.parser_fcts = [(self.param_regex, Parameter, self.node.add_parameter),
-                            (self.subscriber_regex, Subscriber, self.node.add_subscriber),
-                            (self.publisher_regex, Publisher, self.node.add_publisher),
-                            (self.action_client_regex, ActionClient, self.node.add_action_client),
-                            (self.service_client_regex, ServiceClient, self.node.add_service_client),
-                            (self.service_regex, Service, self.node.add_service),
-                            (self.action_regex, Action, self.node.add_action)]
+        self.parser_fcts = [("get_param", Parameter, self.node.add_parameter),
+                            ("Subscriber", Subscriber, self.node.add_subscriber),
+                            ("Publisher", Publisher, self.node.add_publisher),
+                            ("SimpleActionClient", ActionClient, self.node.add_action_client),
+                            ("ServiceProxy", ServiceClient, self.node.add_service_client),
+                            ("Service", Service, self.node.add_service),
+                            ("SimpleActionServer", Action, self.node.add_action)]
         with open(filename) as filecontent:
             self.lines = filecontent.readlines()
+        with open(filename, "r") as source:
+            self.tree = ast.parse(source.read())
+        self.tokens = list()
+        with open(filename, "rb") as source:
+            for five_tuple in tokenize.generate_tokens(source.readline):
+                self.tokens.append(five_tuple)
+
         self.parse()
 
     def parse(self):
@@ -72,40 +182,22 @@ class PythonParser(object):
         Parses the lines extracted from file in init method.
         Therefore extract and add all relevant features from python node including comments on them.
         """
-        # TODO: find out if there is a nicer way to handle statements over more lines than concatenating lines
-        linenumber = 0
-        while linenumber < len(self.lines) - 2:
-            line = self.lines[linenumber].lstrip(' ').strip('\n') + ' ' +\
-                self.lines[linenumber + 1].lstrip(' ').strip('\n') + ' ' +\
-                self.lines[linenumber + 2].lstrip(' ')
+        analyzer = Analyzer(self.tokens)
+        analyzer.visit(self.tree)
 
-            for regex, as_type, add in self.parser_fcts:
-                item, brackets = extract_info(line, as_type, regex)
-                if item:
-                    comment = self.search_for_comment(linenumber)
-                    if comment == '':
-                        filename = self.filename.split("/")[-1]
-                        item.filename = filename
-                        item.line_number = linenumber
-                        item.code = brackets
-                    else:
-                        item.description = comment
-                    add(item)
-
-            linenumber += 1
-
-    def search_for_comment(self, linenumber):
-        """
-        searches for commented lines right above the given linenumber until one line without comment is found
-        """
-        still_comment = True
-        comment = ''
-        line_of_comment = linenumber - 1
-        while still_comment:
-            comm_line = extract_comment(self.lines[line_of_comment])
-            if comm_line:
-                comment = comm_line + " " + comment
-                line_of_comment -= 1
-            else:
-                still_comment = False
-        return comment.strip()
+        for rospy_fcn, astype, add_fcn in self.parser_fcts:
+            for item in analyzer.stats[rospy_fcn]:
+                if rospy_fcn == "get_param":
+                    # print (item)
+                    new_item = astype(name=item["name"],
+                                      description=item["comment"],
+                                      default_value=item["default"]
+                                      )
+                else:
+                    new_item = astype(name=item["topic"],
+                                      description=item["comment"],
+                                      datatype=item["type"])
+                new_item.filename = self.filename
+                new_item.line_number = item["lineno"]
+                new_item.code = self.lines[new_item.line_number - 1]
+                add_fcn(new_item)

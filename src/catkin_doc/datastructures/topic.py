@@ -44,7 +44,7 @@ class Topic(DocObject):
         :return: A functioning url or None if no url is found
         :rtype: str
         """
-        types = datatype.split('::')
+        types = datatype.split('/')
         if len(types) >= 2 and not 'fzi' in datatype:
             url = self.type_doc_url_base.format(types[0], types[1])
 

@@ -107,6 +107,7 @@ class CppParser(object):
                 datatype = self.boost_binds[bind]
             if as_type == Parameter:
                 return as_type(name, default_value=default_value), brackets
+            datatype = datatype.replace("::", "/")
             return as_type(name, datatype=datatype), brackets
         return None, None
 
