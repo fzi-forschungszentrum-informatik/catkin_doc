@@ -23,9 +23,12 @@ class Parameter(DocObject):
         :rtype: str
         """
 
-        out_str = formatter.bold(self.name)
+        out_str = "\"" + formatter.bold(self.name) + "\""
         if self.default_value:
-            out_str += formatter.text(" (default: {})".format(self.default_value))
+            default_formatted = self.default_value
+            if isinstance(self.default_value, str):
+                default_formatted = "\"{}\"".format(self.default_value)
+            out_str += formatter.text(" (default: {})".format(default_formatted))
         else:
             out_str += formatter.new_line()
         out_str += formatter.new_line()
