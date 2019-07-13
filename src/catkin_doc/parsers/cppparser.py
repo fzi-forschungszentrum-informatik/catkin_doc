@@ -69,27 +69,57 @@ class CppParser(object):
         """
         Extract and add all relevant features from cpp node including comments on them.
         """
-        # TODO: find out if there is a nicer way to handle statements over more lines than concatenating lines
+        commands_generator = self.get_commands()
+        for line, linenumber in commands_generator:
+            self.extract_boost_bind(line)
+            for regex, as_type, add in self.parser_fcts:
+                item, brackets = self.extract_info(line, as_type, regex)
+                if item:
+                    comment = self.search_for_comment(linenumber)
+                    if comment == '':
+                        filename = filepath.split("/")[-1]
+                        item.filename = filename
+                        item.line_number = linenumber
+                        item.code = brackets
+                    else:
+                        item.description = comment
+                    add(item)
+
+    def get_commands(self):
+        """
+        Yields all command lines from a file. Assumes that only one semicolon is in one line.
+        Also, this will concatenate things such as if, while, etc.
+        """
         linenumber = 0
-        while linenumber < len(self.lines) - 2:
-            if not self.lines[linenumber].lstrip(' ').startswith("//"):
-                line = self.lines[linenumber].lstrip(' ').strip('\n') + \
-                    ' ' + self.lines[linenumber + 1].lstrip(' ').strip('\n') +\
-                    ' ' + self.lines[linenumber + 2].lstrip(' ')
-                self.extract_boost_bind(line)
-                for regex, as_type, add in self.parser_fcts:
-                    item, brackets = self.extract_info(line, as_type, regex)
-                    if item:
-                        comment = self.search_for_comment(linenumber)
-                        if comment == '':
-                            filename = filepath.split("/")[-1]
-                            item.filename = filename
-                            item.line_number = linenumber
-                            item.code = brackets
-                        else:
-                            item.description = comment
-                        add(item)
+        first_line = 1
+        lines = list()
+        while linenumber < len(self.lines):
+            if self.lines[linenumber].lstrip(' ').startswith("//"):
+                if not lines:
+                    first_line = linenumber + 2
+            else:
+                lines.append(self.lines[linenumber].lstrip(' ').strip('\n'))
+                full_line = " ".join(lines)
+                if self.check_command_end(full_line):
+                    yield full_line, first_line
+                    lines = list()
+                    first_line = linenumber + 2
             linenumber += 1
+
+    @staticmethod
+    def check_command_end(string):
+        """Checks whether the given line is a full c++ command (Whether there is a ';' in the line
+        that is not inside a string)"""
+
+        semicolon = string.find(";")
+        if semicolon > 0:
+            num_pre_quotes = string.count("\"", 0, semicolon)
+            if num_pre_quotes % 2 == 1:
+                # TODO: Check if one or more quotes are escaped
+                return False
+            return True
+
+        return False
 
     def extract_info(self, line, as_type, regex):
         """
