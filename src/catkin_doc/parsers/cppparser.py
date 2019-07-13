@@ -131,7 +131,7 @@ class CppParser(object):
             name = str(match.group('name'))
             default_value = str(match.group('default')).replace('\'', '\"')
             datatype = str(match.group('type')).strip('"').replace(",", "")
-            brackets = str(match.group(0))
+            brackets = line
             bind = str(match.group('bind'))
             if bind and bind in self.boost_binds:
                 datatype = self.boost_binds[bind]
