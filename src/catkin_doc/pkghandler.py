@@ -64,7 +64,7 @@ class PkgHandler(object):
         """
 
         tree = ET.parse(self.pkg_path + '/package.xml').getroot()
-        return tree.find(field).text
+        return tree.find(field).text.strip()
 
     def find_python_nodes(self, pkg_path):
         """
