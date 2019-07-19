@@ -76,7 +76,7 @@ class CppParser(object):
         """
         commands_generator = self.get_commands()
         for line, linenumber in commands_generator:
-            print("{}: {}".format(linenumber, line))
+            # print("{}: {}".format(linenumber, line))
             for regex, as_type, add in self.parser_fcts:
                 item, brackets = self.extract_info(line, as_type, regex)
                 if item:
@@ -170,9 +170,9 @@ class CppParser(object):
         """
         Searches for a function that is named as func_name and extracts its signature
         """
-        print("Searching signature of function {}".format(func_name))
+        # print("Searching signature of function {}".format(func_name))
         sig_regex = func_name + "\((?P<signature>[^)]+)\)"
-        print(sig_regex)
+        # print(sig_regex)
 
         full_line = ""
         for line in self.lines:
@@ -181,7 +181,7 @@ class CppParser(object):
                 continue
             match = re.search(sig_regex, full_line)
             if match:
-                print("Found signature: {}".format(match.group("signature")))
+                # print("Found signature: {}".format(match.group("signature")))
                 return match.group("signature")
         return None
 
