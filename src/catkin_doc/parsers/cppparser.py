@@ -32,7 +32,7 @@ class CppParser(object):
     param_regex = 'param(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?, ?(([^,)]+),\s*)?(?P<default>[^\)]+))(?P<bind>)\)'
     param_regex_alt1 = 'getParam\(("?(?P<name>[^",]+)"?, ?[^)]+)(?P<bind>)(?P<type>)(?P<default>)\)'
     param_regex_alt2 = 'param::get\((("?(?P<name>[^",]+)"?, ?[^)]+))(?P<bind>)(?P<type>)(?P<default>)\)'
-    subscriber_regex = 'subscribe(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?, [^)]*)(?P<bind>)(?P<default>)\)'
+    subscriber_regex = 'subscribe(<(?P<type>[^>]*)>\s*)?\(("?(?P<name>[^",]*)"?,\s*\d+,\s*(boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^)]*)))(?P<default>)\)'
     publisher_regex = 'advertise(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?,[^)]*)(?P<bind>)(?P<default>)\)'
     action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((\s*"?(?P<name>[^,)("]*)?"?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)(?P<default>)\)'
     service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",)]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
