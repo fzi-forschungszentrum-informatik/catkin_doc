@@ -1,13 +1,33 @@
 #!/usr/bin/env python
 """catkin_doc helps creating documentations for catkin packages"""
+import os
+import argparse
 
 from catkin_doc.pkghandler import PkgHandler
 
 from catkin_doc.formatters.markdown_formatter import MarkdownFormatter
 
 import catkin_doc.pkghandler
-import os
-import sys
+
+
+def parse_arguments():
+    """Parses command  line arguments"""
+    parser = argparse.ArgumentParser(
+        description="Autogenerate ROS-API documentation for catkin packages")
+    parser.add_argument("package_root",
+                        help="Root folder of the package that should be documented")
+    parser.add_argument("-f", "--formatter",
+                        help="Use Markdown formatter for output. Defaults to 'md'",
+                        type=str,
+                        choices=["md"],
+                        default="md")
+    parser.add_argument("-o", "--output-filename",
+                        help="Output filename for generated documentation. "
+                             "(Relative to package root, defaults to 'README.md')",
+                        default="README.md")
+    options = parser.parse_args()
+
+    return options
 
 
 def main():
@@ -19,16 +39,18 @@ def main():
     at last the merged nodes are written to given file format
     """
 
-    package_path = sys.argv[1]
+    options = parse_arguments()
 
-    pkg_handler = PkgHandler(package_path)
+    pkg_handler = PkgHandler(options.package_root)
 
-    formatter = MarkdownFormatter()
-    markdown_string = pkg_handler.doc.to_string(1, formatter)
+    formatter = None
+    if options.formatter == "md":
+        formatter = MarkdownFormatter()
+    out_string = pkg_handler.doc.to_string(1, formatter)
 
-    new_filename = os.path.join(package_path, "README.md")
-    with open(new_filename, "w") as f:
-        f.write(markdown_string)
+    new_filename = os.path.join(options.package_root, options.output_filename)
+    with open(new_filename, "w") as doc_out:
+        doc_out.write(out_string)
 
 
 if __name__ == "__main__":
