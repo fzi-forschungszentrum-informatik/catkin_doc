@@ -24,6 +24,9 @@ class LaunchFile(DocObject):
         out_str = formatter.heading(level, self.name) + formatter.new_line()
         out_str += formatter.text(self.description) + formatter.new_line()
 
+        if not self.description and not self.children:
+            out_str += formatter.text("No arguments for this launch file found. You can add a"
+                                      " description by hand, if you like.")
         for key in sorted(ds.KEYS.values()):
             if key in self.children:
                 out_str += formatter.heading(level + 1, key)

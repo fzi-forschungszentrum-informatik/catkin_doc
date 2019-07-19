@@ -43,7 +43,7 @@ class LaunchArgument(Parameter):
 
     def __init__(self, name, description="", datatype="", default_value=""):
         super(LaunchArgument, self).__init__(name, description, datatype, default_value)
-        self.default_description = "Please add description. See file {}.  \n\tCode: {}"
+        self.default_description = "Please add description. See file \"{}\"."
         self.default_desc_regex = "\s+".join(
             self.default_description.format("(.*)", "(.*)").split())
 

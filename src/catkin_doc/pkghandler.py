@@ -24,8 +24,9 @@ class PkgHandler(object):
     """
 
     def __init__(self, pkg_path):
-        self.pkg_path = pkg_path
+        self.pkg_path = os.path.abspath(pkg_path)
 
+        print (self.pkg_path)
         # Get package information from package.xml
         package_name = self.parse_package_xml("name")
         description = self.parse_package_xml("description")
@@ -37,7 +38,7 @@ class PkgHandler(object):
         self.launch_files = list()
         self.find_launchfiles(self.pkg_path)
         for file in self.launch_files:
-            launchparser = LaunchParser(file)
+            launchparser = LaunchParser(file, self.pkg_path)
             self.doc.add_launchfile(launchparser.launchfile)
 
         # Find and parse c++ nodes
