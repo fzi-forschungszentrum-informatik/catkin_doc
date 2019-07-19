@@ -17,9 +17,9 @@ def extract_comment(line):
     If so method returns comment, None otherwise
     """
     comment = None
-    match = re.match("( )*(//)(.*)", line)
+    match = re.match("( )*(\/\/)(.*)", line)
     if match:
-        comment = str(match.group(3))
+        comment = str(match.group(3)).strip()
     return comment
 
 
@@ -75,13 +75,12 @@ class CppParser(object):
             for regex, as_type, add in self.parser_fcts:
                 item, brackets = self.extract_info(line, as_type, regex)
                 if item:
+                    filename = filepath.split("/")[-1]
+                    item.filename = filename
+                    item.line_number = linenumber
+                    item.code = brackets
                     comment = self.search_for_comment(linenumber)
-                    if comment == '':
-                        filename = filepath.split("/")[-1]
-                        item.filename = filename
-                        item.line_number = linenumber
-                        item.code = brackets
-                    else:
+                    if comment:
                         item.description = comment
                     add(item)
 
@@ -91,32 +90,33 @@ class CppParser(object):
         Also, this will concatenate things such as if, while, etc.
         """
         linenumber = 0
-        first_line = 1
+        first_line = None
         lines = list()
         while linenumber < len(self.lines):
-            if self.lines[linenumber].lstrip(' ').startswith("//"):
-                if not lines:
-                    first_line = linenumber + 2
-            else:
+            if not self.lines[linenumber].lstrip(' ').strip('\n'):
+                linenumber += 1
+                continue
+
+            if not self.lines[linenumber].lstrip(' ').startswith("//"):
+                if not first_line:
+                    first_line = linenumber + 1
                 lines.append(self.lines[linenumber].lstrip(' ').strip('\n'))
                 full_line = " ".join(lines)
                 if self.check_command_end(full_line):
                     yield full_line, first_line
                     lines = list()
-                    first_line = linenumber + 2
+                    first_line = None
             linenumber += 1
 
-    @staticmethod
-    def check_command_end(string):
+    def check_command_end(self, string, start_search=0):
         """Checks whether the given line is a full c++ command (Whether there is a ';' in the line
         that is not inside a string)"""
 
-        semicolon = string.find(";")
+        semicolon = string.find(";", start_search)
         if semicolon > 0:
             num_pre_quotes = string.count("\"", 0, semicolon)
             if num_pre_quotes % 2 == 1:
-                # TODO: Check if one or more quotes are escaped
-                return False
+                return self.check_command_end(string, semicolon+1)
             return True
 
         return False
@@ -161,7 +161,9 @@ class CppParser(object):
         """
         still_comment = True
         comment = ''
-        line_of_comment = linenumber - 1
+        # We need to start one line before the starting line and
+        # subtract one more for the indexing
+        line_of_comment = linenumber - 2
         while still_comment:
             comm_line = extract_comment(self.lines[line_of_comment])
             if comm_line:
