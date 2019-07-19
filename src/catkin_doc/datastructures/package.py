@@ -34,7 +34,6 @@ class Package(DocObject):
             out_str += formatter.heading(level + 1, ds.KEYS["launchfile"])
 
             for item in self.children[ds.KEYS["launchfile"]]:
-                print(item)
                 out_str += item.to_string(level + 2, formatter)
 
         if ds.KEYS["node"] in self.children:
