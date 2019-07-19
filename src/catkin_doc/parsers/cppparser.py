@@ -17,9 +17,9 @@ def extract_comment(line):
     If so method returns comment, None otherwise
     """
     comment = None
-    match = re.match("( )*(//)(.*)", line)
+    match = re.match("( )*(\/\/)(.*)", line)
     if match:
-        comment = str(match.group(3))
+        comment = str(match.group(3)).strip()
     return comment
 
 
@@ -29,16 +29,16 @@ class CppParser(object):
     """
 
     # regex for parsing node attributes
-    param_regex = 'param(<(?P<type>[^>]*)>)?\(((?P<name>[^,]*), ?(([^,)]+),\s*)?(?P<default>[^\)]+))(?P<bind>)\)'
-    param_regex_alt1 = 'getParam\(((?P<name>[^,]+), ?[^)]+)(?P<bind>)(?P<type>)(?P<default>)\)'
-    param_regex_alt2 = 'param::get\((((?P<name>[^,]+), ?[^)]+))(?P<bind>)(?P<type>)(?P<default>)\)'
-    subscriber_regex = 'subscribe(<(?P<type>[^>]*)>)?\(((?P<name>[^,]*), [^)]*)(?P<bind>)(?P<default>)\)'
-    publisher_regex = 'advertise(<(?P<type>[^>]*)>)?\(((?P<name>[^,]*),[^)]*)(?P<bind>)(?P<default>)\)'
-    action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((\s*(?P<name>[^,^)^(]*)?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)(?P<default>)\)'
-    service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\(((?P<name>[^,)]*)[^)]*)(?P<bind>)(?P<default>)\)'
-    service_client_regex_alt = 'service::call\(((?P<name>[^,)]*), (?P<type>[^,)]+))(?P<bind>)(?P<default>)\)'
-    action_regex = 'actionlib::SimpleActionServer<(?P<type>[^>]*)>\((\s*(?P<name>[^,]*, ?([^,]*))[^)]*)(?P<bind>)(?P<default>)\)'
-    service_regex = 'advertiseService(<(?P<type>[^>]*)>)?\((\s?(?P<name>[^,]*),\s?(?P<bind>[^\(]*)[^)]*)(?P<default>)\)'
+    param_regex = 'param(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?, ?(([^,)]+),\s*)?"?(?P<default>[^"\)]+)"?)(?P<bind>)\)'
+    param_regex_alt1 = 'getParam\(("?(?P<name>[^",]+)"?, ?[^)]+)(?P<bind>)(?P<type>)(?P<default>)\)'
+    param_regex_alt2 = 'param::get\((("?(?P<name>[^",]+)"?, ?[^)]+))(?P<bind>)(?P<type>)(?P<default>)\)'
+    subscriber_regex = 'subscribe(<(?P<type>[^>]*)>\s*)?\(("?(?P<name>[^",]*)"?,\s*\d+,\s*(boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^)]*)))(?P<default>)\)'
+    publisher_regex = 'advertise(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?,[^)]*)(?P<bind>)(?P<default>)\)'
+    action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((\s*"?(?P<name>[^,)("]*)?"?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)(?P<default>)\)'
+    service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",)]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
+    service_client_regex_alt = 'service::call\(("?(?P<name>[^",)]*)"?, (?P<type>[^,)]+))(?P<bind>)(?P<default>)\)'
+    action_regex = 'actionlib::SimpleActionServer<(?P<type>[^>]*)>\("?(\s*(?P<name>[^",]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
+    service_regex = 'advertiseService(<(?P<type>[^,>]+)::Request.*>)?\((\s?"?(?P<name>[^",]*)"?,\s?(?P<bind>[^\(]*)[^)]*)(?P<default>)\)'
 
     def __init__(self, node_name, files):
         self.node = Node(node_name)
@@ -69,27 +69,57 @@ class CppParser(object):
         """
         Extract and add all relevant features from cpp node including comments on them.
         """
-        # TODO: find out if there is a nicer way to handle statements over more lines than concatenating lines
+        commands_generator = self.get_commands()
+        for line, linenumber in commands_generator:
+            self.extract_boost_bind(line)
+            for regex, as_type, add in self.parser_fcts:
+                item, brackets = self.extract_info(line, as_type, regex)
+                if item:
+                    filename = filepath.split("/")[-1]
+                    item.filename = filename
+                    item.line_number = linenumber
+                    item.code = brackets
+                    comment = self.search_for_comment(linenumber)
+                    if comment:
+                        item.description = comment
+                    add(item)
+
+    def get_commands(self):
+        """
+        Yields all command lines from a file. Assumes that only one semicolon is in one line.
+        Also, this will concatenate things such as if, while, etc.
+        """
         linenumber = 0
-        while linenumber < len(self.lines) - 2:
+        first_line = None
+        lines = list()
+        while linenumber < len(self.lines):
+            if not self.lines[linenumber].lstrip(' ').strip('\n'):
+                linenumber += 1
+                continue
+
             if not self.lines[linenumber].lstrip(' ').startswith("//"):
-                line = self.lines[linenumber].lstrip(' ').strip('\n') + \
-                    ' ' + self.lines[linenumber + 1].lstrip(' ').strip('\n') +\
-                    ' ' + self.lines[linenumber + 2].lstrip(' ')
-                self.extract_boost_bind(line)
-                for regex, as_type, add in self.parser_fcts:
-                    item, brackets = self.extract_info(line, as_type, regex)
-                    if item:
-                        comment = self.search_for_comment(linenumber)
-                        if comment == '':
-                            filename = filepath.split("/")[-1]
-                            item.filename = filename
-                            item.line_number = linenumber
-                            item.code = brackets
-                        else:
-                            item.description = comment
-                        add(item)
+                if not first_line:
+                    first_line = linenumber + 1
+                lines.append(self.lines[linenumber].lstrip(' ').strip('\n'))
+                full_line = " ".join(lines)
+                if self.check_command_end(full_line):
+                    yield full_line, first_line
+                    lines = list()
+                    first_line = None
             linenumber += 1
+
+    def check_command_end(self, string, start_search=0):
+        """Checks whether the given line is a full c++ command (Whether there is a ';' in the line
+        that is not inside a string)"""
+
+        semicolon = string.find(";", start_search)
+        if semicolon > 0:
+            num_pre_quotes = string.count("\"", 0, semicolon)
+            if num_pre_quotes % 2 == 1:
+                return self.check_command_end(string, semicolon+1)
+            return True
+
+        return False
 
     def extract_info(self, line, as_type, regex):
         """
@@ -101,12 +131,12 @@ class CppParser(object):
             name = str(match.group('name'))
             default_value = str(match.group('default')).replace('\'', '\"')
             datatype = str(match.group('type')).strip('"').replace(",", "")
-            brackets = str(match.group(0))
+            brackets = line
             bind = str(match.group('bind'))
             if bind and bind in self.boost_binds:
                 datatype = self.boost_binds[bind]
             if as_type == Parameter:
-                return as_type(name, default_value=default_value), brackets
+                return as_type(name, default_value=default_value, datatype=datatype), brackets
             datatype = datatype.replace("::", "/")
             return as_type(name, datatype=datatype), brackets
         return None, None
@@ -131,7 +161,9 @@ class CppParser(object):
         """
         still_comment = True
         comment = ''
-        line_of_comment = linenumber - 1
+        # We need to start one line before the starting line and
+        # subtract one more for the indexing
+        line_of_comment = linenumber - 2
         while still_comment:
             comm_line = extract_comment(self.lines[line_of_comment])
             if comm_line:
