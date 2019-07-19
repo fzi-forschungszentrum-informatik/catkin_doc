@@ -11,7 +11,7 @@ class DocObject(object):
     """Base class for a doc object"""
 
     def __init__(self, name, description=""):
-        self.default_description = "Please add description. See {} line number: {}\n\tCode: {}"
+        self.default_description = "Please add description. See {} line number: {}\n\n\t{}"
         self.default_desc_regex = "\s+".join(
             self.default_description.format("(.*)", "(\d+)", "(.*)").split())
 
