@@ -22,6 +22,12 @@ def extract_comment(line):
         comment = str(match.group(3)).strip()
     return comment
 
+def rchop(thestring, ending):
+    """Removes ending from end if thestring if thestring ens in ending"""
+    if thestring.endswith(ending):
+        return thestring[:-len(ending)]
+    return thestring
+
 
 class CppParser(object):
     """
@@ -32,13 +38,13 @@ class CppParser(object):
     param_regex = 'param(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?, ?(([^,)]+),\s*)?"?(?P<default>[^"\)]+)"?)(?P<bind>)\)'
     param_regex_alt1 = 'getParam\(("?(?P<name>[^",]+)"?, ?[^)]+)(?P<bind>)(?P<type>)(?P<default>)\)'
     param_regex_alt2 = 'param::get\((("?(?P<name>[^",]+)"?, ?[^)]+))(?P<bind>)(?P<type>)(?P<default>)\)'
-    subscriber_regex = 'subscribe(<(?P<type>[^>]*)>\s*)?\(("?(?P<name>[^",]*)"?,\s*\d+,\s*(boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^)]*)))(?P<default>)\)'
+    subscriber_regex = 'subscribe(<(?P<type>[^>]*)>\s*)?\(("?(?P<name>[^",]*)"?,\s*\d+,\s*(.*boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^,)]*)(,.*)*))(?P<default>)\)'
     publisher_regex = 'advertise(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?,[^)]*)(?P<bind>)(?P<default>)\)'
     action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((\s*"?(?P<name>[^,)("]*)?"?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)(?P<default>)\)'
     service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",)]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
     service_client_regex_alt = 'service::call\(("?(?P<name>[^",)]*)"?, (?P<type>[^,)]+))(?P<bind>)(?P<default>)\)'
     action_regex = 'actionlib::SimpleActionServer<(?P<type>[^>]*)>\("?(\s*(?P<name>[^",]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
-    service_regex = 'advertiseService(<(?P<type>[^,>]+)::Request.*>)?\((\s?"?(?P<name>[^",]*)"?,\s?(?P<bind>[^\(]*)[^)]*)(?P<default>)\)'
+    service_regex = 'advertiseService(<(?P<type>[^,>]+)::Request.*>)?\((\s?"?(?P<name>[^",]*)"?,\s*(.*boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^,)]*)(,.*)*))(?P<default>)\)'
 
     def __init__(self, node_name, files):
         self.node = Node(node_name)
@@ -57,7 +63,6 @@ class CppParser(object):
             (self.action_regex, Action, self.node.add_action)
         ]
         self.lines = None
-        self.boost_binds = dict()
 
         # Need to parse all files belonging to node
         for filepath in self.files:
@@ -71,7 +76,7 @@ class CppParser(object):
         """
         commands_generator = self.get_commands()
         for line, linenumber in commands_generator:
-            self.extract_boost_bind(line)
+            print("{}: {}".format(linenumber, line))
             for regex, as_type, add in self.parser_fcts:
                 item, brackets = self.extract_info(line, as_type, regex)
                 if item:
@@ -100,6 +105,7 @@ class CppParser(object):
             if not self.lines[linenumber].lstrip(' ').startswith("//"):
                 if not first_line:
                     first_line = linenumber + 1
+                    continue
                 lines.append(self.lines[linenumber].lstrip(' ').strip('\n'))
                 full_line = " ".join(lines)
                 if self.check_command_end(full_line):
@@ -121,6 +127,7 @@ class CppParser(object):
 
         return False
 
+
     def extract_info(self, line, as_type, regex):
         """
         Check whether a line contains a topic item matching the given regex
@@ -131,28 +138,52 @@ class CppParser(object):
             name = str(match.group('name'))
             default_value = str(match.group('default')).replace('\'', '\"')
             datatype = str(match.group('type')).strip('"').replace(",", "")
+            if datatype == "None":
+                if "callback" in match.groupdict().keys():
+                    if match.group("callback"):
+                        signature  = self.get_func_signature(match.group('callback').lstrip("&"))
+                        if signature:
+                            datatype = signature.split(" ")[0]
+                            datatype = datatype.strip("&")
+                            datatype = rchop(datatype, "Ptr")
+                            datatype = rchop(datatype, "Const")
+                            datatype = rchop(datatype, "Request")
+                            datatype = datatype.strip(":")
+                if "bind" in match.groupdict().keys() and match.group("bind"):
+                    func_call = match.group("bind").split(",")[0]
+                    signature = self.get_func_signature(func_call.lstrip("&"))
+                    if signature:
+                        datatype = signature.split(" ")[0]
+                        datatype = datatype.strip("&")
+                        datatype = rchop(datatype, "Ptr")
+                        datatype = rchop(datatype, "Const")
+                        datatype = rchop(datatype, "Request")
+                        datatype = datatype.strip(":")
             brackets = line
-            bind = str(match.group('bind'))
-            if bind and bind in self.boost_binds:
-                datatype = self.boost_binds[bind]
             if as_type == Parameter:
                 return as_type(name, default_value=default_value, datatype=datatype), brackets
             datatype = datatype.replace("::", "/")
             return as_type(name, datatype=datatype), brackets
         return None, None
 
-    def extract_boost_bind(self, line):
+    def get_func_signature(self, func_name):
         """
-        Function to parse boost bindings and saves type of binded functions input.
+        Searches for a function that is named as func_name and extracts its signature
         """
-        match = re.search(
-            'boost::function<bool\((\S+)::Request&,\s?\S+::Response&\)>\s?(\S+);', line)
-        if match:
-            service_type = str(match.group(1))
-            bind_fct = str(match.group(2))
-            self.boost_binds[bind_fct] = service_type
-            return True
-        return False
+        print("Searching signature of function {}".format(func_name))
+        sig_regex = func_name + "\((?P<signature>[^)]+)\)"
+        print(sig_regex)
+
+        full_line = ""
+        for line in self.lines:
+            if not self.check_command_end(line):
+                full_line += line
+                continue
+            match = re.search(sig_regex, full_line)
+            if match:
+                print("Found signature: {}".format(match.group("signature")))
+                return match.group("signature")
+        return None
 
     def search_for_comment(self, linenumber):
         """

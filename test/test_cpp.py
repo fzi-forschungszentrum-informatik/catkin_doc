@@ -205,6 +205,10 @@ class TestCpp(unittest.TestCase):
     def test_parsing(self):
         """Tests whole parsing of a file"""
         source_code = r'''// This is some initial comment
+void chatterCallback(std_msgs::StringConstPtr& msg) {}
+bool PathLoader::newTrajectory(fzi_manipulation_msgs::NewTrajectory::Request& req,
+                               fzi_manipulation_msgs::NewTrajectory::Response& res) {}
+ros::init();
 
 // The publisher
 chatter_pub = n.advertise<std_msgs::String>("chatter", 1000);
@@ -213,10 +217,6 @@ chatter_pub = n.advertise<std_msgs::String>("chatter", 1000);
 n.subscribe("chat;ter", 1000, chatterCallback);
 
 ros::Subscriber sub2=n.subscribe<std_msgs::String> ("chatter",1, boost::bind(&stringcallback, _1, &test));
-
-typedef boost::function<bool(fzi_manipulation_msgs::NewTrajectory::Request&,
-                             fzi_manipulation_msgs::NewTrajectory::Response&)>
-    f_NewTrajectory;
 
 m_private_nh.advertiseService( "new_trajectory",
 f_NewTrajectory(boost::bind(&PathLoader::newTrajectory, this, _1, _2)) );
@@ -235,19 +235,20 @@ f_NewTrajectory(boost::bind(&PathLoader::newTrajectory, this, _1, _2)) );
         self.assertEqual(node.name, "example_node")
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].name, "chatter")
-        self.assertEqual(node.children[ds.KEYS["publisher"]][0].line_number, 4)
+        self.assertEqual(node.children[ds.KEYS["publisher"]][0].line_number, 8)
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].datatype, "std_msgs/String")
         self.assertEqual(node.children[ds.KEYS["publisher"]]
-                         [0].code, data[3].lstrip(' ').strip("\n"))
+                         [0].code, data[7].lstrip(' ').strip("\n"))
 
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].name, "chat;ter")
-        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].line_number, 7)
-        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].code, data[6].strip("\n"))
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].line_number, 11)
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].datatype, "std_msgs/String")
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].code, data[10].strip("\n"))
         self.assertEqual(node.children[ds.KEYS["subscriber"]]
-                         [0].description, data[5].lstrip("// ").strip("\n"))
+                         [0].description, data[9].lstrip("// ").strip("\n"))
 
         self.assertEqual(node.children[ds.KEYS["subscriber"]][1].name, "chatter")
-        self.assertEqual(node.children[ds.KEYS["subscriber"]][1].line_number, 9)
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][1].line_number, 13)
 
         self.assertEqual(node.children[ds.KEYS["service"]][0].name, "new_trajectory")
         self.assertEqual(node.children[ds.KEYS["service"]][0].line_number, 15)
