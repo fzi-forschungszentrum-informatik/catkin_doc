@@ -64,19 +64,20 @@ class CppParser(object):
     template_regex = '(<\s*(?P<type>[^>\s]*)\s*>)?'
     name_regex = '"?(?P<name>[^",]*)"?'
     queue_regex = '\d+'
-    callback_regex = '(?P<callback>[^,)]*)'
-    remainder_regex = '(,.*)*'
+    callback_regex = '(?P<callback>([^,()]+)(\([^()]*\))?([^,)])*)'
+    remainder_regex = '(,\s*(?P<remainder>.+))?'
 
+    # Based on http://wiki.ros.org/roscpp/Overview/Publishers%20and%20Subscribers#Subscriber_Options
     subscriber_regex = "\s*".join(['subscribe', template_regex, '\(', name_regex,
                                    ',', queue_regex, ',', callback_regex, remainder_regex, '\)'])
+
+    publisher_regex = "\s*".join(['advertise', template_regex, '\(', name_regex,
+                                  ',', queue_regex, remainder_regex, '\)'])
 
     # regex for parsing node attributes
     param_regex = 'param(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?, ?(([^,)]+),\s*)?"?(?P<default>[^"\)]+)"?)(?P<bind>)\)'
     param_regex_alt1 = 'getParam\(("?(?P<name>[^",]+)"?, ?[^)]+)(?P<bind>)(?P<type>)(?P<default>)\)'
     param_regex_alt2 = 'param::get\((("?(?P<name>[^",]+)"?, ?[^)]+))(?P<bind>)(?P<type>)(?P<default>)\)'
-    # Based on http://wiki.ros.org/roscpp/Overview/Publishers%20and%20Subscribers#Subscriber_Options
-    # subscriber_regex = 'subscribe(<(?P<type>[^>]*)>\s*)?\(("?(?P<name>[^",]*)"?,\s*\d+,\s*(.*boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^,)]*)(,.*)*))(?P<default>)\)'
-    publisher_regex = 'advertise(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?,[^)]*)(?P<bind>)(?P<default>)\)'
     action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((\s*"?(?P<name>[^,)("]*)?"?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)(?P<default>)\)'
     service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",)]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
     service_client_regex_alt = 'service::call\(("?(?P<name>[^",)]*)"?, (?P<type>[^,)]+))(?P<bind>)(?P<default>)\)'
