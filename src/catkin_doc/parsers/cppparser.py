@@ -61,11 +61,21 @@ class CppParser(object):
     Parses cpp ROS nodes
     """
 
+    template_regex = '(<\s*(?P<type>[^>\s]*)\s*>)?'
+    name_regex = '"?(?P<name>[^",]*)"?'
+    queue_regex = '\d+'
+    callback_regex = '(?P<callback>[^,)]*)'
+    remainder_regex = '(,.*)*'
+
+    subscriber_regex = "\s*".join(['subscribe', template_regex, '\(', name_regex,
+                                   ',', queue_regex, ',', callback_regex, remainder_regex, '\)'])
+
     # regex for parsing node attributes
     param_regex = 'param(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?, ?(([^,)]+),\s*)?"?(?P<default>[^"\)]+)"?)(?P<bind>)\)'
     param_regex_alt1 = 'getParam\(("?(?P<name>[^",]+)"?, ?[^)]+)(?P<bind>)(?P<type>)(?P<default>)\)'
     param_regex_alt2 = 'param::get\((("?(?P<name>[^",]+)"?, ?[^)]+))(?P<bind>)(?P<type>)(?P<default>)\)'
-    subscriber_regex = 'subscribe(<(?P<type>[^>]*)>\s*)?\(("?(?P<name>[^",]*)"?,\s*\d+,\s*(.*boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^,)]*)(,.*)*))(?P<default>)\)'
+    # Based on http://wiki.ros.org/roscpp/Overview/Publishers%20and%20Subscribers#Subscriber_Options
+    # subscriber_regex = 'subscribe(<(?P<type>[^>]*)>\s*)?\(("?(?P<name>[^",]*)"?,\s*\d+,\s*(.*boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^,)]*)(,.*)*))(?P<default>)\)'
     publisher_regex = 'advertise(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?,[^)]*)(?P<bind>)(?P<default>)\)'
     action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((\s*"?(?P<name>[^,)("]*)?"?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)(?P<default>)\)'
     service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",)]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
@@ -163,12 +173,24 @@ class CppParser(object):
         match = re.search(regex, line)
         if match:
             name = str(match.group('name'))
-            default_value = str(match.group('default')).replace('\'', '\"')
-            datatype = str(match.group('type')).strip('"').replace(",", "")
-            if datatype == "None":
-                if "callback" in match.groupdict().keys():
-                    if match.group("callback"):
-                        signature  = self.get_func_signature(match.group('callback').lstrip("&"))
+            if 'default' in match.groupdict().keys():
+                default_value = str(match.group('default')).replace('\'', '\"')
+            if 'type' in match.groupdict().keys():
+                datatype = str(match.group('type')).strip('"').replace(",", "")
+                if datatype == "None":
+                    if "callback" in match.groupdict().keys():
+                        if match.group("callback"):
+                            signature  = self.get_func_signature(match.group('callback').lstrip("&"))
+                            if signature:
+                                datatype = signature.split(" ")[0]
+                                datatype = datatype.strip("&")
+                                datatype = rchop(datatype, "Ptr")
+                                datatype = rchop(datatype, "Const")
+                                datatype = rchop(datatype, "Request")
+                                datatype = datatype.strip(":")
+                    if "bind" in match.groupdict().keys() and match.group("bind"):
+                        func_call = match.group("bind").split(",")[0]
+                        signature = self.get_func_signature(func_call.lstrip("&"))
                         if signature:
                             datatype = signature.split(" ")[0]
                             datatype = datatype.strip("&")
@@ -176,16 +198,6 @@ class CppParser(object):
                             datatype = rchop(datatype, "Const")
                             datatype = rchop(datatype, "Request")
                             datatype = datatype.strip(":")
-                if "bind" in match.groupdict().keys() and match.group("bind"):
-                    func_call = match.group("bind").split(",")[0]
-                    signature = self.get_func_signature(func_call.lstrip("&"))
-                    if signature:
-                        datatype = signature.split(" ")[0]
-                        datatype = datatype.strip("&")
-                        datatype = rchop(datatype, "Ptr")
-                        datatype = rchop(datatype, "Const")
-                        datatype = rchop(datatype, "Request")
-                        datatype = datatype.strip(":")
             brackets = line
             if as_type == Parameter:
                 return as_type(name, default_value=default_value, datatype=datatype), brackets
