@@ -44,7 +44,7 @@ def extract_comment(line):
     If so method returns comment, None otherwise
     """
     comment = None
-    match = re.match("( )*(\/\/)(.*)", line)
+    match = re.match(r"( )*(\/\/)(.*)", line)
     if match:
         comment = str(match.group(3)).strip()
     return comment
@@ -221,7 +221,7 @@ class CppParser(object):
         Searches for a function that is named as func_name and extracts its signature
         """
         # print("Searching signature of function {}".format(func_name))
-        sig_regex = func_name + "\((?P<signature>[^)]+)\)"
+        sig_regex = func_name + r"\((?P<signature>[^)]+)\)"
         # print(sig_regex)
 
         full_line = ""
