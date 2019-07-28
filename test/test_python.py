@@ -129,7 +129,8 @@ add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
                                       'type': 'id: AddTwoInts'}],
                     }
 
-        self.assertDictContainsSubset(expected, analyzer.stats)
+        subset = {k:v for k, v in analyzer.stats.items() if k in expected}
+        self.assertDictEqual(subset, expected)
 
     def test_comment_search(self):
         source_code = r'''from std_msgs.msg import String
@@ -154,8 +155,8 @@ self.pub = rospy.Subscriber("sub_topic", String)
                                     'type': 'std_msgs/String'}],
                     }
 
-        self.assertDictContainsSubset(expected, analyzer.stats)
-
+        subset = {k:v for k, v in analyzer.stats.items() if k in expected}
+        self.assertDictEqual(subset, expected)
 
 if __name__ == '__main__':
     unittest.main()
