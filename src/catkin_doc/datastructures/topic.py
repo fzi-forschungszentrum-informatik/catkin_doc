@@ -28,8 +28,13 @@
 """
 Topic datastructure
 """
-
-import urllib2
+try:
+    from urllib.parse import urlparse
+    from urllib.request import urlopen
+    from urllib.error import URLError
+except ImportError:
+    from urlparse import urlparse
+    from urllib2 import urlopen, URLError
 from catkin_doc.datastructures.doc_object import DocObject
 
 
@@ -76,14 +81,14 @@ class Topic(DocObject):
             url = self.type_doc_url_base.format(types[0], types[1])
 
             try:
-                if not urllib2.urlparse.urlparse(url).netloc:
+                if not urlparse(url).netloc:
                     return False
 
-                website = urllib2.urlopen(url)
+                website = urlopen(url)
 
                 if website.code != 200:
                     return False
-            except urllib2.URLError:
+            except URLError:
                 # print "Could not validate link: ", url
                 # print e
                 # print "Skipping url"
