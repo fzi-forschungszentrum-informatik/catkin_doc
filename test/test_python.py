@@ -30,7 +30,7 @@
 import unittest
 import ast
 import tokenize
-from StringIO import StringIO
+from io import StringIO
 # import os.path
 
 # import catkin_doc.datastructures as ds
