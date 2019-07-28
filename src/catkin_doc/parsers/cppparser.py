@@ -64,6 +64,7 @@ class CppParser(object):
 
     template_regex = r'(<\s*(?P<type>[^>\s]*)\s*>)?'
     service_template_regex = r'(<(?P<type>[^,>]+)::Request.*>)?'
+    type_regex = r'(?P<type>[^,)]+)'
     name_regex = r'"?(?P<name>[^",]*)"?'
     filler_regex = r'[^,)]+'
     default_regex = r'"?(?P<default>[^",]*)"?'
@@ -83,16 +84,18 @@ class CppParser(object):
     service_regex = r"\s*".join(['advertiseService', service_template_regex, r'\(',
                                  name_regex, ',', boost_callback_regex, remainder_regex, r'\)'])
 
-    param_regex = r"\s*".join([r'(get)?[pP]aram(::get)?', template_regex, r'\(', name_regex, ',', filler_regex, ',',
-                               default_regex, r'\)'])
+    param_regex = r"\s*".join([r'(get)?[pP]aram(::get)?', template_regex, r'\(', name_regex, ',',
+                               filler_regex, ',?', '(' + default_regex + ')', r'\)'])
+    service_client_regex = r"\s*".join(['serviceClient', template_regex, r'\(', name_regex,
+                                        remainder_regex])
+    service_client_regex_alt = r"\s*".join(['service::call', r'\(', name_regex, ',', type_regex,
+                                            r'\)'])
+    action_client_regex = r"\s*".join(['actionlib::SimpleActionClient', template_regex, r'\(',
+                                       name_regex, remainder_regex])
+    action_regex = r"\s*".join(['SimpleActionServer', template_regex, r'\(', name_regex,
+                                remainder_regex, r'\)'])
     # regex for parsing node attributes
-    # param_regex = 'param(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?, ?(([^,)]+),\s*)?"?(?P<default>[^"\)]+)"?)(?P<bind>)\)'
-    param_regex_alt1 = 'getParam\(("?(?P<name>[^",]+)"?, ?[^)]+)(?P<bind>)(?P<type>)(?P<default>)\)'
-    param_regex_alt2 = 'param::get\((("?(?P<name>[^",]+)"?, ?[^)]+))(?P<bind>)(?P<type>)(?P<default>)\)'
-    action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((\s*"?(?P<name>[^,)("]*)?"?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)(?P<default>)\)'
-    service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",)]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
-    service_client_regex_alt = 'service::call\(("?(?P<name>[^",)]*)"?, (?P<type>[^,)]+))(?P<bind>)(?P<default>)\)'
-    action_regex = 'actionlib::SimpleActionServer<(?P<type>[^>]*)>\("?(\s*(?P<name>[^",]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
+    # action_regex = 'actionlib::SimpleActionServer<(?P<type>[^>]*)>\("?(\s*(?P<name>[^",]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
 
     def __init__(self, node_name, files):
         self.node = Node(node_name)
@@ -100,8 +103,6 @@ class CppParser(object):
 
         self.parser_fcts = [
             (self.param_regex, Parameter, self.node.add_parameter),
-            (self.param_regex_alt1, Parameter, self.node.add_parameter),
-            (self.param_regex_alt2, Parameter, self.node.add_parameter),
             (self.subscriber_regex, Subscriber, self.node.add_subscriber),
             (self.publisher_regex, Publisher, self.node.add_publisher),
             (self.action_client_regex, ActionClient, self.node.add_action_client),

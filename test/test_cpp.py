@@ -57,12 +57,12 @@ class TestCpp(unittest.TestCase):
         self.assertEqual(brackets, code)
 
         code = 'ros::param::get("/param2", param2)'
-        param, brackets = node.extract_info(code, Parameter, node.param_regex_alt2)
+        param, brackets = node.extract_info(code, Parameter, node.param_regex)
         self.assertEqual(param.name, "/param2")
         self.assertEqual(brackets, code)
 
         code = 'nh.getParam("param3", param3)'
-        param, brackets = node.extract_info(code, Parameter, node.param_regex_alt1)
+        param, brackets = node.extract_info(code, Parameter, node.param_regex)
         self.assertEqual(param.name, "param3")
         self.assertEqual(brackets, code)
 
