@@ -30,7 +30,10 @@
 import unittest
 import ast
 import tokenize
-from io import StringIO
+import io
+import sys
+
+
 # import os.path
 
 # import catkin_doc.datastructures as ds
@@ -39,6 +42,11 @@ import catkin_doc.parsers.pythonparser as pythonparser
 # from catkin_doc.datastructures.service import Service, ServiceClient
 # from catkin_doc.datastructures.action import Action, ActionClient
 # from catkin_doc.datastructures.topic import Subscriber, Publisher
+
+if sys.version_info[0] == 3:
+    StringIO = io.StringIO
+else:
+    StringIO = io.BytesIO
 
 
 class TestPython(unittest.TestCase):
