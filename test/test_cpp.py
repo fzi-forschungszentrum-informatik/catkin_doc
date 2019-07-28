@@ -223,7 +223,7 @@ class TestCpp(unittest.TestCase):
       node_object_here
 '''
         source_file = tempfile.NamedTemporaryFile(delete=False)
-        source_file.write(source_code)
+        source_file.write(source_code.encode(encoding="utf-8", errors="strict"))
         source_file.seek(0)
         parser = CppParser("comment", [source_file.name])
         self.assertEqual(parser.search_for_comment(5),
@@ -249,7 +249,7 @@ m_private_nh.advertiseService( "new_trajectory",
 f_NewTrajectory(boost::bind(&PathLoader::newTrajectory, this, _1, _2)) );
 '''
         source_file = tempfile.NamedTemporaryFile(delete=False)
-        source_file.write(source_code)
+        source_file.write(source_code.encode(encoding="utf-8", errors="strict"))
         source_file.seek(0)
         print("Used source code:")
         data = source_file.readlines()
@@ -264,15 +264,15 @@ f_NewTrajectory(boost::bind(&PathLoader::newTrajectory, this, _1, _2)) );
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].name, "chatter")
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].line_number, 8)
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].datatype, "std_msgs/String")
-        self.assertEqual(node.children[ds.KEYS["publisher"]]
-                         [0].code, data[7].lstrip(' ').strip("\n"))
+        self.assertEqual(node.children[ds.KEYS["publisher"]][0].code,
+                         data[7].decode("utf-8").lstrip(' ').strip("\n"))
 
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].name, "chat;ter")
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].line_number, 11)
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].datatype, "std_msgs/String")
-        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].code, data[10].strip("\n"))
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].code, data[10].decode("utf-8").strip("\n"))
         self.assertEqual(node.children[ds.KEYS["subscriber"]]
-                         [0].description, data[9].lstrip("// ").strip("\n"))
+                         [0].description, data[9].decode("utf-8").lstrip("// ").strip("\n"))
 
         self.assertEqual(node.children[ds.KEYS["subscriber"]][1].name, "chatter")
         self.assertEqual(node.children[ds.KEYS["subscriber"]][1].line_number, 13)
