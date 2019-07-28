@@ -49,6 +49,7 @@ def extract_comment(line):
         comment = str(match.group(3)).strip()
     return comment
 
+
 def rchop(thestring, ending):
     """Removes ending from end if thestring if thestring ens in ending"""
     if thestring.endswith(ending):
@@ -61,28 +62,37 @@ class CppParser(object):
     Parses cpp ROS nodes
     """
 
-    template_regex = '(<\s*(?P<type>[^>\s]*)\s*>)?'
-    name_regex = '"?(?P<name>[^",]*)"?'
-    queue_regex = '\d+'
-    callback_regex = '(?P<callback>([^,()]+)(\([^()]*\))?([^,)])*)'
-    remainder_regex = '(,\s*(?P<remainder>.+))?'
+    template_regex = r'(<\s*(?P<type>[^>\s]*)\s*>)?'
+    service_template_regex = r'(<(?P<type>[^,>]+)::Request.*>)?'
+    name_regex = r'"?(?P<name>[^",]*)"?'
+    filler_regex = r'[^,)]+'
+    default_regex = r'"?(?P<default>[^",]*)"?'
+    queue_regex = r'\d+'
+    callback_regex = r'(?P<callback>([^,()]+)(\([^()]*\))?([^,)])*)'
+    remainder_regex = r'(,\s*(?P<remainder>.+))?'
+
+    # I'd like to get rid of this....
+    boost_callback_regex = r'(.*boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^,)]*))'
 
     # Based on http://wiki.ros.org/roscpp/Overview/Publishers%20and%20Subscribers#Subscriber_Options
-    subscriber_regex = "\s*".join(['subscribe', template_regex, '\(', name_regex,
-                                   ',', queue_regex, ',', callback_regex, remainder_regex, '\)'])
+    subscriber_regex = r"\s*".join(['subscribe', template_regex, r'\(', name_regex,
+                                    ',', queue_regex, ',', callback_regex, remainder_regex, r'\)'])
 
-    publisher_regex = "\s*".join(['advertise', template_regex, '\(', name_regex,
-                                  ',', queue_regex, remainder_regex, '\)'])
+    publisher_regex = r"\s*".join(['advertise', template_regex, r'\(', name_regex,
+                                   ',', queue_regex, remainder_regex, r'\)'])
+    service_regex = r"\s*".join(['advertiseService', service_template_regex, r'\(',
+                                 name_regex, ',', boost_callback_regex, remainder_regex, r'\)'])
 
+    param_regex = r"\s*".join([r'(get)?[pP]aram(::get)?', template_regex, r'\(', name_regex, ',', filler_regex, ',',
+                               default_regex, r'\)'])
     # regex for parsing node attributes
-    param_regex = 'param(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?, ?(([^,)]+),\s*)?"?(?P<default>[^"\)]+)"?)(?P<bind>)\)'
+    # param_regex = 'param(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",]*)"?, ?(([^,)]+),\s*)?"?(?P<default>[^"\)]+)"?)(?P<bind>)\)'
     param_regex_alt1 = 'getParam\(("?(?P<name>[^",]+)"?, ?[^)]+)(?P<bind>)(?P<type>)(?P<default>)\)'
     param_regex_alt2 = 'param::get\((("?(?P<name>[^",]+)"?, ?[^)]+))(?P<bind>)(?P<type>)(?P<default>)\)'
     action_client_regex = 'actionlib::SimpleActionClient<(?P<type>[^>]*)>\((\s*"?(?P<name>[^,)("]*)?"?,?\s*([^,^)]*)?,([^,^)]*))(?P<bind>)(?P<default>)\)'
     service_client_regex = 'serviceClient(<(?P<type>[^>]*)>)?\(("?(?P<name>[^",)]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
     service_client_regex_alt = 'service::call\(("?(?P<name>[^",)]*)"?, (?P<type>[^,)]+))(?P<bind>)(?P<default>)\)'
     action_regex = 'actionlib::SimpleActionServer<(?P<type>[^>]*)>\("?(\s*(?P<name>[^",]*)"?[^)]*)(?P<bind>)(?P<default>)\)'
-    service_regex = 'advertiseService(<(?P<type>[^,>]+)::Request.*>)?\((\s?"?(?P<name>[^",]*)"?,\s*(.*boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^,)]*)(,.*)*))(?P<default>)\)'
 
     def __init__(self, node_name, files):
         self.node = Node(node_name)
@@ -160,11 +170,10 @@ class CppParser(object):
         if semicolon > 0:
             num_pre_quotes = string.count("\"", 0, semicolon)
             if num_pre_quotes % 2 == 1:
-                return self.check_command_end(string, semicolon+1)
+                return self.check_command_end(string, semicolon + 1)
             return True
 
         return False
-
 
     def extract_info(self, line, as_type, regex):
         """
@@ -181,7 +190,7 @@ class CppParser(object):
                 if datatype == "None":
                     if "callback" in match.groupdict().keys():
                         if match.group("callback"):
-                            signature  = self.get_func_signature(match.group('callback').lstrip("&"))
+                            signature = self.get_func_signature(match.group('callback').lstrip("&"))
                             if signature:
                                 datatype = signature.split(" ")[0]
                                 datatype = datatype.strip("&")
