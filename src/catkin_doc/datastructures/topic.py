@@ -45,8 +45,7 @@ class Topic(DocObject):
         super(Topic, self).__init__(name, description)
         self.datatype = datatype
         self.type_doc_url_base = "http://docs.ros.org/api/{}/html/msg/{}.html"
-        self.url = self.create_url(datatype)
-
+        self.create_url(datatype)
 
     def to_string(self, level, formatter):
         """
@@ -82,19 +81,17 @@ class Topic(DocObject):
 
             try:
                 if not urlparse(url).netloc:
-                    return False
+                    print("Illegal URL")
 
                 website = urlopen(url)
 
-                if website.code != 200:
-                    return False
+                if website.code == 200:
+                    self.url = url
             except URLError:
                 # print "Could not validate link: ", url
                 # print e
                 # print "Skipping url"
-                return None
-            return url
-        return None
+                pass
 
 
 class Subscriber(Topic):
