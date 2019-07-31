@@ -26,7 +26,7 @@
 # -- END LICENSE BLOCK ------------------------------------------------
 
 """Module to parse an existing mark down documentation"""
-
+from __future__ import print_function
 import re
 
 import catkin_doc.datastructures as ds
@@ -195,4 +195,4 @@ class MdParser(object):
                 lines = filecontent.readlines()
                 self.doc = DocSection(lines, Package, level=0)
         else:
-            print "This is not a markdown file."
+            print("This is not a markdown file.")
