@@ -84,58 +84,67 @@ class CMakeParser(object):
         """
         if "#" in self.lines[linenumber]:
             return
-        match = re.search("(add_executable\()(\S+)+( ([^)]+))+\)", self.lines[linenumber])
+        # match = re.search("(add_executable\()(\S+)+( ([^)]+))+\)", self.lines[linenumber])
+        # if match:
+            # self.exec_name = str(match.group(2))
+            # if "${PROJECT_NAME}" in self.exec_name:
+            # self.exec_name = self.exec_name.replace("${PROJECT_NAME}", self.project_name)
+            # cpp_files = list()
+            # cpp_file = str(match.group(4))
+            # if "${PROJECT_NAME}" in cpp_file:
+            # cpp_file = cpp_file.replace("${PROJECT_NAME}", self.project_name)
+            # if os.path.isfile(self.pkg_path + "/" + cpp_file):
+            # cpp_files.append(self.pkg_path + "/" + cpp_file)
+            # elif os.path.isdir(self.pkg_path + "/" + cpp_file):
+            # for filename in os.listdir(self.pkg_path):
+            # cpp_files.append(self.pkg_path + "/" + filename)
+
+            # linenumber += 1
+            # while not ")" in self.lines[linenumber]:
+            # match_files = re.search("(\S+)", self.lines[linenumber])
+            # if match_files:
+            # cpp_file = str(match_files.group(1))
+            # if "${PROJECT_NAME}" in cpp_file:
+            # cpp_file = cpp_file.replace("${PROJECT_NAME}", self.project_name)
+            # if os.path.isfile(self.pkg_path + "/" + cpp_file):
+            # cpp_files.append(self.pkg_path + "/" + cpp_file)
+            # elif os.path.isdir(self.pkg_path + "/" + cpp_file):
+            # for filename in os.listdir(self.pkg_path):
+            # cpp_files.append(self.pkg_path + "/" + filename)
+
+            # linenumber += 1
+            # self.executables[self.exec_name] = cpp_files
+            # return
+
+        pattern = r'add_executable\(\s*(\S+)'
+        match = re.search(pattern, self.lines[linenumber])
         if match:
-            self.exec_name = str(match.group(2))
+            self.exec_name = str(match.group(1))
+            # print(self.exec_name)
             if "${PROJECT_NAME}" in self.exec_name:
                 self.exec_name = self.exec_name.replace("${PROJECT_NAME}", self.project_name)
-            cpp_files = list()
-            cpp_file = str(match.group(4))
-            if "${PROJECT_NAME}" in cpp_file:
-                cpp_file = cpp_file.replace("${PROJECT_NAME}", self.project_name)
-            if os.path.isfile(self.pkg_path + "/" + cpp_file):
-                cpp_files.append(self.pkg_path + "/" + cpp_file)
-            elif os.path.isdir(self.pkg_path + "/" + cpp_file):
-                for filename in os.listdir(self.pkg_path):
-                    cpp_files.append(self.pkg_path + "/" + filename)
-
-            linenumber += 1
+            line = self.lines[linenumber].rstrip()
             while not ")" in self.lines[linenumber]:
-                match_files = re.search("(\S+)", self.lines[linenumber])
-                if match_files:
-                    cpp_file = str(match_files.group(1))
-                    if "${PROJECT_NAME}" in cpp_file:
-                        cpp_file = cpp_file.replace("${PROJECT_NAME}", self.project_name)
-                    if os.path.isfile(self.pkg_path + "/" + cpp_file):
-                        cpp_files.append(self.pkg_path + "/" + cpp_file)
-                    elif os.path.isdir(self.pkg_path + "/" + cpp_file):
-                        for filename in os.listdir(self.pkg_path):
-                            cpp_files.append(self.pkg_path + "/" + filename)
-
                 linenumber += 1
-            self.executables[self.exec_name] = cpp_files
-            return
+                line += " " + self.lines[linenumber].rstrip().lstrip()
 
-        match = re.search("(add_executable\()(\S+)", self.lines[linenumber])
-        if match:
-            self.exec_name = str(match.group(2))
-            if "${PROJECT_NAME}" in self.exec_name:
-                self.exec_name = self.exec_name.replace("${PROJECT_NAME}", self.project_name)
+            line = re.sub(pattern, '', line)
+            line = re.sub('\)[^)]*$', '', line)
+
+            cpp_files_raw = line.strip().split(' ')
+
             cpp_files = list()
-            linenumber += 1
-            while not ")" in self.lines[linenumber]:
-                match_files = re.search("(\S+)", self.lines[linenumber])
-                if match_files:
-                    cpp_file = str(match_files.group(1))
-                    if "${PROJECT_NAME}" in cpp_file:
-                        cpp_file = cpp_file.replace("${PROJECT_NAME}", self.project_name)
-                    if os.path.isfile(self.pkg_path + "/" + cpp_file):
-                        cpp_files.append(self.pkg_path + "/" + cpp_file)
-                    elif os.path.isdir(self.pkg_path + "/" + cpp_file):
-                        for filename in os.listdir(self.pkg_path):
-                            cpp_files.append(self.pkg_path + "/" + filename)
 
-                linenumber += 1
+            for cpp_file in cpp_files_raw:
+                if "${PROJECT_NAME}" in cpp_file:
+                    cpp_file = cpp_file.replace("${PROJECT_NAME}", self.project_name)
+                if os.path.isfile(self.pkg_path + "/" + cpp_file):
+                    cpp_files.append(self.pkg_path + "/" + cpp_file)
+                elif os.path.isdir(self.pkg_path + "/" + cpp_file):
+                    for filename in os.listdir(self.pkg_path):
+                        cpp_files.append(self.pkg_path + "/" + filename)
+
+            # print("Adding " + self.exec_name)
             self.executables[self.exec_name] = cpp_files
 
     def remove_not_nodes(self):
@@ -145,15 +154,18 @@ class CMakeParser(object):
         """
         delete_exec = []
         for key in self.executables:
+            # print("Checking " + key)
             node = False
             for filename in self.executables[key]:
                 content = open(filename, "r")
+                # print(filename)
                 if "ros::init" in content.read():
                     node = True
             if not node:
                 delete_exec.append(key)
 
         for key in delete_exec:
+            # print("Deleting " + key)
             self.executables.pop(key)
 
     def find_more_files(self):
