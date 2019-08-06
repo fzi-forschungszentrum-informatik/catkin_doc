@@ -45,6 +45,7 @@ class Topic(DocObject):
         super(Topic, self).__init__(name, description)
         self.datatype = datatype
         self.type_doc_url_base = "http://docs.ros.org/api/{}/html/msg/{}.html"
+        self.url = None
         self.create_url(datatype)
 
     def to_string(self, level, formatter):
