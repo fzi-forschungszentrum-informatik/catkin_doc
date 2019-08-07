@@ -222,7 +222,7 @@ class TestCpp(unittest.TestCase):
       //comment
       node_object_here
 '''
-        source_file = tempfile.NamedTemporaryFile(delete=False)
+        source_file = tempfile.NamedTemporaryFile()
         source_file.write(source_code.encode(encoding="utf-8", errors="strict"))
         source_file.seek(0)
         parser = CppParser("comment", [source_file.name])
@@ -248,7 +248,7 @@ ros::Subscriber sub2=n.subscribe<std_msgs::String> ("chatter",1, boost::bind(&st
 m_private_nh.advertiseService( "new_trajectory",
 f_NewTrajectory(boost::bind(&PathLoader::newTrajectory, this, _1, _2)) );
 '''
-        source_file = tempfile.NamedTemporaryFile(delete=False)
+        source_file = tempfile.NamedTemporaryFile()
         source_file.write(source_code.encode(encoding="utf-8", errors="strict"))
         source_file.seek(0)
         print("Used source code:")
