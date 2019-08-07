@@ -65,11 +65,12 @@ class TestCpp(unittest.TestCase):
         param, brackets = node.extract_info(code, Parameter, node.param_regex)
         self.assertEqual(param.name, "param3")
         self.assertEqual(brackets, code)
+        self.assertEqual(param.default_value, "")
 
-        code = 'nh.param<std::string>("param4", param4, "default_value4");'
+        code = 'nh.param<std::string>("param4", param4, defaultGenerator());'
         param, brackets = node.extract_info(code, Parameter, node.param_regex)
         self.assertEqual(param.name, "param4")
-        self.assertEqual(param.default_value, "default_value4")
+        self.assertEqual(param.default_value, "defaultGenerator()")
         self.assertEqual(param.datatype, "std::string")
         self.assertEqual(brackets, code)
 
@@ -270,7 +271,8 @@ f_NewTrajectory(boost::bind(&PathLoader::newTrajectory, this, _1, _2)) );
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].name, "chat;ter")
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].line_number, 11)
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].datatype, "std_msgs/String")
-        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].code, data[10].decode("utf-8").strip("\n"))
+        self.assertEqual(node.children[ds.KEYS["subscriber"]]
+                         [0].code, data[10].decode("utf-8").strip("\n"))
         self.assertEqual(node.children[ds.KEYS["subscriber"]]
                          [0].description, data[9].decode("utf-8").lstrip("// ").strip("\n"))
 
