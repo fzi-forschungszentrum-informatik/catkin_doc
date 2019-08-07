@@ -67,7 +67,7 @@ class CppParser(object):
     type_regex = r'(?P<type>[^,)]+)'
     name_regex = r'"?(?P<name>[^",]*)"?'
     filler_regex = r'[^,)]+'
-    default_regex = r'"?(?P<default>[^",]*)"?'
+    default_regex = r'"?(?P<default>[^",)]*)"?'
     queue_regex = r'\d+'
     callback_regex = r'(?P<callback>([^,()]+)(\([^()]*\))?([^,)])*)'
     remainder_regex = r'(,\s*(?P<remainder>.+))?'
