@@ -69,7 +69,7 @@ class CMakeParser(object):
         Method to parse the project name from CMAkeLists.txt as it may be needed to replace Params
         later on
         """
-        match = re.search("(project\()(\S+)(\))", self.lines[linenumber])
+        match = re.search(r"(project\()(\S+)(\))", self.lines[linenumber])
         if match:
             self.project_name = str(match.group(2))
 
@@ -91,13 +91,13 @@ class CMakeParser(object):
             # print(self.exec_name)
             if "${PROJECT_NAME}" in self.exec_name:
                 self.exec_name = self.exec_name.replace("${PROJECT_NAME}", self.project_name)
-            line = self.lines[linenumber].rstrip()
+            line = self.lines[linenumber].strip()
             while not ")" in self.lines[linenumber]:
                 linenumber += 1
-                line += " " + self.lines[linenumber].rstrip().lstrip()
+                line += " " + self.lines[linenumber].strip()
 
             line = re.sub(pattern, '', line)
-            line = re.sub('\)[^)]*$', '', line)
+            line = re.sub(r'\)[^)]*$', '', line)
 
             cpp_files_raw = line.strip().split(' ')
 
@@ -154,7 +154,7 @@ class CMakeParser(object):
                 with open(filename) as filecontent:
                     lines = filecontent.readlines()
                 for line in lines:
-                    match = re.search('(#include\ )(\<|\")(\S+)(\>|\")', line)
+                    match = re.search(r'(#include\ )(\<|\")(\S+)(\>|\")', line)
                     if match:
                         included_file = str(match.group(3))
                         if pkg_name in included_file:
