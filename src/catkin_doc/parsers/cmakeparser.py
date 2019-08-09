@@ -84,38 +84,6 @@ class CMakeParser(object):
         """
         if "#" in self.lines[linenumber]:
             return
-        # match = re.search("(add_executable\()(\S+)+( ([^)]+))+\)", self.lines[linenumber])
-        # if match:
-            # self.exec_name = str(match.group(2))
-            # if "${PROJECT_NAME}" in self.exec_name:
-            # self.exec_name = self.exec_name.replace("${PROJECT_NAME}", self.project_name)
-            # cpp_files = list()
-            # cpp_file = str(match.group(4))
-            # if "${PROJECT_NAME}" in cpp_file:
-            # cpp_file = cpp_file.replace("${PROJECT_NAME}", self.project_name)
-            # if os.path.isfile(self.pkg_path + "/" + cpp_file):
-            # cpp_files.append(self.pkg_path + "/" + cpp_file)
-            # elif os.path.isdir(self.pkg_path + "/" + cpp_file):
-            # for filename in os.listdir(self.pkg_path):
-            # cpp_files.append(self.pkg_path + "/" + filename)
-
-            # linenumber += 1
-            # while not ")" in self.lines[linenumber]:
-            # match_files = re.search("(\S+)", self.lines[linenumber])
-            # if match_files:
-            # cpp_file = str(match_files.group(1))
-            # if "${PROJECT_NAME}" in cpp_file:
-            # cpp_file = cpp_file.replace("${PROJECT_NAME}", self.project_name)
-            # if os.path.isfile(self.pkg_path + "/" + cpp_file):
-            # cpp_files.append(self.pkg_path + "/" + cpp_file)
-            # elif os.path.isdir(self.pkg_path + "/" + cpp_file):
-            # for filename in os.listdir(self.pkg_path):
-            # cpp_files.append(self.pkg_path + "/" + filename)
-
-            # linenumber += 1
-            # self.executables[self.exec_name] = cpp_files
-            # return
-
         pattern = r'add_executable\(\s*(\S+)'
         match = re.search(pattern, self.lines[linenumber])
         if match:
