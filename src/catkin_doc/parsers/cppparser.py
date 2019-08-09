@@ -194,6 +194,8 @@ class CppParser(object):
                             signature = self.get_func_signature(match.group('callback').lstrip("&"))
                             if signature:
                                 datatype = signature.split(" ")[0]
+                                if datatype.strip() == "const":
+                                    datatype = signature.split(" ")[1]
                                 datatype = datatype.strip("&")
                                 datatype = rchop(datatype, "Ptr")
                                 datatype = rchop(datatype, "Const")
@@ -204,6 +206,8 @@ class CppParser(object):
                         signature = self.get_func_signature(func_call.lstrip("&"))
                         if signature:
                             datatype = signature.split(" ")[0]
+                            if datatype == "const":
+                                datatype = signature.split(" ")[1]
                             datatype = datatype.strip("&")
                             datatype = rchop(datatype, "Ptr")
                             datatype = rchop(datatype, "Const")
@@ -224,15 +228,17 @@ class CppParser(object):
         sig_regex = func_name + r"\((?P<signature>[^)]+)\)"
         # print(sig_regex)
 
+        lines = list()
         full_line = ""
         for line in self.lines:
             if not self.check_command_end(line):
-                full_line += line
+                lines.append(line.strip(' ').strip('\n'))
+                full_line = " ".join(lines)
                 continue
             match = re.search(sig_regex, full_line)
             if match:
-                # print("Found signature: {}".format(match.group("signature")))
-                return match.group("signature")
+                # print("Found signature: '{}'".format(match.group("signature").strip()))
+                return match.group("signature").strip()
         return None
 
     def search_for_comment(self, linenumber):
