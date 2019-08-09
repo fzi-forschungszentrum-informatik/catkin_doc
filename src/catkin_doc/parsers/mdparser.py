@@ -120,7 +120,7 @@ class DocSection(object):
                         [line] + sub_lines, doc_object_type=self.children_t, level=self.level + 1)
             elif line.strip():
                 if self.description:
-                    self.description = "\n".join([self.description, line.strip()])
+                    self.description = " ".join([self.description, line.strip()])
                 else:
                     self.description = line.strip()
 
