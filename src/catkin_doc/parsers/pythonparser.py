@@ -182,7 +182,7 @@ class PythonParser(object):
     """Parser for python nodes which fills the node representation"""
 
     def __init__(self, filename):
-        node_name = filename.split('/')[-1].strip(".py")
+        node_name = filename.split('/')[-1]
         self.node = Node(node_name)
         self.filename = filename.split('/')[-1]
         #                    regex        as_type    add_function
