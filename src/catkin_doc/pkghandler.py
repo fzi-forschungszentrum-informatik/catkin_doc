@@ -143,16 +143,11 @@ class PkgHandler(object):
         """
         Finds and parses existing documentation.
         """
-        docufile = None
-        for filename in os.listdir(pkg_path):
-            if output_filename in filename:
-                docufile = pkg_path + "/" + filename
-                break
+        docufile_filename = os.path.join(pkg_path, output_filename)
+        if os.path.isfile(docufile_filename):
+            mdparser = MdParser(filename=docufile_filename)
 
-        if not docufile:
-            print("Didn't find an existing documentation")
-            return None
+            return mdparser.doc.to_doc_object()
 
-        mdparser = MdParser(filename=docufile)
-
-        return mdparser.doc.to_doc_object()
+        print("Didn't find an existing documentation")
+        return None
