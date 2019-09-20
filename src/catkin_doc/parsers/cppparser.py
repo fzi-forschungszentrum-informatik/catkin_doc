@@ -138,6 +138,18 @@ class CppParser(object):
                         item.description = comment
                     add(item)
 
+    @staticmethod
+    def remove_comments(text):
+        """Removes c++ and c-style comments from given text"""
+        def replacer(match):
+            """Makes sure only to replace comments and not all strings"""
+            s = match.group(0)
+            if s.startswith('/'):
+                return " " # note: a space and not an empty string
+            return s
+        pattern = re.compile(r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL)
+        return re.sub(pattern, replacer, text)
+
     def get_commands(self):
         """
         Yields all command lines from a file. Assumes that only one semicolon is in one line.
@@ -147,16 +159,18 @@ class CppParser(object):
         first_line = None
         lines = list()
         while linenumber < len(self.lines):
-            if not self.lines[linenumber].lstrip(' ').strip('\n'):
+            stripped_line = self.lines[linenumber].lstrip(' ')
+
+            if not stripped_line.strip('\n'):
                 linenumber += 1
                 continue
 
-            if not self.lines[linenumber].lstrip(' ').startswith("//"):
+            if not (stripped_line.startswith("//") or stripped_line.startswith("#")):
                 if not first_line:
                     first_line = linenumber + 1
                     continue
                 lines.append(self.lines[linenumber].lstrip(' ').strip('\n'))
-                full_line = " ".join(lines)
+                full_line = self.remove_comments(" ".join(lines))
                 if self.check_command_end(full_line):
                     yield full_line, first_line
                     lines = list()
