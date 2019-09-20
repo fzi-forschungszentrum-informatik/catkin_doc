@@ -139,16 +139,27 @@ class CppParser(object):
                     add(item)
 
     @staticmethod
-    def remove_comments(text):
+    def comment_replacer(match):
+        """Makes sure only to replace comments and not all strings"""
+        s = match.group(0)
+        if s.startswith('/'):
+            return " " # note: a space and not an empty string
+        return s
+
+    def remove_comments_and_strings(self, code):
+        """Remove all comments and strings from a given piece of c++ code"""
+        return self.replace_comments_and_strings(code, " ")
+
+
+    def remove_comments(self, code):
+        """Remove all comments from a given piece of c++ code"""
+        return self.replace_comments_and_strings(code, self.comment_replacer)
+
+    @staticmethod
+    def replace_comments_and_strings(text, replacement):
         """Removes c++ and c-style comments from given text"""
-        def replacer(match):
-            """Makes sure only to replace comments and not all strings"""
-            s = match.group(0)
-            if s.startswith('/'):
-                return " " # note: a space and not an empty string
-            return s
         pattern = re.compile(r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL)
-        return re.sub(pattern, replacer, text)
+        return re.sub(pattern, replacement, text)
 
     def get_commands(self):
         """
