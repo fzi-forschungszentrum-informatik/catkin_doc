@@ -161,6 +161,14 @@ class CppParser(object):
         pattern = re.compile(r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL)
         return re.sub(pattern, replacement, text)
 
+    @staticmethod
+    def has_leading_closing_brace(code):
+        pattern = re.compile(r'[^{}]*(})?(.*({.*})*.*)')
+        match = re.match(pattern, code)
+        if match:
+            return str(match.group(1)) == "}"
+        return False
+
     def get_commands(self):
         """
         Yields all command lines from a file. Assumes that only one semicolon is in one line.
@@ -169,23 +177,31 @@ class CppParser(object):
         linenumber = 0
         first_line = None
         lines = list()
+        full_line = ""
         while linenumber < len(self.lines):
-            stripped_line = self.lines[linenumber].lstrip(' ')
+            stripped_line = self.lines[linenumber].strip(' ')
+            stripped_line = self.remove_comments_and_strings(stripped_line)
 
-            if not stripped_line.strip('\n'):
+            if not stripped_line.strip('\n').strip():
+                # Skip empty lines
                 linenumber += 1
                 continue
 
-            if not (stripped_line.startswith("//") or stripped_line.startswith("#")):
+            if not stripped_line.startswith("#"):
+                full_line += stripped_line.lstrip(' ').strip('\n')
+                if self.has_leading_closing_brace(full_line):
+                    full_line = ""
+                    linenumber += 1
+                    continue
+                # print(full_line)
                 if not first_line:
                     first_line = linenumber + 1
-                    continue
                 lines.append(self.lines[linenumber].lstrip(' ').strip('\n'))
-                full_line = self.remove_comments(" ".join(lines))
                 if self.check_command_end(full_line):
-                    yield full_line, first_line
+                    yield self.remove_comments(" ".join(lines)), first_line
                     lines = list()
                     first_line = None
+                    full_line = ""
             linenumber += 1
 
     def check_command_end(self, string, start_search=0):
