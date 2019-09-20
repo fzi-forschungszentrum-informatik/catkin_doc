@@ -50,7 +50,7 @@ class PkgHandler(object):
     Toplevel instance for parsing a package and its contents.
     """
 
-    def __init__(self, pkg_path):
+    def __init__(self, pkg_path, output_filename):
         self.pkg_path = os.path.abspath(pkg_path)
 
         print (self.pkg_path)
@@ -82,7 +82,7 @@ class PkgHandler(object):
             self.doc.add_node(pyparser.node)
 
         # find existing documentation and merge it
-        existing_doc = self.find_existing_docu(self.pkg_path)
+        existing_doc = self.find_existing_docu(self.pkg_path, output_filename)
         if existing_doc:
             self.doc.merge_with(existing_doc)
 
@@ -139,13 +139,13 @@ class PkgHandler(object):
         return False
 
     @staticmethod
-    def find_existing_docu(pkg_path):
+    def find_existing_docu(pkg_path, output_filename):
         """
-        Finds and parses existing documentation. Currently, only README.md at top level is searched
+        Finds and parses existing documentation.
         """
         docufile = None
         for filename in os.listdir(pkg_path):
-            if "README.md" in filename:
+            if output_filename in filename:
                 docufile = pkg_path + "/" + filename
                 break
 

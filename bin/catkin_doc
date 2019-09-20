@@ -68,7 +68,7 @@ def main():
 
     options = parse_arguments()
 
-    pkg_handler = PkgHandler(options.package_root)
+    pkg_handler = PkgHandler(options.package_root, options.output_filename)
 
     formatter = None
     if options.formatter == "md":
