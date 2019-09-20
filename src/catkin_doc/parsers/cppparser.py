@@ -253,9 +253,9 @@ class CppParser(object):
         line_of_comment = linenumber - 2
         while still_comment:
             comm_line = extract_comment(self.lines[line_of_comment])
-            if comm_line:
+            if comm_line is None:
+                still_comment = False
+            else:
                 comment = comm_line + " " + comment
                 line_of_comment -= 1
-            else:
-                still_comment = False
         return comment.strip()
