@@ -288,15 +288,15 @@ class CppParser(object):
         is found
         """
         still_comment = True
-        comment = ''
         # We need to start one line before the starting line and
         # subtract one more for the indexing
         line_of_comment = linenumber - 2
+        comment_lines = list()
         while still_comment:
             comm_line = extract_comment(self.lines[line_of_comment])
             if comm_line is None:
                 still_comment = False
             else:
-                comment = comm_line + " " + comment
+                comment_lines.insert(0, comm_line)
                 line_of_comment -= 1
-        return comment.strip()
+        return " ".join(comment_lines)
