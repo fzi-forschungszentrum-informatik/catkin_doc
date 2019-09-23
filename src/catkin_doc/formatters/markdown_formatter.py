@@ -40,6 +40,7 @@ class MarkdownFormatter(BaseFormatter):
         return markdown_strings.header(text, level) + "\n"
 
     def text(self, text, newline=True):
+        text = text.replace("\n", "\n\n")
         if newline:
             return "{}\n".format(text)
         return "{}".format(text)
