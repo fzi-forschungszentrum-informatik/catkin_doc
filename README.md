@@ -13,13 +13,10 @@ docstring.
 ## Installation
 It's easiest to use pip to install this on a per-user basis:
 ```bash
-# clone it somewhere where you want to store sources
-cd local_install/src
-git clone git@ids-git.fzi.de:mauch/catkin_doc.git
-pip install --user -e catkin_doc
+# clone this repository and call from inside the cloned directory
+pip install --user -e .
 ```
-As `pip --user` installs to your local space, you might have to add `~/.local/bin` to your path. If
-you're using robot_folders already, this should however already be the case.
+As `pip --user` installs to your local space, you might have to add `~/.local/bin` to your path.
 
 ## How to use:
 
