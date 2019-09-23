@@ -139,16 +139,35 @@ class CppParser(object):
                     add(item)
 
     @staticmethod
-    def remove_comments(text):
+    def comment_replacer(match):
+        """Makes sure only to replace comments and not all strings"""
+        s = match.group(0)
+        if s.startswith('/'):
+            return " " # note: a space and not an empty string
+        return s
+
+    def remove_comments_and_strings(self, code):
+        """Remove all comments and strings from a given piece of c++ code"""
+        return self.replace_comments_and_strings(code, " ")
+
+
+    def remove_comments(self, code):
+        """Remove all comments from a given piece of c++ code"""
+        return self.replace_comments_and_strings(code, self.comment_replacer)
+
+    @staticmethod
+    def replace_comments_and_strings(text, replacement):
         """Removes c++ and c-style comments from given text"""
-        def replacer(match):
-            """Makes sure only to replace comments and not all strings"""
-            s = match.group(0)
-            if s.startswith('/'):
-                return " " # note: a space and not an empty string
-            return s
         pattern = re.compile(r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL)
-        return re.sub(pattern, replacer, text)
+        return re.sub(pattern, replacement, text)
+
+    @staticmethod
+    def has_leading_closing_brace(code):
+        pattern = re.compile(r'[^{}]*(})?(.*({.*})*.*)')
+        match = re.match(pattern, code)
+        if match:
+            return str(match.group(1)) == "}"
+        return False
 
     def get_commands(self):
         """
@@ -158,23 +177,31 @@ class CppParser(object):
         linenumber = 0
         first_line = None
         lines = list()
+        full_line = ""
         while linenumber < len(self.lines):
-            stripped_line = self.lines[linenumber].lstrip(' ')
+            stripped_line = self.lines[linenumber].strip(' ')
+            stripped_line = self.remove_comments_and_strings(stripped_line)
 
-            if not stripped_line.strip('\n'):
+            if not stripped_line.strip('\n').strip():
+                # Skip empty lines
                 linenumber += 1
                 continue
 
-            if not (stripped_line.startswith("//") or stripped_line.startswith("#")):
+            if not stripped_line.startswith("#"):
+                full_line += stripped_line.lstrip(' ').strip('\n')
+                if self.has_leading_closing_brace(full_line):
+                    full_line = ""
+                    linenumber += 1
+                    continue
+                # print(full_line)
                 if not first_line:
                     first_line = linenumber + 1
-                    continue
                 lines.append(self.lines[linenumber].lstrip(' ').strip('\n'))
-                full_line = self.remove_comments(" ".join(lines))
                 if self.check_command_end(full_line):
-                    yield full_line, first_line
+                    yield self.remove_comments(" ".join(lines)), first_line
                     lines = list()
                     first_line = None
+                    full_line = ""
             linenumber += 1
 
     def check_command_end(self, string, start_search=0):
