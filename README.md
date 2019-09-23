@@ -3,7 +3,7 @@
 
 # The catkin\_doc project
 
-Generally this package is for automatically generating documentation for ros nodes. Documentation is
+Generally this package is for automatically generating documentation for ROS nodes. Documentation is
 generated for each python and cpp node found in a given package.
 
 For this, it will extract all nodes, their parameters, subscribers, etc and create doc entries for
@@ -29,11 +29,11 @@ How to create new or update documentation for a package:
 catkin_doc "/path/to/your/package"
 ```
 If updating a previously generated documentation any description altered by hand will not be
-automatically overwritten. If Descriptions from code and a previously generated documentation
+automatically overwritten. If descriptions from code and a previously generated documentation
 differ, the user can choose the correct version.
 
 ## How to have your docstrings extracted from code
-`catkin_doc` encourages you to document your ROS-Api elements in your source code already. For
+`catkin_doc` encourages you to document your ROS-API elements in your source code already. For
 example
 
 ```cpp
