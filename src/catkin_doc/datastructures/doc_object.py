@@ -37,13 +37,15 @@ import copy
 class DocObject(object):
     """Base class for a doc object"""
 
-    def __init__(self, name, description=""):
+    def __init__(self, name, description="", var_name = False):
         self.default_description = "Please add description. See {} line number: {}\n\n\t{}"
         self.default_desc_regex = "\s+".join(
             self.default_description.format("(.*)", "(\d+)", "(.*)").split())
 
-        self.name = name
-        # This is neede for the default description
+        self.name, self.var_name = self.set_name(name)
+        if var_name:
+            self.var_name = True
+        # This is needed for the default description
         self.filename = ""
         self.line_number = None
         self.code = ""
@@ -143,6 +145,20 @@ class DocObject(object):
             self.line_number = match.group(2)
             self.code = match.group(3)
             return ""
+        return description
+
+    def set_name(self, name):
+        """
+        Checks wheter the given name is in a string format meaning have leading or trailing quotation marks,
+        if it has those we assume this is the actual name of the object.
+        If quotation marks are missing we assume it to be a variable in the original code and will mark it accordingly.
+        """
+
+        if name[0] == name[-1] and (name[0] == "'" or name[0]=='"'):
+            return name.strip("'"+'"'), False
+        else:
+            return name, True
+
         return description
 
     def merge_with(self, other):
