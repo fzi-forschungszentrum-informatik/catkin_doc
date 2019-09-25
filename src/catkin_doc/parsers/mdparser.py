@@ -61,7 +61,7 @@ class DocSection(object):
 
         self.title_regex = "^#{" + str(level + 1) + "} ?([^#].*)"
         if self.package_t in self.parameter_style_types:
-            self.title_regex = "^\s*\*\s*\*\*(.*)\*\*\s*(\(default:\s*(.*)\))?(\(\[([^\]]*)\]\(.*\)\))?(\((.*)\))?$"
+            self.title_regex = r'^\s*\*\s*"\*\*(.*)\*\*"\s*(\(default:\s*(.*)\))?(\(\[([^\]]*)\]\(.*\)\))?(\((.*)\))?$'
         self.parse_title()
         self.description = ""
 
@@ -70,7 +70,7 @@ class DocSection(object):
         if self.children_t is Node or self.children_t is LaunchFile:
             pass
         elif self.children_t in self.parameter_style_types:
-            self.sub_regex = "^\s*\*\s*\*\*(.*)\*\*"
+            self.sub_regex = r'^\s*\*\s*"\*\*(.*)\*\*"'
         self.parse_children()
 
     def parse_title(self):
