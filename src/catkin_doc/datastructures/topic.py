@@ -41,8 +41,8 @@ from catkin_doc.datastructures.doc_object import DocObject
 class Topic(DocObject):
     """Datastructure representing a subscribed or advertised topic"""
 
-    def __init__(self, name, description="", datatype=""):
-        super(Topic, self).__init__(name, description)
+    def __init__(self, name, description="", datatype="", var_name=None):
+        super(Topic, self).__init__(name, description, var_name)
         self.datatype = datatype
         self.type_doc_url_base = "http://docs.ros.org/api/{}/html/msg/{}.html"
         self.url = None

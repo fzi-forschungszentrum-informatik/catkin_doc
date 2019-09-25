@@ -221,9 +221,18 @@ class PythonParser(object):
                                       default_value=item["default"]
                                       )
                 else:
-                    new_item = astype(name=item["topic"],
-                                      description=item["comment"],
-                                      datatype=item["type"])
+                    if "id: " in item["topic"]:
+                        topic = item["topic"].replace("id: ", "")
+                        new_item = astype(name=topic,
+                                          description=item["comment"],
+                                          datatype=item["type"],
+                                          var_name=True)
+                    else:
+                        new_item = astype(name=item["topic"],
+                                          description=item["comment"],
+                                          datatype=item["type"],
+                                          var_name=False)
+
                 new_item.filename = self.filename
                 new_item.line_number = item["lineno"]
                 new_item.code = self.lines[new_item.line_number - 1]

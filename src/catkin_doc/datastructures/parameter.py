@@ -35,8 +35,8 @@ from catkin_doc.datastructures.doc_object import DocObject
 class Parameter(DocObject):
     """Datastructure representing a node's parameter"""
 
-    def __init__(self, name, description="", datatype="", default_value=""):
-        super(Parameter, self).__init__(name, description)
+    def __init__(self, name, description="", datatype="", default_value="", var_name=None):
+        super(Parameter, self).__init__(name, description, var_name)
         self.datatype = datatype
         self.default_value = default_value
 

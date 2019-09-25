@@ -58,19 +58,20 @@ class DocSection(object):
         # Only needed for some types
         self.type_info = None
         self.default_value = None
+        self.var_name = False
 
-        self.title_regex = "^#{" + str(level + 1) + "} ?([^#].*)"
+        self.title_regex = "()^#{" + str(level + 1) + "} ?([^#].*)"
         if self.package_t in self.parameter_style_types:
-            self.title_regex = r'^\s*\*\s*"\*\*(.*)\*\*"\s*(\(default:\s*(.*)\))?(\(\[([^\]]*)\]\(.*\)\))?(\((.*)\))?$'
+            self.title_regex = r'^\s*\*\s*(var)?\s*"\*\*(.*)\*\*"\s*(\(default:\s*(.*)\))?(\(\[([^\]]*)\]\(.*\)\))?(\((.*)\))?$'
         self.parse_title()
         self.description = ""
 
-        self.sub_regex = "^#{" + str(level + 2) + "} ?([^#].*)"
+        self.sub_regex = "()^#{" + str(level + 2) + "} ?([^#].*)"
 
         if self.children_t is Node or self.children_t is LaunchFile:
             pass
         elif self.children_t in self.parameter_style_types:
-            self.sub_regex = r'^\s*\*\s*"\*\*(.*)\*\*"'
+            self.sub_regex = r'^\s*\*\s*(var)?\s*"\*\*(.*)\*\*"'
         self.parse_children()
 
     def parse_title(self):
@@ -81,23 +82,25 @@ class DocSection(object):
         for _, line in self.line_iterator:
             match = re.search(self.title_regex, line)
             if match:
+                if match.group(1) == r'var':
+                    self.var_name = True
                 # print("{}Found current level's title: {}".format(self.level*" ", match.group(1)))
-                self.name = match.group(1)
-                self.children_t = ds.create_doc_object(match.group(1))
+                self.name = match.group(2)
+                self.children_t = ds.create_doc_object(match.group(2))
                 try:
-                    self.default_value = match.group(3)
+                    self.default_value = match.group(4)
                     # print(match.group(3))
-                    if match.group(5):
-                        self.type_info = match.group(5)
+                    if match.group(6):
+                        self.type_info = match.group(6)
                         # print(match.group(5))
                     else:
-                        self.type_info = match.group(7)
+                        self.type_info = match.group(8)
                         # print(match.group(7))
 
                 except IndexError:
                     # If our regex doesn't contain these groups, ignore
                     pass
-                return match.group(1)
+                return match.group(2)
             else:
                 # If we haven't found a name, continue until we do
                 continue
@@ -112,7 +115,7 @@ class DocSection(object):
         for _, line in self.line_iterator:
             match = re.search(self.sub_regex, line)
             if match:
-                name = match.group(1)
+                name = match.group(2)
                 # print("{}Found child: {}".format(self.level*" ", name))
                 sub_lines, _ = self.get_sub_lines()
                 if sub_lines:
@@ -151,15 +154,16 @@ class DocSection(object):
             # print("DocObject for {}".format(self.name))
             if self.package_t in self.parameter_style_types and self.package_t is not Parameter:
                 doc_object = self.package_t(
-                    name=self.name, description=self.description, datatype=self.type_info)
+                    name=self.name, description=self.description, datatype=self.type_info, var_name=self.var_name)
             elif self.package_t is Parameter:
                 doc_object = self.package_t(
                     name=self.name,
                     description=self.description,
                     default_value=self.default_value,
-                    datatype=self.type_info)
+                    datatype=self.type_info,
+                    var_name=self.var_name)
             else:
-                doc_object = self.package_t(name=self.name, description=self.description)
+                doc_object = self.package_t(name=self.name, description=self.description, var_name=self.var_name)
 
             for child in self.children:
                 doc_object.children[child] = self.children[child].to_doc_object()

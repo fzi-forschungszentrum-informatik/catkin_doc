@@ -37,14 +37,12 @@ import copy
 class DocObject(object):
     """Base class for a doc object"""
 
-    def __init__(self, name, description="", var_name = False):
+    def __init__(self, name, description="", var_name = None):
         self.default_description = "Please add description. See {} line number: {}\n\n\t{}"
         self.default_desc_regex = "\s+".join(
             self.default_description.format("(.*)", "(\d+)", "(.*)").split())
 
-        self.name, self.var_name = self.set_name(name)
-        if var_name:
-            self.var_name = True
+        self.name, self.var_name = self.set_name(name, var_name)
         # This is needed for the default description
         self.filename = ""
         self.line_number = None
@@ -147,13 +145,14 @@ class DocObject(object):
             return ""
         return description
 
-    def set_name(self, name):
+    def set_name(self, name, var_name):
         """
         Checks wheter the given name is in a string format meaning have leading or trailing quotation marks,
         if it has those we assume this is the actual name of the object.
         If quotation marks are missing we assume it to be a variable in the original code and will mark it accordingly.
         """
-
+        if not var_name is None:
+            return name.strip("'"+'"'), var_name
         if name[0] == name[-1] and (name[0] == "'" or name[0]=='"'):
             return name.strip("'"+'"'), False
         else:
