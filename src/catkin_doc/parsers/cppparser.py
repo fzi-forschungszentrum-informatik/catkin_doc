@@ -65,7 +65,7 @@ class CppParser(object):
     template_regex = r'(<\s*(?P<type>[^>\s]*)\s*>)?'
     service_template_regex = r'(<(?P<type>[^,>]+)::Request.*>)?'
     type_regex = r'(?P<type>[^,)]+)'
-    name_regex = r'(?P<name>[^",]*)'
+    name_regex = r'(?P<name>"?[^",]*"?)'
     filler_regex = r'[^,)]+'
     default_regex = r'"?(?P<default>[^",()]*(\([^",()]*\))?)"?'
     queue_regex = r'\d+'

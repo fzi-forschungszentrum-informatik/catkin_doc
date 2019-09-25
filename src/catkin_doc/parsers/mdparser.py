@@ -153,6 +153,7 @@ class DocSection(object):
         if ds.get_identifier_for_type(self.package_t) in ds.KEYS:
             # print("DocObject for {}".format(self.name))
             if self.package_t in self.parameter_style_types and self.package_t is not Parameter:
+                #print(self.package_t)
                 doc_object = self.package_t(
                     name=self.name, description=self.description, datatype=self.type_info, var_name=self.var_name)
             elif self.package_t is Parameter:

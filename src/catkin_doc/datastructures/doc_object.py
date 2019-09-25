@@ -153,7 +153,7 @@ class DocObject(object):
         """
         if not var_name is None:
             return name.strip("'"+'"'), var_name
-        if name[0] == name[-1] and (name[0] == "'" or name[0]=='"'):
+        if len(name) > 0 and name[0] == name[-1] and (name[0] == "'" or name[0]=='"'):
             return name.strip("'"+'"'), False
         else:
             return name, True
