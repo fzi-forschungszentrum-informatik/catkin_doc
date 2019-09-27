@@ -60,8 +60,9 @@ class Topic(DocObject):
 
         out_str = ""
         if self.var_name:
-            out_str += "var "
-        out_str += "\"" + formatter.bold(self.name) + "\""
+            out_str += "\"Symbol: " + formatter.bold(self.name) + "\""
+        else:
+            out_str += "\"" + formatter.bold(self.name) + "\""
         if self.url:
             out_str += formatter.text(" ({})".format(formatter.link(self.url, self.datatype)))
         else:
