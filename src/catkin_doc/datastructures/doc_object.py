@@ -145,20 +145,20 @@ class DocObject(object):
             return ""
         return description
 
-    def set_name(self, name, var_name):
+    @staticmethod
+    def set_name(name, var_name):
         """
-        Checks wheter the given name is in a string format meaning have leading or trailing quotation marks,
-        if it has those we assume this is the actual name of the object.
-        If quotation marks are missing we assume it to be a variable in the original code and will mark it accordingly.
+        Checks wheter the given name is in a string format meaning have leading or trailing
+        quotation marks, if it has those we assume this is the actual name of the object.  If
+        quotation marks are missing we assume it to be a variable in the original code and will mark
+        it accordingly.
         """
         if not var_name is None:
             return name.strip("'"+'"'), var_name
-        if len(name) > 0 and name[0] == name[-1] and (name[0] == "'" or name[0]=='"'):
+        if name and name[0] == name[-1] and (name[0] == "'" or name[0] == '"'):
             return name.strip("'"+'"'), False
-        else:
-            return name, True
+        return name, True
 
-        return description
 
     def merge_with(self, other):
         """
