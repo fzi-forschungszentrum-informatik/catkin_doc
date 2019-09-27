@@ -14,7 +14,7 @@ setup(
     name="catkin_doc",
     description="Generate ROS API documentation of catkin package",
     long_description=read("README.md"),
-    author="Felix Mauch",
+    author="Felix Mauch, Lena Holoch",
     author_email="mauch@fzi.de",
     license="BSD",
     keywords=["catkin", "ROS"],

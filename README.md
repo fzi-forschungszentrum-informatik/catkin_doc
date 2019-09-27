@@ -70,3 +70,7 @@ code:
 >    
 >    Please add description. See test_node.py line number: 14\
 >    Code: Publisher('~state', State, queue_size=1, latch=True)
+
+## Acknowledgment
+Special thanks to **Lena Holoch**, who developed large parts of this project.
+For a full list of contributors, please see [CONTRIBUTORS.md](CONTRIBUTORS.md)
