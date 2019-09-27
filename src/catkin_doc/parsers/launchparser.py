@@ -51,7 +51,8 @@ class LaunchParser(object):
                 name = item.get('name')
                 default = item.get('default', default='')
                 comment = item.get('doc', default='')
-                add_item = node_t(name=name, description=comment, default_value=default)
+                add_item = node_t(name=name, description=comment, default_value=default,
+                                  var_name=False)
                 if comment == '':
                     add_item.filename = os.path.relpath(self.filename, self.package_root)
                     # add_item.code = ET.tostring(item)
