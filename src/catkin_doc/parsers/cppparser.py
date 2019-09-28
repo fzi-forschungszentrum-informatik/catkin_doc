@@ -118,26 +118,54 @@ class CppParser(object):
         for filepath in self.files:
             with open(filepath) as filecontent:
                 self.lines = filecontent.readlines()
+                self.filecontent = filecontent
                 self.parse(filepath)
 
     def parse(self, filepath):
         """
         Extract and add all relevant features from cpp node including comments on them.
         """
-        commands_generator = self.get_commands()
-        for line, linenumber in commands_generator:
-            # print("{}: {}".format(linenumber, line))
-            for regex, as_type, add in self.parser_fcts:
+        line_end = '.*\n'
+        line_ends = list()
+        for match in re.finditer(line_end, self.filecontent):
+            line_ends.append(match.end())
+
+        for regex, as_type, add in self.parser_fcts:
+            for match in re.finditer(regex, self.filecontent, re.DOTALL | re.MULTILINE):
+                line_start = next(i for i in range(len(line_ends)) if line_ends[i] > match.start())
+                line_end = next(i for i in range(len(line_ends)) if line_ends[i] > match.end())
+                print("Line {}-{}:".format(line_start + 1, line_end + 1))
+                line = "".join(self.lines[line_start:line_end - line_start])
+                code = ""
+                for i in range(line_start, line_end + 1):
+                    # print(self.lines[i].strip("\n"))
+                    code += self.lines[i]
                 item, brackets = self.extract_info(line, as_type, regex)
                 if item:
                     filename = filepath.split("/")[-1]
                     item.filename = filename
-                    item.line_number = linenumber
-                    item.code = brackets
-                    comment = self.search_for_comment(linenumber)
+                    item.line_number = line_start + 1
+                    item.code = code
+                    comment = self.search_for_comment(line_start)
                     if comment:
                         item.description = comment
                     add(item)
+                    # print("Name: {}, is_var: {}".format(item.name, item.var_name))
+
+        # commands_generator = self.get_commands()
+        # for line, linenumber in commands_generator:
+            # # print("{}: {}".format(linenumber, line))
+            # for regex, as_type, add in self.parser_fcts:
+                # item, brackets = self.extract_info(line, as_type, regex)
+                # if item:
+                    # filename = filepath.split("/")[-1]
+                    # item.filename = filename
+                    # item.line_number = linenumber
+                    # item.code = brackets
+                    # comment = self.search_for_comment(linenumber)
+                    # if comment:
+                    # item.description = comment
+                    # add(item)
                     # print("Name: {}, is_var: {}".format(item.name, item.var_name))
 
     @staticmethod
@@ -145,13 +173,12 @@ class CppParser(object):
         """Makes sure only to replace comments and not all strings"""
         s = match.group(0)
         if s.startswith('/'):
-            return " " # note: a space and not an empty string
+            return " "  # note: a space and not an empty string
         return s
 
     def remove_comments_and_strings(self, code):
         """Remove all comments and strings from a given piece of c++ code"""
         return self.replace_comments_and_strings(code, " ")
-
 
     def remove_comments(self, code):
         """Remove all comments from a given piece of c++ code"""
