@@ -78,7 +78,7 @@ class CppParser(object):
     # Based on http://wiki.ros.org/roscpp/Overview/Publishers%20and%20Subscribers#Subscriber_Options
     subscriber_regex = r"\s*".join(['subscribe', template_regex, r'\(', name_regex,
                                     ',', queue_regex, ',', callback_regex, remainder_regex, r'\)'])
-    print("Subscriber regex: " + subscriber_regex)
+    # print("Subscriber regex: " + subscriber_regex)
 
     publisher_regex = r"\s*".join(['advertise', template_regex, r'\(', name_regex,
                                    ',', queue_regex, remainder_regex, r'\)'])
@@ -138,7 +138,7 @@ class CppParser(object):
                     if comment:
                         item.description = comment
                     add(item)
-                    print("Name: {}, is_var: {}".format(item.name, item.var_name))
+                    # print("Name: {}, is_var: {}".format(item.name, item.var_name))
 
     @staticmethod
     def comment_replacer(match):
