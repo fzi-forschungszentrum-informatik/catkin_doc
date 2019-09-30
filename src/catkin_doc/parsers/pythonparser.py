@@ -104,11 +104,13 @@ class Analyzer(ast.NodeVisitor):
             if func_name == "get_param":
                 param_name = ""
                 default_value = ""
+                is_symbol = False
                 if len(node.args) >= 1:
                     if isinstance(node.args[0], ast.Str):
                         param_name = node.args[0].s
                     elif isinstance(node.args[0], ast.Name):
-                        param_name = "id: " + node.args[0].id
+                        param_name = node.args[0].id
+                        is_symbol = True
 
                 if len(node.args) >= 2:
                     default_value = self.ast_to_python(node.args[1])
@@ -119,18 +121,26 @@ class Analyzer(ast.NodeVisitor):
                     {"name": param_name,
                      "lineno": node.lineno,
                      "default": default_value,
-                     "comment": comment})
+                     "comment": comment,
+                     "is_symbol": is_symbol})
             elif func_name in self.func_names:
                 topic_name = ""
                 msg_type = ""
+                is_symbol = False
+                id_regex = r'(id: )(.+)'
                 if len(node.args) >= 2:
                     topic_name = self.ast_to_python(node.args[0])
+                    match = re.match(id_regex, topic_name)
+                    if match:
+                        topic_name = match.group(2)
+                        is_symbol = True
 
                     if isinstance(node.args[1], ast.Name):
                         if node.args[1].id in self.from_imports:
                             msg_type = self.from_imports[node.args[1].id]
                         else:
-                            msg_type = "id: " + node.args[1].id
+                            msg_type = node.args[1].id
+                            is_symbol = True
                     elif isinstance(node.args[1], ast.Attribute):
                         def parse(candidate):
                             if isinstance(candidate, ast.Attribute):
@@ -150,7 +160,8 @@ class Analyzer(ast.NodeVisitor):
                         {"topic": topic_name,
                          "lineno": node.lineno,
                          "type": self.parse_datatype(msg_type),
-                         "comment": comment})
+                         "comment": comment,
+                         "is_symbol": is_symbol})
 
     def visit_Import(self, node):
         for alias in node.names:
@@ -214,24 +225,19 @@ class PythonParser(object):
 
         for rospy_fcn, astype, add_fcn in self.parser_fcts:
             for item in analyzer.stats[rospy_fcn]:
+                print(item)
                 if rospy_fcn == "get_param":
                     # print (item)
                     new_item = astype(name=item["name"],
                                       description=item["comment"],
-                                      default_value=item["default"]
+                                      default_value=item["default"],
+                                      var_name=item["is_symbol"]
                                       )
                 else:
-                    if "id: " in item["topic"]:
-                        topic = item["topic"].replace("id: ", "")
-                        new_item = astype(name=topic,
-                                          description=item["comment"],
-                                          datatype=item["type"],
-                                          var_name=True)
-                    else:
-                        new_item = astype(name=item["topic"],
-                                          description=item["comment"],
-                                          datatype=item["type"],
-                                          var_name=False)
+                    new_item = astype(name=item["topic"],
+                                      description=item["comment"],
+                                      datatype=item["type"],
+                                      var_name=item["is_symbol"])
 
                 new_item.filename = self.filename
                 new_item.line_number = item["lineno"]
