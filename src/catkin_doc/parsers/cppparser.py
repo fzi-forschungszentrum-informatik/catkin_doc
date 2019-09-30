@@ -70,7 +70,7 @@ class CppParser(object):
     default_regex = r'(?P<default>[^,]*(\([^,()]*\))?)'
     queue_regex = r'\d+'
     callback_regex = r'(?P<callback>([^,()]+)(\([^()]*\))?([^,)])*)'
-    remainder_regex = r'(,\s*(?P<remainder>.+))?'
+    remainder_regex = r'(,\s*(?P<remainder>[^)]+))?'
 
     # I'd like to get rid of this....
     boost_callback_regex = r'(.*boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^,)]*))'
