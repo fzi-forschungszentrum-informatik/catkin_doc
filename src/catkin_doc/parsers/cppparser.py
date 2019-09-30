@@ -118,7 +118,7 @@ class CppParser(object):
         for filepath in self.files:
             with open(filepath) as filecontent:
                 self.lines = filecontent.readlines()
-                self.filecontent = filecontent
+                self.filecontent = "".join(self.lines)
                 self.parse(filepath)
 
     def parse(self, filepath):
@@ -134,13 +134,12 @@ class CppParser(object):
             for match in re.finditer(regex, self.filecontent, re.DOTALL | re.MULTILINE):
                 line_start = next(i for i in range(len(line_ends)) if line_ends[i] > match.start())
                 line_end = next(i for i in range(len(line_ends)) if line_ends[i] > match.end())
-                print("Line {}-{}:".format(line_start + 1, line_end + 1))
-                line = "".join(self.lines[line_start:line_end - line_start])
-                code = ""
-                for i in range(line_start, line_end + 1):
-                    # print(self.lines[i].strip("\n"))
-                    code += self.lines[i]
-                item, brackets = self.extract_info(line, as_type, regex)
+                code = "".join(self.lines[line_start:line_end+1])
+                # print("Line {}-{}".format(line_start + 1, line_end + 1))
+                # print(regex)
+                # print(match.group(0))
+                # print("Line {}-{}:\n{}".format(line_start + 1, line_end + 1, code))
+                item, brackets = self.extract_info(code, as_type, regex)
                 if item:
                     filename = filepath.split("/")[-1]
                     item.filename = filename
@@ -150,23 +149,6 @@ class CppParser(object):
                     if comment:
                         item.description = comment
                     add(item)
-                    # print("Name: {}, is_var: {}".format(item.name, item.var_name))
-
-        # commands_generator = self.get_commands()
-        # for line, linenumber in commands_generator:
-            # # print("{}: {}".format(linenumber, line))
-            # for regex, as_type, add in self.parser_fcts:
-                # item, brackets = self.extract_info(line, as_type, regex)
-                # if item:
-                    # filename = filepath.split("/")[-1]
-                    # item.filename = filename
-                    # item.line_number = linenumber
-                    # item.code = brackets
-                    # comment = self.search_for_comment(linenumber)
-                    # if comment:
-                    # item.description = comment
-                    # add(item)
-                    # print("Name: {}, is_var: {}".format(item.name, item.var_name))
 
     @staticmethod
     def comment_replacer(match):
@@ -258,7 +240,7 @@ class CppParser(object):
         Check whether a line contains a topic item matching the given regex
         Returns True if line contains a corresponding item and False otherwise.
         """
-        match = re.search(regex, line)
+        match = re.search(regex, line, re.DOTALL | re.MULTILINE)
         if match:
             name = str(match.group('name'))
             if 'default' in match.groupdict().keys():
@@ -328,9 +310,9 @@ class CppParser(object):
         is found
         """
         still_comment = True
-        # We need to start one line before the starting line and
-        # subtract one more for the indexing
-        line_of_comment = linenumber - 2
+        # We need to start one line before the starting line
+        line_of_comment = linenumber - 1
+        # print("Searching for comment starting in line {}".format(line_of_comment+1))
         comment_lines = list()
         while still_comment:
             comm_line = extract_comment(self.lines[line_of_comment])
