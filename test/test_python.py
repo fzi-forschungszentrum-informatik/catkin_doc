@@ -82,62 +82,76 @@ add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
 
         analyzer = pythonparser.Analyzer(tokens)
         analyzer.visit(tree)
+        self.maxDiff = None
 
         expected = {'Publisher': [{'comment': '',
+                                   'is_symbol': False,
                                    'lineno': 3,
                                    'topic': 'pub_topic',
                                    'type': 'std_msgs/String'}],
                     'Subscriber': [{'comment': '',
+                                    'is_symbol': False,
                                     'lineno': 4,
                                     'topic': 'sub_topic',
                                     'type': 'std_msgs/String'}],
                     'Service': [{'comment': '',
+                                 'is_symbol': False,
                                  'lineno': 5,
                                  'topic': 'service_name',
                                  'type': 'std_srvs/Trigger'}],
                     'get_param': [{'comment': '',
+                                   'is_symbol': False,
                                    'lineno': 6,
                                    'name': 'param_name',
                                    'default': 'default_value'},
                                   {'comment': '',
+                                   'is_symbol': True,
                                    'lineno': 8,
-                                   'name': "id: param_name",
+                                   'name': "param_name",
                                    'default': 1.0},
                                   {'comment': '',
+                                   'is_symbol': False,
                                    'lineno': 9,
                                    'name': "param_name3",
                                    'default': ''},
                                   {'comment': '',
+                                   'is_symbol': False,
                                    'lineno': 10,
                                    'name': "param_name4",
                                    'default': 'id: param_name'},
                                   {'comment': '',
+                                   'is_symbol': False,
                                    'lineno': 11,
                                    'name': "param_list",
                                    'default': [1, 2, 3]},
                                   {'comment': '',
+                                   'is_symbol': False,
                                    'lineno': 12,
                                    'name': "~param_dict",
                                    'default': {'a': 1, 'b': 2, 'c': 3}},
                                   {'comment': '',
+                                   'is_symbol': False,
                                    'lineno': 13,
                                    'name': "~param_tuple",
                                    'default': "UNKNOWN_TYPE"}],
                     'SimpleActionServer': [{'comment': '',
+                                            'is_symbol': True,
                                             'lineno': 16,
-                                            'topic': 'id: action_name',
+                                            'topic': 'action_name',
                                             'type': 'actionlib_tutorials/FibonacciAction'}],
                     'SimpleActionClient': [{'comment': '',
+                                            'is_symbol': False,
                                             'lineno': 17,
                                             'topic': 'fibonacci',
                                             'type': 'actionlib_tutorials/FibonacciAction'}],
                     'ServiceProxy': [{'comment': 'AddTwoInts is unknown due to wildcard export',
+                                      'is_symbol': True,
                                       'lineno': 20,
                                       'topic': 'add_two_ints',
-                                      'type': 'id: AddTwoInts'}],
+                                      'type': 'AddTwoInts'}],
                     }
 
-        subset = {k:v for k, v in analyzer.stats.items() if k in expected}
+        subset = {k: v for k, v in analyzer.stats.items() if k in expected}
         self.assertDictEqual(subset, expected)
 
     def test_comment_search(self):
@@ -158,13 +172,15 @@ self.pub = rospy.Subscriber("sub_topic", String)
         analyzer.visit(tree)
 
         expected = {'Subscriber': [{'comment': 'Comment for subscriber1 Comment for subscriber2',
+                                    'is_symbol': False,
                                     'lineno': 6,
                                     'topic': 'sub_topic',
                                     'type': 'std_msgs/String'}],
                     }
 
-        subset = {k:v for k, v in analyzer.stats.items() if k in expected}
+        subset = {k: v for k, v in analyzer.stats.items() if k in expected}
         self.assertDictEqual(subset, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
