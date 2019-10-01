@@ -225,7 +225,7 @@ class PythonParser(object):
 
         for rospy_fcn, astype, add_fcn in self.parser_fcts:
             for item in analyzer.stats[rospy_fcn]:
-                print(item)
+                # print(item)
                 if rospy_fcn == "get_param":
                     # print (item)
                     new_item = astype(name=item["name"],
