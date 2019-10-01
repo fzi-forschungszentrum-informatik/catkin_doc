@@ -103,7 +103,7 @@ class Analyzer(ast.NodeVisitor):
             func_name = node.func.attr
             if func_name == "get_param":
                 param_name = ""
-                default_value = ""
+                default_value = None
                 is_symbol = False
                 if len(node.args) >= 1:
                     if isinstance(node.args[0], ast.Str):

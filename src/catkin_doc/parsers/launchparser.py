@@ -49,7 +49,7 @@ class LaunchParser(object):
         for tag, node_t, add in self.parser_fcts:
             for item in self.root.findall(tag):
                 name = item.get('name')
-                default = item.get('default', default='')
+                default = item.get('default', default=None)
                 comment = item.get('doc', default='')
                 add_item = node_t(name=name, description=comment, default_value=default,
                                   var_name=False)
