@@ -50,7 +50,7 @@ class LaunchParser(object):
             for item in self.root.findall(tag):
                 name = item.get('name')
                 default = item.get('default', default=None)
-                comment = item.get('doc', default='')
+                comment = item.get('doc', default=None)
                 add_item = node_t(name=name, description=comment, default_value=default,
                                   var_name=False)
                 if comment == '':
