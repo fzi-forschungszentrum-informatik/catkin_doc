@@ -1,3 +1,5 @@
+[![Build badge](https://travis-ci.org/fzi-forschungszentrum-informatik/catkin_doc.svg?branch=master)](https://travis-ci.org/fzi-forschungszentrum-informatik/catkin_doc)
+
 # The catkin\_doc project
 
 Generally this package is for automatically generating documentation for ROS nodes. Documentation is
