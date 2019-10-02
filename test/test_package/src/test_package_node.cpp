@@ -42,19 +42,19 @@ int main(int argc, char** argv)
   // Functor subscriber
   ros::Subscriber functor_sub = nh.subscribe<std_msgs::String>("my_topic", 1, Listener());
 
-  nh.subscribe("chatter", 1, callback1);
-  nh.subscribe("chatter", 1, callback2);
-  nh.subscribe("chatter", 1, callback3);
-  nh.subscribe("chatter", 1, callback4);
-  nh.subscribe("chatter", 1, callback5);
-  nh.subscribe("chatter", 1, callback6);
-  nh.subscribe("chatter", 1, callback7);
-  nh.subscribe("chatter", 1, callback8);
-  nh.subscribe("chatter", 1, callback9);
-  nh.subscribe("chatter", 1, callback10);
-  nh.subscribe("chatter", 1, callback11);
-  nh.subscribe("chatter", 1, callback12);
-  nh.subscribe("chatter", 1, callback13);
+  nh.subscribe("chatter1", 1, callback1);
+  nh.subscribe("chatter2", 1, callback2);
+  nh.subscribe("chatter3", 1, callback3);
+  nh.subscribe("chatter4", 1, callback4);
+  nh.subscribe("chatter5", 1, callback5);
+  nh.subscribe("chatter6", 1, callback6);
+  nh.subscribe("chatter7", 1, callback7);
+  nh.subscribe("chatter8", 1, callback8);
+  nh.subscribe("chatter9", 1, callback9);
+  nh.subscribe("chatter10", 1, callback10);
+  nh.subscribe("chatter11", 1, callback11);
+  nh.subscribe("chatter12", 1, callback12);
+  nh.subscribe("chatter13", 1, callback13);
 
   ros::spin();
   return 0;
