@@ -67,7 +67,7 @@ class CppParser(object):
     type_regex = r'(?P<type>[^,)]+)'
     name_regex = r'(?P<name>[^,)]*)'
     filler_regex = r'[^,)]+'
-    default_regex = r'"?(?P<default>[^",()]*(\([^",()]*\))?)"?'
+    default_regex = r'(?P<default>[^,()]*(\([^,()]*\))?)'
     queue_regex = r'\d+'
     callback_regex = r'(?P<callback>([^,()]+)(\([^()]*\))?([^,)])*)'
     remainder_regex = r'(,\s*(?P<remainder>.+))?'
@@ -228,7 +228,10 @@ class CppParser(object):
         if match:
             name = str(match.group('name'))
             if 'default' in match.groupdict().keys():
-                default_value = str(match.group('default')).replace('\'', '\"')
+                if match.group('default') == "":
+                    default_value = None
+                else:
+                    default_value = str(match.group('default')).replace('\'', '').replace('\"', '')
             if 'type' in match.groupdict().keys():
                 datatype = str(match.group('type')).strip('"').replace(",", "")
                 if datatype == "None":

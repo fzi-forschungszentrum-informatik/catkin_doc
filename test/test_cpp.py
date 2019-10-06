@@ -65,7 +65,7 @@ class TestCpp(unittest.TestCase):
         param, brackets = node.extract_info(code, Parameter, node.param_regex)
         self.assertEqual(param.name, "param3")
         self.assertEqual(brackets, code)
-        self.assertEqual(param.default_value, "")
+        self.assertEqual(param.default_value, None)
 
         code = 'nh.param<std::string>("param4", param4, defaultGenerator());'
         param, brackets = node.extract_info(code, Parameter, node.param_regex)

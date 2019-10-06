@@ -113,7 +113,7 @@ add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
                                    'is_symbol': False,
                                    'lineno': 9,
                                    'name': "param_name3",
-                                   'default': ''},
+                                   'default': None},
                                   {'comment': '',
                                    'is_symbol': False,
                                    'lineno': 10,

@@ -35,7 +35,7 @@ from catkin_doc.datastructures.doc_object import DocObject
 class Parameter(DocObject):
     """Datastructure representing a node's parameter"""
 
-    def __init__(self, name, description="", datatype="", default_value="", var_name=None):
+    def __init__(self, name, description="", datatype="", default_value=None, var_name=None):
         super(Parameter, self).__init__(name, description, var_name)
         self.datatype = datatype
         self.default_value = default_value
@@ -55,13 +55,13 @@ class Parameter(DocObject):
             out_str += "\"Symbol: " + formatter.bold(self.name) + "\""
         else:
             out_str += "\"" + formatter.bold(self.name) + "\""
-        if self.default_value:
+        if self.default_value is not None:
             default_formatted = self.default_value
             if isinstance(self.default_value, str):
                 default_formatted = "\"{}\"".format(self.default_value)
             out_str += formatter.text(" (default: {})".format(default_formatted))
         else:
-            out_str += formatter.new_line()
+            out_str += formatter.text(" (Required)")
         out_str += formatter.new_line()
 
         out_str += formatter.text(self.get_description())
@@ -72,7 +72,7 @@ class Parameter(DocObject):
 class LaunchArgument(Parameter):
     """Datastructure representing argument of a launchfile"""
 
-    def __init__(self, name, description="", datatype="", default_value="", var_name=None):
+    def __init__(self, name, description="", datatype="", default_value=None, var_name=None):
         super(LaunchArgument, self).__init__(name, description, datatype, default_value, var_name)
         self.default_description = "Please add description. See file \"{}\"."
         self.default_desc_regex = "\s+".join(

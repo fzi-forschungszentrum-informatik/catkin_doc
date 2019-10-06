@@ -137,12 +137,13 @@ class DocObject(object):
         and information is extracted from the given description.
         """
 
-        match = re.search(self.default_desc_regex, " ".join(description.split()))
-        if match:
-            self.filename = match.group(1)
-            self.line_number = match.group(2)
-            self.code = match.group(3)
-            return ""
+        if description is not None:
+            match = re.search(self.default_desc_regex, " ".join(description.split()))
+            if match:
+                self.filename = match.group(1)
+                self.line_number = match.group(2)
+                self.code = match.group(3)
+                return ""
         return description
 
     @staticmethod
