@@ -29,6 +29,7 @@
 
 import ast
 import io
+import os
 import sys
 import tempfile
 import tokenize
@@ -286,6 +287,43 @@ self.pub = rospy.Subscriber("sub_topic", String)
                                     'lineno': 6,
                                     'topic': 'sub_topic',
                                     'type': 'std_msgs/String'}],
+                    }
+
+        subset = {k: v for k, v in analyzer.stats.items() if k in expected}
+        self.assertDictEqual(subset, expected)
+
+    def test_python_node(self):
+        """Test parsing of a python node file"""
+        script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+        rel_path = 'test_package/scripts/python_node'
+        abs_file_path = os.path.join(script_dir, rel_path)
+        with open(abs_file_path, 'r') as source_file:
+            source_code = source_file.read()
+        tree = ast.parse(source_code)
+        tokens = list()
+        for five_tuple in tokenize.generate_tokens(StringIO(source_code).readline):
+            tokens.append(five_tuple)
+
+        analyzer = pythonparser.Analyzer(tokens)
+        analyzer.visit(tree)
+
+        self.maxDiff = None
+
+        expected = {'Subscriber': [{'comment': '',
+                                    'is_symbol': False,
+                                    'lineno': 14,
+                                    'topic': 'topic1',
+                                    'type': 'std_msgs/Bool'},
+                                   {'comment': 'This is a comment for sub2',
+                                    'is_symbol': False,
+                                    'lineno': 17,
+                                    'topic': 'topic2',
+                                    'type': 'std_msgs/Bool'},
+                                   {'comment': '',
+                                    'is_symbol': False,
+                                    'lineno': 19,
+                                    'topic': 'topic3',
+                                    'type': 'std_msgs/Bool'}],
                     }
 
         subset = {k: v for k, v in analyzer.stats.items() if k in expected}
