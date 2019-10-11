@@ -52,7 +52,6 @@ This is a parameter
 
         self.assertEqual(formatted_string, expected_string)
 
-
         my_param = ds.parameter.Parameter("param_name_2",
                                           description="This is a parameter",
                                           var_name=False)
@@ -65,7 +64,6 @@ This is a parameter
 '''
 
         self.assertEqual(formatted_string, expected_string)
-
 
         my_param = ds.parameter.Parameter("param_name_sym",
                                           description="This is a symbol",
@@ -80,7 +78,6 @@ This is a symbol
 
         self.assertEqual(formatted_string, expected_string)
 
-
         my_param = ds.parameter.Parameter("param_string",
                                           default_value="hello",
                                           description="This is a symbol",
@@ -92,8 +89,78 @@ This is a symbol
 
 This is a symbol
 '''
+        self.assertEqual(formatted_string, expected_string)
+
+        my_param = ds.parameter.Parameter("param_string",
+                                          default_value="hello",
+                                          description=None,
+                                          var_name=False)
+        my_param.code = r"""  param_string = rospy.param("~param_string", default("hello"))"""
+        my_param.line_number = 1
+
+        # Test default description
+        formatter = mdformatter.MarkdownFormatter()
+        formatted_string = my_param.to_string(1, formatter)
+        expected_string = r'''"**param_string**" (default: "hello")
+
+Please add description. See  line number: 1
+
+
+
+	  param_string = rospy.param("~param_string", default("hello"))
+'''
 
         self.assertEqual(formatted_string, expected_string)
+
+        # Test no code
+        my_param = ds.parameter.Parameter("param_string",
+                                          default_value="hello",
+                                          description=None,
+                                          var_name=False)
+        formatter = mdformatter.MarkdownFormatter()
+
+        with self.assertRaises(RuntimeError):
+            formatted_string = my_param.to_string(1, formatter)
+
+    def test_launch_arguments(self):
+        """Test formatting of paramter objects"""
+        # Default entry
+        my_arg = ds.parameter.LaunchArgument("arg_name",
+                                             description="This is a launch argument.",
+                                             default_value=1.5,
+                                             var_name=False)
+        formatter = mdformatter.MarkdownFormatter()
+        formatted_string = my_arg.to_string(1, formatter)
+        expected_string = r'''"**arg_name**" (default: 1.5)
+
+This is a launch argument.
+'''
+        self.assertEqual(formatted_string, expected_string)
+
+        # No description
+        my_arg = ds.parameter.LaunchArgument("arg_name",
+                                             description=None,
+                                             default_value=1.5,
+                                             var_name=False)
+        my_arg.filename = "test_launch.launch"
+        my_arg.line_number = 1
+        formatter = mdformatter.MarkdownFormatter()
+        formatted_string = my_arg.to_string(1, formatter)
+        expected_string = r'''"**arg_name**" (default: 1.5)
+
+Please add description. See file "test_launch.launch".
+'''
+        self.assertEqual(formatted_string, expected_string)
+
+        # Test no line
+        my_arg = ds.parameter.LaunchArgument("param_string",
+                                             default_value=None,
+                                             description=None,
+                                             var_name=False)
+        formatter = mdformatter.MarkdownFormatter()
+
+        with self.assertRaises(RuntimeError):
+            formatted_string = my_arg.to_string(1, formatter)
 
 if __name__ == '__main__':
     unittest.main()
