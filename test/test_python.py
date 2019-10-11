@@ -144,7 +144,7 @@ add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
                                             'topic': 'fibonacci',
                                             'type': 'actionlib_tutorials/FibonacciAction'}],
                     'ServiceProxy': [{'comment': 'AddTwoInts is unknown due to wildcard export',
-                                      'is_symbol': True,
+                                      'is_symbol': False,
                                       'lineno': 20,
                                       'topic': 'add_two_ints',
                                       'type': 'AddTwoInts'}],
@@ -260,6 +260,7 @@ add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
         self.assertEqual(node.children[ds.KEYS["service_client"]][0].line_number, 20)
         self.assertEqual(node.children[ds.KEYS["service_client"]][0].datatype,
                          "AddTwoInts")
+        self.assertEqual(node.children[ds.KEYS["service_client"]][0].var_name, False)
         self.assertEqual(node.children[ds.KEYS["service_client"]][0].code,
                          data[19].decode("utf-8").lstrip(' '))
 

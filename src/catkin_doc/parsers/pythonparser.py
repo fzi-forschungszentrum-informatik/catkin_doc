@@ -140,7 +140,6 @@ class Analyzer(ast.NodeVisitor):
                             msg_type = self.from_imports[node.args[1].id]
                         else:
                             msg_type = node.args[1].id
-                            is_symbol = True
                     elif isinstance(node.args[1], ast.Attribute):
                         def parse(candidate):
                             if isinstance(candidate, ast.Attribute):
