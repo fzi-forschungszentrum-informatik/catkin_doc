@@ -162,5 +162,66 @@ Please add description. See file "test_launch.launch".
         with self.assertRaises(RuntimeError):
             formatted_string = my_arg.to_string(1, formatter)
 
+    def test_subscribers(self):
+        """Test formatting of Topic objects"""
+        # Default entry
+        my_topic = ds.topic.Topic("topic_name",
+                                  description="This is a fancy topic",
+                                  datatype="std_msgs/Bool",
+                                  var_name=False)
+        formatter = mdformatter.MarkdownFormatter()
+        formatted_string = my_topic.to_string(1, formatter)
+        expected_string = r'''"**topic_name**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
+
+This is a fancy topic
+'''
+        self.assertEqual(formatted_string, expected_string)
+
+        # Custom datatype
+        my_topic = ds.topic.Topic("topic_name",
+                                  description="This is a fancy topic",
+                                  datatype="my_own_msgs/Imaginary",
+                                  var_name=False)
+        formatter = mdformatter.MarkdownFormatter()
+        formatted_string = my_topic.to_string(1, formatter)
+        expected_string = r'''"**topic_name**" (my_own_msgs/Imaginary)
+
+This is a fancy topic
+'''
+        self.assertEqual(formatted_string, expected_string)
+
+        # Symbol name
+        my_topic = ds.topic.Topic("topic_name",
+                                  description="This is a fancy topic",
+                                  datatype="std_msgs/Bool",
+                                  var_name=True)
+        formatter = mdformatter.MarkdownFormatter()
+        formatted_string = my_topic.to_string(1, formatter)
+        expected_string = r'''"Symbol: **topic_name**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
+
+This is a fancy topic
+'''
+        self.assertEqual(formatted_string, expected_string)
+
+        # No description
+        my_topic = ds.topic.Topic("topic_name",
+                                  description=None,
+                                  datatype="std_msgs/Bool",
+                                  var_name=True)
+        my_topic.line_number = 1
+        my_topic.code = r"""  self.pub = rospy.Publisher(topic_name)"""
+        formatter = mdformatter.MarkdownFormatter()
+        formatted_string = my_topic.to_string(1, formatter)
+        expected_string = r'''"Symbol: **topic_name**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
+
+Please add description. See  line number: 1
+
+
+
+	  self.pub = rospy.Publisher(topic_name)
+'''
+        self.assertEqual(formatted_string, expected_string)
+
+
 if __name__ == '__main__':
     unittest.main()
