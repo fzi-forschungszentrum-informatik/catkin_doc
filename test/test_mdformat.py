@@ -222,6 +222,44 @@ Please add description. See  line number: 1
 '''
         self.assertEqual(formatted_string, expected_string)
 
+    def test_launchfile(self):
+        """Test launchfile formatting"""
+        launchfile = ds.launchfile.LaunchFile("example_launch")
+        my_arg = ds.parameter.LaunchArgument("arg_name",
+                                             description="This is a launch argument.",
+                                             default_value=1.5,
+                                             var_name=False)
+        my_arg.filename = "example_launch.launch"
+        my_arg.line_number = 1
+        launchfile.add_argument(my_arg)
+
+        formatter = mdformatter.MarkdownFormatter()
+        formatted_string = launchfile.to_string(1, formatter)
+        expected_string = r'''# example_launch
+
+
+
+## Arguments
+ * "**arg_name**" (default: 1.5)
+
+    This is a launch argument.
+
+'''
+        self.assertEqual(formatted_string, expected_string)
+
+        # Test empty launchfile
+        launchfile = ds.launchfile.LaunchFile("empty_launch")
+
+        formatter = mdformatter.MarkdownFormatter()
+        formatted_string = launchfile.to_string(1, formatter)
+        expected_string = r'''# empty_launch
+
+
+
+No arguments for this launch file found. You can add a description by hand, if you like.
+'''
+        self.assertEqual(formatted_string, expected_string)
+
 
 if __name__ == '__main__':
     unittest.main()
