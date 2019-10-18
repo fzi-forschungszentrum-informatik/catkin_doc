@@ -43,9 +43,9 @@ class CMakeParser(object):
         self.exec_name = None
         self.pkg_path = pkg_path
         self.executables = dict()
-        self.search_for_cpp_node()
         self.parser = list()
         self.project_name = ""
+        self.search_for_cpp_node()
         for node in self.executables:
             print("Found node " + node)
 
