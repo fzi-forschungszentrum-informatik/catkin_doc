@@ -145,7 +145,6 @@ class CMakeParser(object):
         # get package name
         pkg_name = self.pkg_path.split("/")[-1]
         for key in self.executables:
-            add_list = list()
             for filename in self.executables[key]:
                 with open(filename) as filecontent:
                     lines = filecontent.readlines()
@@ -158,6 +157,5 @@ class CMakeParser(object):
                             headerpath = self.pkg_path + "/include/" + pkg_name + "/" + filename
                             if os.path.isfile(headerpath) and \
                                     headerpath not in self.executables[key]:
-                                add_list.append(headerpath)
+                                self.executables[key].append(headerpath)
                             filecpp = filename.split(".")[0] + ".cpp"
-            self.executables[key] += add_list
