@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="test_node" pkg="test_package" type="node" respawn="false" output="screen">
+  </node>
+</launch>
