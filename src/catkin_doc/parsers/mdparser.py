@@ -49,6 +49,7 @@ class DocSection(object):
         self.package_t = doc_object_type
         self.children_t = doc_object_type
         self.children = dict()
+        self.name = None
 
         self.line_iterator = enumerate(self.lines)
 
