@@ -62,7 +62,7 @@ class DocSection(object):
 
         self.title_regex = "()^#{" + str(level + 1) + "} ?([^#].*)"
         if self.package_t in self.parameter_style_types:
-            self.title_regex = r'^\s*\*\s*(var)?\s*"\*\*(.*)\*\*"\s*(\(default:\s*(.*)\))?(\(\[([^\]]*)\]\(.*\)\))?(\((.*)\))?$'
+            self.title_regex = r'^\s*\*\s*"(Symbol:)?\s*\*\*(.*)\*\*"\s*(\(default:\s*(.*)\))?(\(\[([^\]]*)\]\(.*\)\))?(\((.*)\))?$'
         self.parse_title()
         self.description = ""
 
@@ -71,7 +71,7 @@ class DocSection(object):
         if self.children_t is Node or self.children_t is LaunchFile:
             pass
         elif self.children_t in self.parameter_style_types:
-            self.sub_regex = r'^\s*\*\s*(var)?\s*"\*\*(.*)\*\*"'
+            self.sub_regex = r'^\s*\*\s*"(Symbol:)?\s*\*\*(.*)\*\*"'
         self.parse_children()
 
     def parse_title(self):
@@ -82,7 +82,7 @@ class DocSection(object):
         for _, line in self.line_iterator:
             match = re.search(self.title_regex, line)
             if match:
-                if match.group(1) == r'var':
+                if match.group(1) == r'Symbol:':
                     self.var_name = True
                 # print("{}Found current level's title: {}".format(self.level*" ", match.group(1)))
                 self.name = match.group(2)
