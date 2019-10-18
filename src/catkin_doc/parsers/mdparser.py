@@ -196,4 +196,4 @@ class MdParser(object):
                 lines = filecontent.readlines()
                 self.doc = DocSection(lines, Package, level=0)
         else:
-            print("This is not a markdown file.")
+            raise RuntimeError("This is not a markdown file: {}".format(filename))
