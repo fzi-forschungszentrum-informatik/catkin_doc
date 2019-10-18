@@ -68,9 +68,7 @@ class DocSection(object):
 
         self.sub_regex = "()^#{" + str(level + 2) + "} ?([^#].*)"
 
-        if self.children_t is Node or self.children_t is LaunchFile:
-            pass
-        elif self.children_t in self.parameter_style_types:
+        if self.children_t in self.parameter_style_types:
             self.sub_regex = r'^\s*\*\s*"(Symbol:)?\s*\*\*(.*)\*\*"'
         self.parse_children()
 
@@ -101,9 +99,6 @@ class DocSection(object):
                     # If our regex doesn't contain these groups, ignore
                     pass
                 return match.group(2)
-            else:
-                # If we haven't found a name, continue until we do
-                continue
         return None
 
     def parse_children(self):
