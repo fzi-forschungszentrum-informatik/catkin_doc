@@ -43,7 +43,6 @@ class CMakeParser(object):
         self.exec_name = None
         self.pkg_path = pkg_path
         self.executables = dict()
-        self.parser = list()
         self.project_name = ""
         self.search_for_cpp_node()
         for node in self.executables:
@@ -108,9 +107,6 @@ class CMakeParser(object):
                     cpp_file = cpp_file.replace("${PROJECT_NAME}", self.project_name)
                 if os.path.isfile(self.pkg_path + "/" + cpp_file):
                     cpp_files.append(self.pkg_path + "/" + cpp_file)
-                elif os.path.isdir(self.pkg_path + "/" + cpp_file):
-                    for filename in os.listdir(self.pkg_path):
-                        cpp_files.append(self.pkg_path + "/" + filename)
 
             # print("Adding " + self.exec_name)
             self.executables[self.exec_name] = cpp_files
@@ -164,7 +160,4 @@ class CMakeParser(object):
                                     headerpath not in self.executables[key]:
                                 add_list.append(headerpath)
                             filecpp = filename.split(".")[0] + ".cpp"
-                            cpppath = self.pkg_path + "/src/" + filecpp
-                            if os.path.isfile(cpppath) and cpppath not in self.executables[key]:
-                                add_list.append(cpppath)
             self.executables[key] += add_list
