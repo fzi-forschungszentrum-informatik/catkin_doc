@@ -30,8 +30,8 @@
 from __future__ import print_function
 
 import ast
-import tokenize
 import re
+import tokenize
 
 from catkin_doc.datastructures.node import Node
 from catkin_doc.datastructures.parameter import Parameter
@@ -140,7 +140,6 @@ class Analyzer(ast.NodeVisitor):
                             msg_type = self.from_imports[node.args[1].id]
                         else:
                             msg_type = node.args[1].id
-                            is_symbol = True
                     elif isinstance(node.args[1], ast.Attribute):
                         def parse(candidate):
                             if isinstance(candidate, ast.Attribute):
@@ -206,10 +205,10 @@ class PythonParser(object):
                             ("SimpleActionServer", Action, self.node.add_action)]
         with open(filename) as filecontent:
             self.lines = filecontent.readlines()
-        with open(filename, "r") as source:
-            self.tree = ast.parse(source.read())
         self.tokens = list()
-        with open(filename, "rb") as source:
+        with open(filename) as source:
+            self.tree = ast.parse(source.read())
+        with open(filename) as source:
             for five_tuple in tokenize.generate_tokens(source.readline):
                 self.tokens.append(five_tuple)
 

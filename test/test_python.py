@@ -27,16 +27,16 @@
 # -- END LICENSE BLOCK ------------------------------------------------
 
 
-import unittest
 import ast
-import tokenize
 import io
 import sys
+import tempfile
+import tokenize
+import unittest
 
+import os.path
 
-# import os.path
-
-# import catkin_doc.datastructures as ds
+import catkin_doc.datastructures as ds
 import catkin_doc.parsers.pythonparser as pythonparser
 # from catkin_doc.datastructures.parameter import Parameter
 # from catkin_doc.datastructures.service import Service, ServiceClient
@@ -51,16 +51,14 @@ else:
 
 class TestPython(unittest.TestCase):
     """Test basic functionality of the python doc module"""
-
-    def test_parsing(self):
-        source_code = r'''from std_msgs.msg import String
+    source_code = r'''from std_msgs.msg import String
 from std_srvs.srv import Trigger as Trigg
 self.pub = rospy.Publisher("pub_topic", String, queue_size=1)
 self.pub = rospy.Subscriber("sub_topic", String)
 self.service = rospy.Service('service_name', Trigg, trigger_cb)
 self.param = rospy.get_param('param_name', "default_value")
-param_name = "my_param"
-self.param2 = rospy.get_param(param_name, 1.0)
+param_name_var = "my_param"
+self.param2 = rospy.get_param(param_name_var, 1.0)
 self.param3 = rospy.get_param("param_name3")
 self.param4 = rospy.get_param("param_name4", param_name)
 self.param_list = rospy.get_param("param_list", [1, 2, 3])
@@ -75,9 +73,10 @@ from beginner_tutorials.srv import *
 add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
 '''
 
-        tree = ast.parse(source_code)
+    def test_parsing(self):
+        tree = ast.parse(self.source_code)
         tokens = list()
-        for five_tuple in tokenize.generate_tokens(StringIO(source_code).readline):
+        for five_tuple in tokenize.generate_tokens(StringIO(self.source_code).readline):
             tokens.append(five_tuple)
 
         analyzer = pythonparser.Analyzer(tokens)
@@ -107,7 +106,7 @@ add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
                                   {'comment': '',
                                    'is_symbol': True,
                                    'lineno': 8,
-                                   'name': "param_name",
+                                   'name': "param_name_var",
                                    'default': 1.0},
                                   {'comment': '',
                                    'is_symbol': False,
@@ -145,7 +144,7 @@ add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
                                             'topic': 'fibonacci',
                                             'type': 'actionlib_tutorials/FibonacciAction'}],
                     'ServiceProxy': [{'comment': 'AddTwoInts is unknown due to wildcard export',
-                                      'is_symbol': True,
+                                      'is_symbol': False,
                                       'lineno': 20,
                                       'topic': 'add_two_ints',
                                       'type': 'AddTwoInts'}],
@@ -153,6 +152,117 @@ add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
 
         subset = {k: v for k, v in analyzer.stats.items() if k in expected}
         self.assertDictEqual(subset, expected)
+
+    def test_create_objects(self):
+        """Test creating objects from parsed code"""
+        source_file = tempfile.NamedTemporaryFile()
+        source_file.write(self.source_code.encode(encoding="utf-8", errors="strict"))
+        source_file.seek(0)
+        parser = pythonparser.PythonParser(source_file.name)
+        data = source_file.readlines()
+        for number, line in enumerate(data):
+            print("{}: {}".format(number + 1, line))
+
+        node = parser.node
+
+        self.assertEqual(node.name, os.path.basename(source_file.name))
+        self.assertEqual(len(node.children), 7)
+        self.assertEqual(node.children[ds.KEYS["publisher"]][0].name, "pub_topic")
+        self.assertEqual(node.children[ds.KEYS["publisher"]][0].line_number, 3)
+        self.assertEqual(node.children[ds.KEYS["publisher"]][0].datatype, "std_msgs/String")
+        self.assertEqual(node.children[ds.KEYS["publisher"]][0].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["publisher"]][0].code,
+                         data[2].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].name, "sub_topic")
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].line_number, 4)
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].datatype, "std_msgs/String")
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].code,
+                         data[3].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["service"]][0].name, "service_name")
+        self.assertEqual(node.children[ds.KEYS["service"]][0].line_number, 5)
+        self.assertEqual(node.children[ds.KEYS["service"]][0].datatype, "std_srvs/Trigger")
+        self.assertEqual(node.children[ds.KEYS["service"]][0].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["service"]][0].code,
+                         data[4].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["parameter"]][0].name, "param_name")
+        self.assertEqual(node.children[ds.KEYS["parameter"]][0].line_number, 6)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][0].default_value, "default_value")
+        self.assertEqual(node.children[ds.KEYS["parameter"]][0].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][0].code,
+                         data[5].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["parameter"]][1].name, "param_name_var")
+        self.assertEqual(node.children[ds.KEYS["parameter"]][1].line_number, 8)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][1].default_value, 1.0)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][1].var_name, True)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][1].code,
+                         data[7].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["parameter"]][2].name, "param_name3")
+        self.assertEqual(node.children[ds.KEYS["parameter"]][2].line_number, 9)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][2].default_value, None)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][2].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][2].code,
+                         data[8].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["parameter"]][3].name, "param_name4")
+        self.assertEqual(node.children[ds.KEYS["parameter"]][3].line_number, 10)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][3].default_value, "id: param_name")
+        self.assertEqual(node.children[ds.KEYS["parameter"]][3].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][3].code,
+                         data[9].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["parameter"]][4].name, "param_list")
+        self.assertEqual(node.children[ds.KEYS["parameter"]][4].line_number, 11)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][4].default_value, [1, 2, 3])
+        self.assertEqual(node.children[ds.KEYS["parameter"]][4].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][4].code,
+                         data[10].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["parameter"]][5].name, "~param_dict")
+        self.assertEqual(node.children[ds.KEYS["parameter"]][5].line_number, 12)
+        self.assertEqual(node.children[ds.KEYS["parameter"]]
+                         [5].default_value, {'a': 1, 'b': 2, 'c': 3})
+        self.assertEqual(node.children[ds.KEYS["parameter"]][5].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][5].code,
+                         data[11].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["parameter"]][6].name, "~param_tuple")
+        self.assertEqual(node.children[ds.KEYS["parameter"]][6].line_number, 13)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][6].default_value, "UNKNOWN_TYPE")
+        self.assertEqual(node.children[ds.KEYS["parameter"]][6].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["parameter"]][6].code,
+                         data[12].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["action"]][0].name, "action_name")
+        self.assertEqual(node.children[ds.KEYS["action"]][0].line_number, 16)
+        self.assertEqual(node.children[ds.KEYS["action"]][0].datatype,
+                         "actionlib_tutorials/FibonacciAction")
+        self.assertEqual(node.children[ds.KEYS["action"]][0].var_name, True)
+        self.assertEqual(node.children[ds.KEYS["action"]][0].code,
+                         data[15].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["action_client"]][0].name, "fibonacci")
+        self.assertEqual(node.children[ds.KEYS["action_client"]][0].line_number, 17)
+        self.assertEqual(node.children[ds.KEYS["action_client"]][0].datatype,
+                         "actionlib_tutorials/FibonacciAction")
+        self.assertEqual(node.children[ds.KEYS["action_client"]][0].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["action_client"]][0].code,
+                         data[16].decode("utf-8").lstrip(' '))
+
+        self.assertEqual(node.children[ds.KEYS["service_client"]][0].name, "add_two_ints")
+        self.assertEqual(node.children[ds.KEYS["service_client"]][0].description,
+                         "AddTwoInts is unknown due to wildcard export")
+        self.assertEqual(node.children[ds.KEYS["service_client"]][0].line_number, 20)
+        self.assertEqual(node.children[ds.KEYS["service_client"]][0].datatype,
+                         "AddTwoInts")
+        self.assertEqual(node.children[ds.KEYS["service_client"]][0].var_name, False)
+        self.assertEqual(node.children[ds.KEYS["service_client"]][0].code,
+                         data[19].decode("utf-8").lstrip(' '))
 
     def test_comment_search(self):
         source_code = r'''from std_msgs.msg import String
