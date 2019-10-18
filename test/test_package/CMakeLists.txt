@@ -139,6 +139,10 @@ add_executable(${PROJECT_NAME}_node
   src/listener.cpp
 )
 
+add_executable(non_ros_node
+  src/non_ros.cpp
+)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
