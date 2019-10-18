@@ -65,7 +65,7 @@ class CMakeParser(object):
 
     def parse_project_name(self, linenumber):
         """
-        Method to parse the project name from CMAkeLists.txt as it may be needed to replace Params
+        Method to parse the project name from CMakeLists.txt as it may be needed to replace Params
         later on
         """
         match = re.search(r"(project\()(\S+)(\))", self.lines[linenumber])
@@ -134,13 +134,14 @@ class CMakeParser(object):
 
     def find_more_files(self):
         """
-        Method to find included files belonging to the node and which aren't in the CMakeList As
-        this isn't trivial there are some assumptions made: all files belonging to the node are from
-        the same package we won't look at includes from different packages if there is a Header from
-        the same package included we assume that its location is
-        package_name/include/package_name/name_of_class.cpp the pkghandler is always used for a
-        package not for parent- or childdirectories of one. So the package name is the last part of
-        the String the pkghandler is instanciated with.
+        Method to find included files belonging to the node and which aren't in the CMakeList
+        As this isn't trivial there are some assumptions made:
+          - all files belonging to the node are from the same package
+          - we won't look at includes from different packages if there is a Header from the same
+            package included we assume that its location is
+              package_name/include/package_name/name_of_class.cpp
+          - the pkghandler is always used for a package not for parent- or childdirectories of one.
+            So the package name is the last part of the String the pkghandler is instanciated with.
         """
         # get package name
         pkg_name = self.pkg_path.split("/")[-1]
