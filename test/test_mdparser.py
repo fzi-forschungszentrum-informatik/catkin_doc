@@ -60,7 +60,7 @@ class TestMdParsing(unittest.TestCase):
         self.assertEqual(parser.doc.name, 'test_package')
         self.assertEqual(parser.doc.description, 'The test_package package')
 
-        self.assertListEqual(list(parser.doc.children.keys()), ['Nodes'])
+        self.assertListEqual(sorted(parser.doc.children.keys()), ['Launchfiles', 'Nodes'])
         nodes = parser.doc.children['Nodes']
 
         self.assertListEqual(list(nodes.children.keys()), ['test_package_node', 'python_node'])
