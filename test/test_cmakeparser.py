@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -- BEGIN LICENSE BLOCK ----------------------------------------------
 # Copyright (c) 2019, FZI Forschungszentrum Informatik
 #
@@ -25,43 +26,33 @@
 # WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # -- END LICENSE BLOCK ------------------------------------------------
 
-"""
-Launchfile datastructure
-"""
-import catkin_doc.datastructures as ds
-from catkin_doc.datastructures.doc_object import DocObject
+import os
+import unittest
+
+from catkin_doc.parsers.cmakeparser import CMakeParser
 
 
-class LaunchFile(DocObject):
+class TestCmakeParsing(unittest.TestCase):
+    """Test basic functionality of the cmake parsing module"""
 
-    def add_argument(self, argument):
-        """Adds a argument as child"""
-        self.add_child(ds.KEYS["launch_argument"], argument)
+    def test_parsing(self):
+        """Test parsing of a cmake file"""
+        script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+        rel_path = 'test_package'
+        pkg_dir = os.path.join(script_dir, rel_path)
 
-    def to_string(self, level, formatter):
-        """
-        Formats the object as text
+        parser = CMakeParser(pkg_dir)
 
-        :param int level: Level of heading hierarchy
-        :param formatter: Formatter to use
-        :return: A formatted string for this object formatted by the given formatter
-        :rtype: str
-        """
+        executables = {'test_package_node': [
+            os.path.join(pkg_dir, 'src/test_package_node.cpp'),
+            os.path.join(pkg_dir, 'src/listener.cpp'),
+            os.path.join(pkg_dir, 'include/test_package/listener.h')
+        ]}
+        self.maxDiff = None
 
-        out_str = formatter.heading(level, self.name) + formatter.new_line()
+        self.assertDictEqual(parser.executables, executables)
+        self.assertEqual(parser.project_name, 'test_package')
 
-        if self.description:
-            out_str += formatter.text(self.description) + formatter.new_line()
 
-        if not self.description and not self.children:
-            out_str += formatter.text("No arguments for this launch file found. You can add a"
-                                      " description by hand, if you like.")
-            out_str += formatter.new_line()
-        for key in sorted(ds.KEYS.values()):
-            if key in self.children:
-                out_str += formatter.heading(level + 1, key)
-                for item in sorted(self.children[key]):
-                    list_str = item.to_string(level + 2, formatter)
-                    out_str += formatter.as_list_item(0, list_str) + formatter.new_line()
-
-        return out_str
+if __name__ == '__main__':
+    unittest.main()

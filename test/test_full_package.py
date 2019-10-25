@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -- BEGIN LICENSE BLOCK ----------------------------------------------
 # Copyright (c) 2019, FZI Forschungszentrum Informatik
 #
@@ -25,43 +26,47 @@
 # WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # -- END LICENSE BLOCK ------------------------------------------------
 
-"""
-Launchfile datastructure
-"""
-import catkin_doc.datastructures as ds
-from catkin_doc.datastructures.doc_object import DocObject
+
+import os
+import tempfile
+import unittest
+
+import catkin_doc
 
 
-class LaunchFile(DocObject):
+class TestFullPackage(unittest.TestCase):
+    """Test the full documentation generation"""
 
-    def add_argument(self, argument):
-        """Adds a argument as child"""
-        self.add_child(ds.KEYS["launch_argument"], argument)
+    def test_generation(self):
+        """Test generating documentation generation"""
 
-    def to_string(self, level, formatter):
-        """
-        Formats the object as text
+        script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+        rel_path = 'test_package'
+        pkg_path = os.path.join(script_dir, rel_path)
+        ref_doc = os.path.join(pkg_path, 'README.md')
+        pkg_handler = catkin_doc.pkghandler.PkgHandler(pkg_path, 'ignore_existing_doc')
 
-        :param int level: Level of heading hierarchy
-        :param formatter: Formatter to use
-        :return: A formatted string for this object formatted by the given formatter
-        :rtype: str
-        """
+        formatter = catkin_doc.formatters.markdown_formatter.MarkdownFormatter()
+        out_string = pkg_handler.doc.to_string(1, formatter)
 
-        out_str = formatter.heading(level, self.name) + formatter.new_line()
+        with open(ref_doc) as ref_file:
+            self.assertEqual(out_string, ref_file.read())
 
-        if self.description:
-            out_str += formatter.text(self.description) + formatter.new_line()
+    def test_round_trip(self):
+        """Test generating documentation generation and merging it with the existing one"""
 
-        if not self.description and not self.children:
-            out_str += formatter.text("No arguments for this launch file found. You can add a"
-                                      " description by hand, if you like.")
-            out_str += formatter.new_line()
-        for key in sorted(ds.KEYS.values()):
-            if key in self.children:
-                out_str += formatter.heading(level + 1, key)
-                for item in sorted(self.children[key]):
-                    list_str = item.to_string(level + 2, formatter)
-                    out_str += formatter.as_list_item(0, list_str) + formatter.new_line()
+        script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+        rel_path = 'test_package'
+        pkg_path = os.path.join(script_dir, rel_path)
+        ref_doc = os.path.join(pkg_path, 'README.md')
+        pkg_handler = catkin_doc.pkghandler.PkgHandler(pkg_path, 'README.md')
 
-        return out_str
+        formatter = catkin_doc.formatters.markdown_formatter.MarkdownFormatter()
+        out_string = pkg_handler.doc.to_string(1, formatter)
+
+        self.maxDiff = None
+        with open(ref_doc) as ref_file:
+            self.assertEqual(out_string, ref_file.read())
+
+if __name__ == '__main__':
+    unittest.main()

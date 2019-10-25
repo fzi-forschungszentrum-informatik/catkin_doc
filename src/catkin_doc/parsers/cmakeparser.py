@@ -43,9 +43,8 @@ class CMakeParser(object):
         self.exec_name = None
         self.pkg_path = pkg_path
         self.executables = dict()
-        self.search_for_cpp_node()
-        self.parser = list()
         self.project_name = ""
+        self.search_for_cpp_node()
         for node in self.executables:
             print("Found node " + node)
 
@@ -66,7 +65,7 @@ class CMakeParser(object):
 
     def parse_project_name(self, linenumber):
         """
-        Method to parse the project name from CMAkeLists.txt as it may be needed to replace Params
+        Method to parse the project name from CMakeLists.txt as it may be needed to replace Params
         later on
         """
         match = re.search(r"(project\()(\S+)(\))", self.lines[linenumber])
@@ -108,9 +107,6 @@ class CMakeParser(object):
                     cpp_file = cpp_file.replace("${PROJECT_NAME}", self.project_name)
                 if os.path.isfile(self.pkg_path + "/" + cpp_file):
                     cpp_files.append(self.pkg_path + "/" + cpp_file)
-                elif os.path.isdir(self.pkg_path + "/" + cpp_file):
-                    for filename in os.listdir(self.pkg_path):
-                        cpp_files.append(self.pkg_path + "/" + filename)
 
             # print("Adding " + self.exec_name)
             self.executables[self.exec_name] = cpp_files
@@ -138,18 +134,18 @@ class CMakeParser(object):
 
     def find_more_files(self):
         """
-        Method to find included files belonging to the node and which aren't in the CMakeList As
-        this isn't trivial there are some assumptions made: all files belonging to the node are from
-        the same package we won't look at includes from different packages if there is a Header from
-        the same package included we assume that its location is
-        package_name/include/package_name/name_of_class.cpp the pkghandler is always used for a
-        package not for parent- or childdirectories of one. So the package name is the last part of
-        the String the pkghandler is instanciated with.
+        Method to find included files belonging to the node and which aren't in the CMakeList
+        As this isn't trivial there are some assumptions made:
+          - all files belonging to the node are from the same package
+          - we won't look at includes from different packages if there is a Header from the same
+            package included we assume that its location is
+              package_name/include/package_name/name_of_class.cpp
+          - the pkghandler is always used for a package not for parent- or childdirectories of one.
+            So the package name is the last part of the String the pkghandler is instanciated with.
         """
         # get package name
         pkg_name = self.pkg_path.split("/")[-1]
         for key in self.executables:
-            add_list = list()
             for filename in self.executables[key]:
                 with open(filename) as filecontent:
                     lines = filecontent.readlines()
@@ -162,9 +158,5 @@ class CMakeParser(object):
                             headerpath = self.pkg_path + "/include/" + pkg_name + "/" + filename
                             if os.path.isfile(headerpath) and \
                                     headerpath not in self.executables[key]:
-                                add_list.append(headerpath)
+                                self.executables[key].append(headerpath)
                             filecpp = filename.split(".")[0] + ".cpp"
-                            cpppath = self.pkg_path + "/src/" + filecpp
-                            if os.path.isfile(cpppath) and cpppath not in self.executables[key]:
-                                add_list.append(cpppath)
-            self.executables[key] += add_list

@@ -237,8 +237,6 @@ Please add description. See  line number: 1
         formatted_string = launchfile.to_string(1, formatter)
         expected_string = r'''# example_launch
 
-
-
 ## Arguments
  * "**arg_name**" (default: 1.5)
 
@@ -254,10 +252,48 @@ Please add description. See  line number: 1
         formatted_string = launchfile.to_string(1, formatter)
         expected_string = r'''# empty_launch
 
-
-
 No arguments for this launch file found. You can add a description by hand, if you like.
+
 '''
+        self.assertEqual(formatted_string, expected_string)
+
+    def test_node(self):
+        """Test node formatting"""
+        node = ds.node.Node("test_node", "This is some imaginary node")
+        my_param = ds.parameter.Parameter("param_name",
+                                          description="This is a parameter",
+                                          default_value=1.5,
+                                          var_name=False)
+        node.add_parameter(my_param)
+        my_topic = ds.topic.Topic("topic_name",
+                                  description="This is a fancy topic",
+                                  datatype="std_msgs/Bool",
+                                  var_name=False)
+        node.add_subscriber(my_topic)
+
+        formatter = mdformatter.MarkdownFormatter()
+        formatted_string = node.to_string(2, formatter)
+        expected_raw = r'''## test_node
+
+This is some imaginary node
+
+### Parameters
+ * "**param_name**" (default: 1.5)
+
+    This is a parameter
+
+### Subscribed topics
+ * "**topic_name**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
+
+    This is a fancy topic
+
+'''
+        replacements = {'parameters': ds.KEYS['parameter'],
+                        'subscribers': ds.KEYS['subscriber'],
+                        'my_param': my_param.to_string(3, formatter),
+                        'my_topic': my_topic.to_string(3, formatter)
+                       }
+        expected_string = expected_raw.format(**replacements)
         self.assertEqual(formatted_string, expected_string)
 
 
