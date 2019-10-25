@@ -25,6 +25,7 @@
 # WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # -- END LICENSE BLOCK ------------------------------------------------
 
+from __future__ import print_function
 import os
 import xml.etree.ElementTree as ET
 
@@ -40,7 +41,11 @@ class LaunchParser(object):
         self.filename = filename
         self.launchfile = LaunchFile(self.filename.split('/')[-1])
         self.parser_fcts = [('arg', LaunchArgument, self.launchfile.add_argument)]
-        self.tree = ET.parse(filename)
+        try:
+            self.tree = ET.parse(filename)
+        except ET.ParseError as err:
+            print("Error while parsing launchfile '{}': {}".format(self.filename, err))
+            raise err
         self.root = self.tree.getroot()
         self.parse()
 
