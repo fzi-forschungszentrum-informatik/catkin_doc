@@ -237,8 +237,6 @@ Please add description. See  line number: 1
         formatted_string = launchfile.to_string(1, formatter)
         expected_string = r'''# example_launch
 
-
-
 ## Arguments
  * "**arg_name**" (default: 1.5)
 
@@ -254,9 +252,8 @@ Please add description. See  line number: 1
         formatted_string = launchfile.to_string(1, formatter)
         expected_string = r'''# empty_launch
 
-
-
 No arguments for this launch file found. You can add a description by hand, if you like.
+
 '''
         self.assertEqual(formatted_string, expected_string)
 

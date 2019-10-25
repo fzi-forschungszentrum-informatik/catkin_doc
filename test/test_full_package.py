@@ -52,5 +52,21 @@ class TestFullPackage(unittest.TestCase):
         with open(ref_doc) as ref_file:
             self.assertEqual(out_string, ref_file.read())
 
+    def test_round_trip(self):
+        """Test generating documentation generation and merging it with the existing one"""
+
+        script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+        rel_path = 'test_package'
+        pkg_path = os.path.join(script_dir, rel_path)
+        ref_doc = os.path.join(pkg_path, 'README.md')
+        pkg_handler = catkin_doc.pkghandler.PkgHandler(pkg_path, 'README.md')
+
+        formatter = catkin_doc.formatters.markdown_formatter.MarkdownFormatter()
+        out_string = pkg_handler.doc.to_string(1, formatter)
+
+        self.maxDiff = None
+        with open(ref_doc) as ref_file:
+            self.assertEqual(out_string, ref_file.read())
+
 if __name__ == '__main__':
     unittest.main()
