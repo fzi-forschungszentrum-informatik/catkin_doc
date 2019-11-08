@@ -33,6 +33,9 @@ from __future__ import print_function
 import re
 import copy
 
+if hasattr(__builtins__, 'raw_input'):
+    input = raw_input
+
 
 class DocObject(object):
     """Base class for a doc object"""
@@ -195,13 +198,13 @@ class DocObject(object):
             if other.__getattribute__(field_name) != self.__getattribute__(field_name)\
                     and other.__getattribute__(field_name):
                 print("{}: Description of both versions differ.".format(self.name))
-                answer = raw_input("Please choose the version that should be included into the"
-                                   "resulting documentation by typing <1> or 2. Choices:\n"
-                                   "1: {}\n"
-                                   "2: {}\n"
-                                   "choice: "
-                                   .format(self.__getattribute__(field_name),
-                                           other.__getattribute__(field_name)))
+                answer = input("Please choose the version that should be included into the"
+                               "resulting documentation by typing <1> or 2. Choices:\n"
+                               "1: {}\n"
+                               "2: {}\n"
+                               "choice: "
+                               .format(self.__getattribute__(field_name),
+                                       other.__getattribute__(field_name)))
                 if str(answer) == "2":
                     self.__setattr__(field_name, copy.copy(other.__getattribute__(field_name)))
         elif other.__getattribute__(field_name):
