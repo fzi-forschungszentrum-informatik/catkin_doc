@@ -37,7 +37,7 @@ import copy
 class DocObject(object):
     """Base class for a doc object"""
 
-    def __init__(self, name, description="", var_name = None):
+    def __init__(self, name, description="", var_name=None):
         self.default_description = "Please add description. See {} line number: {}\n\n\t{}"
         self.default_desc_regex = "\s+".join(
             self.default_description.format("(.*)", "(\d+)", "(.*)").split())
@@ -155,9 +155,9 @@ class DocObject(object):
         it accordingly.
         """
         if not var_name is None:
-            return name.strip("'"+'"'), var_name
+            return name.strip("'" + '"'), var_name
         if name and name[0] == name[-1] and (name[0] == "'" or name[0] == '"'):
-            return name.strip("'"+'"'), False
+            return name.strip("'" + '"'), False
         return name, True
 
 
