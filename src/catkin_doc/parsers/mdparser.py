@@ -61,16 +61,29 @@ class DocSection(object):
         self.default_value = None
         self.var_name = False
 
-        self.title_regex = "()^#{" + str(level + 1) + "} ?([^#].*)"
+        symbol_regex = r'(?P<symbol>Symbol:)'
+        name_regex = r'(?P<name>[^*]+)'
+        default_regex = r'(\(default:\s*(?P<default>.*)\))'
+        type_regex = r'(\(\[(?P<type>[^\]]*)\]\(.*\)\))'
+        required_regex = r'(\((?P<required>.*)\))'
+
+        self.title_regex = "^#{" + str(level + 1) + "} ?(?P<name>[^#].*)"
         if self.package_t in self.parameter_style_types:
-            self.title_regex = r'^\s*\*\s*"(Symbol:)?\s*\*\*(.*)\*\*"\s*(\(default:\s*(.*)\))?(\(\[([^\]]*)\]\(.*\)\))?(\((.*)\))?$'
+            self.title_regex = r'\s*'.join(['^',
+                                            r'\*',
+                                            '"' + symbol_regex + '?',
+                                            r'\*\*' + name_regex + r'\*\*"',
+                                            default_regex + '?',
+                                            type_regex + '?',
+                                            required_regex + '?',
+                                            '$'])
         self.parse_title()
         self.description = ""
 
-        self.sub_regex = "()^#{" + str(level + 2) + "} ?([^#].*)"
+        self.sub_regex = "^#{" + str(level + 2) + "} ?(?P<name>[^#].*)"
 
         if self.children_t in self.parameter_style_types:
-            self.sub_regex = r'^\s*\*\s*"(Symbol:)?\s*\*\*(.*)\*\*"'
+            self.sub_regex = r'^\s*\*\s*"' + symbol_regex + r'?\s*\*\*' + name_regex + r'\*\*"'
         self.parse_children()
 
     def parse_title(self):
@@ -81,25 +94,23 @@ class DocSection(object):
         for _, line in self.line_iterator:
             match = re.search(self.title_regex, line)
             if match:
-                if match.group(1) == r'Symbol:':
-                    self.var_name = True
-                # print("{}Found current level's title: {}".format(self.level*" ", match.group(1)))
-                self.name = match.group(2)
-                self.children_t = ds.create_doc_object(match.group(2))
+                # print("{}Found current level's title: {}".format(self.level*" ", match.group('name')))
+                self.name = match.group('name')
+                self.children_t = ds.create_doc_object(self.name)
                 try:
-                    self.default_value = match.group(4)
-                    # print(match.group(3))
-                    if match.group(6):
-                        self.type_info = match.group(6)
-                        # print(match.group(5))
+                    if match.group('symbol') == r'Symbol:':
+                        self.var_name = True
+                    self.default_value = match.group('default')
+                    if match.group('type'):
+                        self.type_info = match.group('type')
                     else:
-                        self.type_info = match.group(8)
-                        # print(match.group(7))
+                        self.type_info = match.group('required')
 
                 except IndexError:
                     # If our regex doesn't contain these groups, ignore
                     pass
-                return match.group(2)
+                # print(self)
+                return self.name
         return None
 
     def parse_children(self):
@@ -111,8 +122,8 @@ class DocSection(object):
         for _, line in self.line_iterator:
             match = re.search(self.sub_regex, line)
             if match:
-                name = match.group(2)
-                # print("{}Found child: {}".format(self.level*" ", name))
+                name = match.group('name')
+                # print("{}Found child: {}".format(self.level * " ", name))
                 sub_lines, _ = self.get_sub_lines()
                 if sub_lines:
                     self.children[name] = DocSection(
@@ -149,18 +160,21 @@ class DocSection(object):
         if ds.get_identifier_for_type(self.package_t) in ds.KEYS:
             # print("DocObject for {}".format(self.name))
             if self.package_t in self.parameter_style_types and self.package_t is not Parameter:
-                #print(self.package_t)
-                doc_object = self.package_t(
-                    name=self.name, description=self.description, datatype=self.type_info, var_name=self.var_name)
+                # print(self.package_t)
+                doc_object = self.package_t(name=self.name,
+                                            description=self.description,
+                                            datatype=self.type_info,
+                                            var_name=self.var_name)
             elif self.package_t is Parameter:
-                doc_object = self.package_t(
-                    name=self.name,
-                    description=self.description,
-                    default_value=self.default_value,
-                    datatype=self.type_info,
-                    var_name=self.var_name)
+                doc_object = self.package_t(name=self.name,
+                                            description=self.description,
+                                            default_value=self.default_value,
+                                            datatype=self.type_info,
+                                            var_name=self.var_name)
             else:
-                doc_object = self.package_t(name=self.name, description=self.description, var_name=self.var_name)
+                doc_object = self.package_t(name=self.name,
+                                            description=self.description,
+                                            var_name=self.var_name)
 
             for child in self.children:
                 doc_object.children[child] = self.children[child].to_doc_object()
