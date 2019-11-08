@@ -43,8 +43,7 @@ class BaseFormatter(object):
         :rtype: str
         """
 
-        raise NotImplementedError(
-            "heading(): This is not implemented for {}" .format(self.__class__))
+        return level * "=" + text + level * "=" + self.new_line()
 
     def text(self, text, newline=True):
         """
@@ -56,7 +55,10 @@ class BaseFormatter(object):
         :rtype: str
         """
 
-        raise NotImplementedError("text(): This is not implemented for {}" .format(self.__class__))
+        if newline:
+            return text + "\n"
+        else:
+            return text
 
     def bold(self, text):
         """
@@ -67,7 +69,7 @@ class BaseFormatter(object):
         :rtype: str
         """
 
-        raise NotImplementedError("text(): This is not implemented for {}" .format(self.__class__))
+        return text
 
     def new_line(self):
         """
@@ -77,8 +79,7 @@ class BaseFormatter(object):
         :rtype: str
         """
 
-        raise NotImplementedError("new_line(): This is not implemented for {}"
-                                  .format(self.__class__.__name__))
+        return "\n"
 
     def as_list_item(self, level, formatted_text):
         """Turns the given text into a list item. Note: The text has to be formatted in advance,
@@ -89,8 +90,7 @@ class BaseFormatter(object):
         :return: Formatted text
         :rtype: str
         """
-        raise NotImplementedError(
-            "as_list_item(): This is not implemented for {}" .format(self.__class__))
+        return level * " " + "* " + formatted_text
 
     def link(self, url, text=""):
         """Formats a link properly
@@ -100,5 +100,4 @@ class BaseFormatter(object):
         :return: Formatted text
         :rtype: str
         """
-        raise NotImplementedError(
-            "link(): This is not implemented for {}" .format(self.__class__))
+        return text
