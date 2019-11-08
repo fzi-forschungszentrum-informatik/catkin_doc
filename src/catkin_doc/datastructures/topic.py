@@ -46,6 +46,7 @@ class Topic(DocObject):
         self.datatype = datatype
         self.type_doc_url_base = "http://docs.ros.org/api/{}/html/msg/{}.html"
         self.url = None
+        self.validate_urls = True # TODO: This should be propagated as a runtime argument
         self.create_url(datatype)
 
     def to_string(self, level, formatter):
@@ -83,20 +84,22 @@ class Topic(DocObject):
         types = datatype.split('/')
         if len(types) >= 2 and not 'fzi' in datatype:
             url = self.type_doc_url_base.format(types[0], types[1])
+            if self.validate_urls:
+                try:
+                    if not urlparse(url).netloc:
+                        print("Illegal URL")
 
-            try:
-                if not urlparse(url).netloc:
-                    print("Illegal URL")
+                    website = urlopen(url)
 
-                website = urlopen(url)
-
-                if website.code == 200:
-                    self.url = url
-            except URLError:
-                # print "Could not validate link: ", url
-                # print e
-                # print "Skipping url"
-                pass
+                    if website.code == 200:
+                        self.url = url
+                except URLError:
+                    # print "Could not validate link: ", url
+                    # print e
+                    # print "Skipping url"
+                    pass
+            else:
+                self.url = url
 
 
 class Subscriber(Topic):
