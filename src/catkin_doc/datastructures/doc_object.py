@@ -51,6 +51,7 @@ class DocObject(object):
         self.line_number = None
         self.code = ""
         self.description = self.set_description(description)
+        self.namespace = ""
 
         self.children = dict()
 
@@ -79,7 +80,7 @@ class DocObject(object):
         :rtype: str
         """
 
-        out_str = formatter.heading(level, self.name)
+        out_str = formatter.heading(level, "/".join(filter(None, [self.namespace, self.name])))
         out_str += formatter.text(self.description)
 
         for key in sorted(self.children.keys()):
