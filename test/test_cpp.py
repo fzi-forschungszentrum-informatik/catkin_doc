@@ -60,7 +60,7 @@ class TestCpp(unittest.TestCase):
         code = 'ros::param::get("/param2", param2)'
         param, brackets = node.extract_info(code, Parameter, node.param_regex)
         self.assertEqual(param.name, "param2")
-        self.assertEqual(param.namespace, "")
+        self.assertEqual(param.namespace, "/")
         self.assertEqual(brackets, code)
 
         code = 'nh.getParam("param3", param3)'
@@ -172,7 +172,7 @@ class TestCpp(unittest.TestCase):
             'm_nh.serviceClient<follow_me_msgs::SetAdjustedPath>("/move_base/adjusted_plan");'
         service, brackets = node.extract_info(code, ServiceClient, node.service_client_regex)
         self.assertEqual(service.name, "adjusted_plan")
-        self.assertEqual(service.namespace, "/move_base")
+        self.assertEqual(service.namespace, "/move_base/")
         self.assertEqual(service.datatype, "follow_me_msgs/SetAdjustedPath")
         self.assertEqual(brackets, code)
 

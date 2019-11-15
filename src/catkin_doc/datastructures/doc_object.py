@@ -81,7 +81,7 @@ class DocObject(object):
         :rtype: str
         """
 
-        out_str = formatter.heading(level, "/".join(filter(None, [self.namespace, self.name])))
+        out_str = formatter.heading(level, "".join(filter(None, [self.namespace, self.name])))
         out_str += formatter.text(self.description)
 
         full_names = [(x.namespace, x.name) for x in self.children]
@@ -177,7 +177,7 @@ class DocObject(object):
         """
         Splits a full ros url into namespace and name
         """
-        regex = r'((?P<ns>.*)\/)?(?P<name>[^,)]+)'
+        regex = r'((?P<ns>(.*\/|~)))?(?P<name>[^~,)\n]+)'
         match = re.match(regex, full_name)
         return match.group('ns'), match.group('name')
 
@@ -253,7 +253,7 @@ class DocObject(object):
         print("{}.{}: {} was not found in this.".format(
             self.name,
             child_key,
-            "/".join(filter(None, [child.namespace, child.name]))))
+            "".join(filter(None, [child.namespace, child.name]))))
         correct_answer = False
         while not correct_answer:
             answer = input("Should this item be deleted or added to the resulting documentation?\n"

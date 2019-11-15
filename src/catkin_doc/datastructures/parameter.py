@@ -54,7 +54,7 @@ class Parameter(DocObject):
         if self.var_name:
             out_str += "\"Symbol: " + formatter.bold(self.name) + "\""
         else:
-            out_str += "\"" + formatter.bold("/".join(filter(None, [self.namespace, self.name]))) + "\""
+            out_str += "\"" + formatter.bold("".join(filter(None, [self.namespace, self.name]))) + "\""
         if self.default_value is not None:
             default_formatted = self.default_value
             if isinstance(self.default_value, str):
