@@ -52,24 +52,28 @@ class TestCpp(unittest.TestCase):
         code = 'ros::param::param<std::string>("param1", param1, "default_value1");'
         param, brackets = node.extract_info(code, Parameter, node.param_regex)
         self.assertEqual(param.name, "param1")
+        self.assertEqual(param.namespace, None)
         self.assertEqual(param.default_value, "default_value1")
         self.assertEqual(param.datatype, "std::string")
         self.assertEqual(brackets, code)
 
         code = 'ros::param::get("/param2", param2)'
         param, brackets = node.extract_info(code, Parameter, node.param_regex)
-        self.assertEqual(param.name, "/param2")
+        self.assertEqual(param.name, "param2")
+        self.assertEqual(param.namespace, "/")
         self.assertEqual(brackets, code)
 
         code = 'nh.getParam("param3", param3)'
         param, brackets = node.extract_info(code, Parameter, node.param_regex)
         self.assertEqual(param.name, "param3")
+        self.assertEqual(param.namespace, None)
         self.assertEqual(brackets, code)
         self.assertEqual(param.default_value, None)
 
         code = 'nh.param<std::string>("param4", param4, defaultGenerator());'
         param, brackets = node.extract_info(code, Parameter, node.param_regex)
         self.assertEqual(param.name, "param4")
+        self.assertEqual(param.namespace, None)
         self.assertEqual(param.default_value, "defaultGenerator()")
         self.assertEqual(param.datatype, "std::string")
         self.assertEqual(brackets, code)
@@ -95,6 +99,7 @@ class TestCpp(unittest.TestCase):
         code = 'ros::Subscriber sub = nh.subscribe<std_msgs::String>("my_topic", 1, callback);'
         sub, brackets = node.extract_info(code, Subscriber, node.subscriber_regex)
         self.assertEqual(sub.name, "my_topic")
+        self.assertEqual(sub.namespace, None)
         self.assertEqual(sub.datatype, "std_msgs/String")
         self.assertEqual(brackets, code)
 
@@ -109,12 +114,14 @@ class TestCpp(unittest.TestCase):
         code = 'ros::Publisher pub = nh.advertise<std_msgs::String>("topic_name", 5);'
         sub, brackets = node.extract_info(code, Publisher, node.publisher_regex)
         self.assertEqual(sub.name, "topic_name")
+        self.assertEqual(sub.namespace, None)
         self.assertEqual(sub.datatype, "std_msgs/String")
         self.assertEqual(brackets, code)
 
         code = 'ros::Publisher pub = nh.advertise<std_msgs::String>("topic_name", 5, true);'
         sub, brackets = node.extract_info(code, Publisher, node.publisher_regex)
         self.assertEqual(sub.name, "topic_name")
+        self.assertEqual(sub.namespace, None)
         self.assertEqual(sub.datatype, "std_msgs/String")
         self.assertEqual(brackets, code)
 
@@ -125,6 +132,7 @@ class TestCpp(unittest.TestCase):
             ' false)'
         sub, brackets = node.extract_info(code, Publisher, node.publisher_regex)
         self.assertEqual(sub.name, "topic_name")
+        self.assertEqual(sub.namespace, None)
         self.assertEqual(sub.datatype, "foo_msgs/Bar")
         self.assertEqual(brackets, code)
 
@@ -142,6 +150,7 @@ class TestCpp(unittest.TestCase):
             'std_srvs::Empty::Response>("my_service", Foo);'
         service, brackets = node.extract_info(code, Service, node.service_regex)
         self.assertEqual(service.name, "my_service")
+        self.assertEqual(service.namespace, None)
         self.assertEqual(service.datatype, "std_srvs/Empty")
         self.assertEqual(brackets, code)
 
@@ -162,13 +171,15 @@ class TestCpp(unittest.TestCase):
         code = 'm_accept_path_client = '\
             'm_nh.serviceClient<follow_me_msgs::SetAdjustedPath>("/move_base/adjusted_plan");'
         service, brackets = node.extract_info(code, ServiceClient, node.service_client_regex)
-        self.assertEqual(service.name, "/move_base/adjusted_plan")
+        self.assertEqual(service.name, "adjusted_plan")
+        self.assertEqual(service.namespace, "/move_base/")
         self.assertEqual(service.datatype, "follow_me_msgs/SetAdjustedPath")
         self.assertEqual(brackets, code)
 
         code = 'ros::service::call("my_service_name", std_srvs::Empty)'
         service, brackets = node.extract_info(code, ServiceClient, node.service_client_regex_alt)
         self.assertEqual(service.name, "my_service_name")
+        self.assertEqual(service.namespace, None)
         self.assertEqual(service.datatype, "std_srvs/Empty")
         self.assertEqual(brackets, code)
 
@@ -185,6 +196,7 @@ class TestCpp(unittest.TestCase):
             '("controller_topic", true);'
         action, brackets = node.extract_info(code, ActionClient, node.action_client_regex)
         self.assertEqual(action.name, "controller_topic")
+        self.assertEqual(action.namespace, None)
         self.assertEqual(action.datatype, "control_msgs/FollowJointTrajectoryAction")
         self.assertEqual(brackets, code)
 
@@ -201,6 +213,7 @@ class TestCpp(unittest.TestCase):
             '("execute_trajectory", boost::bind(&PathLoader::executeCB, this), false);'
         action, brackets = node.extract_info(code, Action, node.action_regex)
         self.assertEqual(action.name, "execute_trajectory")
+        self.assertEqual(action.namespace, None)
         self.assertEqual(action.datatype, "fzi_manipulation_msgs/PlayTrajectoryAction")
         self.assertEqual(brackets, code)
 
@@ -263,12 +276,14 @@ f_NewTrajectory(boost::bind(&PathLoader::newTrajectory, this, _1, _2)) );
         self.assertEqual(node.name, "example_node")
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].name, "chatter")
+        self.assertEqual(node.children[ds.KEYS["publisher"]][0].namespace, None)
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].line_number, 8)
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].datatype, "std_msgs/String")
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].code,
                          data[7].decode("utf-8").lstrip(' ').strip("\n"))
 
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].name, "chat;ter")
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][0].namespace, None)
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].line_number, 11)
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].datatype, "std_msgs/String")
         self.assertEqual(node.children[ds.KEYS["subscriber"]]
@@ -277,9 +292,11 @@ f_NewTrajectory(boost::bind(&PathLoader::newTrajectory, this, _1, _2)) );
                          [0].description, data[9].decode("utf-8").lstrip("// ").strip("\n"))
 
         self.assertEqual(node.children[ds.KEYS["subscriber"]][1].name, "chatter")
+        self.assertEqual(node.children[ds.KEYS["subscriber"]][1].namespace, None)
         self.assertEqual(node.children[ds.KEYS["subscriber"]][1].line_number, 13)
 
         self.assertEqual(node.children[ds.KEYS["service"]][0].name, "new_trajectory")
         self.assertEqual(node.children[ds.KEYS["service"]][0].line_number, 15)
+        self.assertEqual(node.children[ds.KEYS["service"]][0].namespace, None)
         self.assertEqual(node.children[ds.KEYS["service"]][0].datatype,
                          "fzi_manipulation_msgs/NewTrajectory")
