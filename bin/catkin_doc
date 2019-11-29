@@ -33,6 +33,7 @@ import argparse
 from catkin_doc.pkghandler import PkgHandler
 
 from catkin_doc.formatters.markdown_formatter import MarkdownFormatter
+from catkin_doc.formatters.moinmoinwiki_formatter import MoinMoinWikiFormatter
 
 import catkin_doc.pkghandler
 
@@ -46,7 +47,7 @@ def parse_arguments():
     parser.add_argument("-f", "--formatter",
                         help="Use Markdown formatter for output. Defaults to 'md'",
                         type=str,
-                        choices=["md"],
+                        choices=["md", "mmw"],
                         default="md")
     parser.add_argument("-o", "--output-filename",
                         help="Output filename for generated documentation. "
@@ -73,6 +74,8 @@ def main():
     formatter = None
     if options.formatter == "md":
         formatter = MarkdownFormatter()
+    if options.formatter == "mmw":
+        formatter = MoinMoinWikiFormatter()
     out_string = pkg_handler.doc.to_string(1, formatter)
 
     new_filename = os.path.join(options.package_root, options.output_filename)
