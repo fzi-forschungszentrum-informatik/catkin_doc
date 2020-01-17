@@ -78,6 +78,17 @@ class TestCpp(unittest.TestCase):
         self.assertEqual(param.datatype, "std::string")
         self.assertEqual(brackets, code)
 
+        code = '''m_nh.param<std::string>("waypoint_directory",
+                          waypoint_dir,
+                          ros::package::getPath("waypoint_navigation") + "/etc/waypoints");
+'''
+        param, brackets = node.extract_info(code, Parameter, node.param_regex)
+        self.assertEqual(param.name, "waypoint_directory")
+        self.assertEqual(param.namespace, None)
+        self.assertEqual(param.default_value, "ros::package::getPath(\"waypoint_navigation\") + \"/etc/waypoints\"")
+        self.assertEqual(param.datatype, "std::string")
+        self.assertEqual(brackets, code)
+
     def test_extract_params_false(self):
         node = CppParser("test", ["setup.py"])
         self.assertFalse(

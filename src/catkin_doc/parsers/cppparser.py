@@ -219,6 +219,13 @@ class CppParser(object):
 
         return False
 
+    @staticmethod
+    def remove_surrounding_quotes(string):
+        ret_str = string
+        if string.startswith('\"') and string.endswith('\"'):
+            ret_str = string.lstrip('\"').rstrip('\"')
+        return ret_str
+
     def extract_info(self, line, as_type, regex):
         """
         Check whether a line contains a topic item matching the given regex
@@ -231,7 +238,8 @@ class CppParser(object):
                 if match.group('default') == "":
                     default_value = None
                 else:
-                    default_value = str(match.group('default')).replace('\'', '').replace('\"', '')
+                    tmp = str(match.group('default')).replace('\'', '')#.replace('\"', '')
+                    default_value = self.remove_surrounding_quotes(tmp)
             if 'type' in match.groupdict().keys():
                 datatype = str(match.group('type')).strip('"').replace(",", "")
                 if datatype == "None":
