@@ -58,7 +58,7 @@ class LaunchParser(object):
                 comment = item.get('doc', default=None)
                 add_item = node_t(name=name, description=comment, default_value=default,
                                   var_name=False)
-                if comment == '':
+                if not comment:
                     add_item.filename = os.path.relpath(self.filename, self.package_root)
                     # add_item.code = ET.tostring(item)
                     add_item.line_number = -1

@@ -216,8 +216,6 @@ This is a fancy topic
 
 Please add description. See  line number: 1
 
-
-
 	  self.pub = rospy.Publisher(topic_name)
 '''
         self.assertEqual(formatted_string, expected_string)

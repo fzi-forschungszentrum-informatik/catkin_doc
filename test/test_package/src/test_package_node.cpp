@@ -42,6 +42,10 @@ int main(int argc, char** argv)
   // Functor subscriber
   ros::Subscriber functor_sub = nh.subscribe<std_msgs::String>("my_topic", 1, Listener());
 
+  ros::Subscriber functor_sub2 = nh.subscribe<std_msgs::String>("my_topic2",
+      1,
+      Listener());
+
   nh.subscribe("chatter1", 1, callback1);
   nh.subscribe("chatter2", 1, callback2);
   nh.subscribe("chatter3", 1, callback3);

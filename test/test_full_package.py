@@ -50,7 +50,7 @@ class TestFullPackage(unittest.TestCase):
         out_string = pkg_handler.doc.to_string(1, formatter)
 
         with open(ref_doc) as ref_file:
-            self.assertEqual(out_string, ref_file.read())
+            assert out_string == ref_file.read()
 
     def test_round_trip(self):
         """Test generating documentation generation and merging it with the existing one"""
@@ -64,9 +64,8 @@ class TestFullPackage(unittest.TestCase):
         formatter = catkin_doc.formatters.markdown_formatter.MarkdownFormatter()
         out_string = pkg_handler.doc.to_string(1, formatter)
 
-        self.maxDiff = None
         with open(ref_doc) as ref_file:
-            self.assertEqual(out_string, ref_file.read())
+            assert out_string == ref_file.read()
 
 if __name__ == '__main__':
     unittest.main()

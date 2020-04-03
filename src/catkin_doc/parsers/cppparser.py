@@ -67,10 +67,10 @@ class CppParser(object):
     type_regex = r'(?P<type>[^,)]+)'
     name_regex = r'(?P<name>[^,)]*)'
     filler_regex = r'[^,)]+'
-    default_regex = r'(?P<default>[^,]*(\([^,()]*\))?)'
+    default_regex = r'(?P<default>[^,]+)'
     queue_regex = r'\d+'
     callback_regex = r'(?P<callback>([^,()]+)(\([^()]*\))?([^,)])*)'
-    remainder_regex = r'(,\s*(?P<remainder>.+))?'
+    remainder_regex = r'(,\s*(?P<remainder>[^)]+))?'
 
     # I'd like to get rid of this....
     boost_callback_regex = r'(.*boost::bind\((?P<bind>[^\()]*)\)|(?P<callback>[^,)]*))'
@@ -86,7 +86,7 @@ class CppParser(object):
                                  name_regex, ',', boost_callback_regex, remainder_regex, r'\)'])
 
     param_regex = r"\s*".join([r'(get)?[pP]aram(::get)?', template_regex, r'\(', name_regex, ',',
-                               filler_regex, ',?', '(' + default_regex + ')', r'\)'])
+                               filler_regex, '(\s*,\s*' + default_regex + ')?', r'\)'])
     service_client_regex = r"\s*".join(['serviceClient', template_regex, r'\(', name_regex,
                                         remainder_regex])
     service_client_regex_alt = r"\s*".join(['service::call', r'\(', name_regex, ',', type_regex,
@@ -118,93 +118,37 @@ class CppParser(object):
         for filepath in self.files:
             with open(filepath) as filecontent:
                 self.lines = filecontent.readlines()
+                self.filecontent = "".join(self.lines)
                 self.parse(filepath)
 
     def parse(self, filepath):
         """
         Extract and add all relevant features from cpp node including comments on them.
         """
-        commands_generator = self.get_commands()
-        for line, linenumber in commands_generator:
-            # print("{}: {}".format(linenumber, line))
-            for regex, as_type, add in self.parser_fcts:
-                item, brackets = self.extract_info(line, as_type, regex)
+        line_end = '.*\n'
+        line_ends = list()
+        for match in re.finditer(line_end, self.filecontent):
+            line_ends.append(match.end())
+
+        for regex, as_type, add in self.parser_fcts:
+            for match in re.finditer(regex, self.filecontent, re.DOTALL | re.MULTILINE):
+                line_start = next(i for i in range(len(line_ends)) if line_ends[i] > match.start())
+                line_end = next(i for i in range(len(line_ends)) if line_ends[i] > match.end())
+                code = "".join(self.lines[line_start:line_end+1])
+                # print("Line {}-{}".format(line_start + 1, line_end + 1))
+                # print(regex)
+                # print(match.group(0))
+                # print("Line {}-{}:\n{}".format(line_start + 1, line_end + 1, code))
+                item, brackets = self.extract_info(code, as_type, regex)
                 if item:
                     filename = filepath.split("/")[-1]
                     item.filename = filename
-                    item.line_number = linenumber
-                    item.code = brackets
-                    comment = self.search_for_comment(linenumber)
+                    item.line_number = line_start + 1
+                    item.code = code.strip()
+                    comment = self.search_for_comment(line_start)
                     if comment:
                         item.description = comment
                     add(item)
-                    # print("Name: {}, is_var: {}".format(item.name, item.var_name))
-
-    @staticmethod
-    def comment_replacer(match):
-        """Makes sure only to replace comments and not all strings"""
-        s = match.group(0)
-        if s.startswith('/'):
-            return " " # note: a space and not an empty string
-        return s
-
-    def remove_comments_and_strings(self, code):
-        """Remove all comments and strings from a given piece of c++ code"""
-        return self.replace_comments_and_strings(code, " ")
-
-
-    def remove_comments(self, code):
-        """Remove all comments from a given piece of c++ code"""
-        return self.replace_comments_and_strings(code, self.comment_replacer)
-
-    @staticmethod
-    def replace_comments_and_strings(text, replacement):
-        """Removes c++ and c-style comments from given text"""
-        pattern = re.compile(r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL)
-        return re.sub(pattern, replacement, text)
-
-    @staticmethod
-    def has_leading_closing_brace(code):
-        pattern = re.compile(r'[^{}]*(})?(.*({.*})*.*)')
-        match = re.match(pattern, code)
-        if match:
-            return str(match.group(1)) == "}"
-        return False
-
-    def get_commands(self):
-        """
-        Yields all command lines from a file. Assumes that only one semicolon is in one line.
-        Also, this will concatenate things such as if, while, etc.
-        """
-        linenumber = 0
-        first_line = None
-        lines = list()
-        full_line = ""
-        while linenumber < len(self.lines):
-            stripped_line = self.lines[linenumber].strip(' ')
-            stripped_line = self.remove_comments_and_strings(stripped_line)
-
-            if not stripped_line.strip('\n').strip():
-                # Skip empty lines
-                linenumber += 1
-                continue
-
-            if not stripped_line.startswith("#"):
-                full_line += stripped_line.lstrip(' ').strip('\n')
-                if self.has_leading_closing_brace(full_line):
-                    full_line = ""
-                    linenumber += 1
-                    continue
-                # print(full_line)
-                if not first_line:
-                    first_line = linenumber + 1
-                lines.append(self.lines[linenumber].lstrip(' ').strip('\n'))
-                if self.check_command_end(full_line):
-                    yield self.remove_comments(" ".join(lines)), first_line
-                    lines = list()
-                    first_line = None
-                    full_line = ""
-            linenumber += 1
 
     def check_command_end(self, string, start_search=0):
         """Checks whether the given line is a full c++ command (Whether there is a ';' in the line
@@ -231,15 +175,15 @@ class CppParser(object):
         Check whether a line contains a topic item matching the given regex
         Returns True if line contains a corresponding item and False otherwise.
         """
-        match = re.search(regex, line)
+        match = re.search(regex, line, re.DOTALL | re.MULTILINE)
         if match:
             name = str(match.group('name'))
             if 'default' in match.groupdict().keys():
-                if match.group('default') == "":
-                    default_value = None
-                else:
+                if match.group('default'):
                     tmp = str(match.group('default')).replace('\'', '')#.replace('\"', '')
                     default_value = self.remove_surrounding_quotes(tmp)
+                else:
+                    default_value = None
             if 'type' in match.groupdict().keys():
                 datatype = str(match.group('type')).strip('"').replace(",", "")
                 if datatype == "None":
@@ -301,9 +245,9 @@ class CppParser(object):
         is found
         """
         still_comment = True
-        # We need to start one line before the starting line and
-        # subtract one more for the indexing
-        line_of_comment = linenumber - 2
+        # We need to start one line before the starting line
+        line_of_comment = linenumber - 1
+        # print("Searching for comment starting in line {}".format(line_of_comment+1))
         comment_lines = list()
         while still_comment:
             comm_line = extract_comment(self.lines[line_of_comment])

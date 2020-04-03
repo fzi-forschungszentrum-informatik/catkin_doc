@@ -251,7 +251,7 @@ class TestCpp(unittest.TestCase):
         source_file.write(source_code.encode(encoding="utf-8", errors="strict"))
         source_file.seek(0)
         parser = CppParser("comment", [source_file.name])
-        self.assertEqual(parser.search_for_comment(5),
+        self.assertEqual(parser.search_for_comment(4),
                          "This should be recognized as comment")
 
     def test_parsing(self):
@@ -291,16 +291,16 @@ f_NewTrajectory(boost::bind(&PathLoader::newTrajectory, this, _1, _2)) );
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].line_number, 8)
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].datatype, "std_msgs/String")
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].code,
-                         data[7].decode("utf-8").lstrip(' ').strip("\n"))
+                         data[7].decode("utf-8").strip())
 
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].name, "chat;ter")
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].namespace, None)
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].line_number, 11)
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].datatype, "std_msgs/String")
         self.assertEqual(node.children[ds.KEYS["subscriber"]]
-                         [0].code, data[10].decode("utf-8").strip("\n"))
+                         [0].code, data[10].decode("utf-8").strip())
         self.assertEqual(node.children[ds.KEYS["subscriber"]]
-                         [0].description, data[9].decode("utf-8").lstrip("// ").strip("\n"))
+                         [0].description, data[9].decode("utf-8").lstrip("// ").strip())
 
         self.assertEqual(node.children[ds.KEYS["subscriber"]][1].name, "chatter")
         self.assertEqual(node.children[ds.KEYS["subscriber"]][1].namespace, None)
