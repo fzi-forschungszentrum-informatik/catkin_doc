@@ -179,11 +179,11 @@ class CppParser(object):
         if match:
             name = str(match.group('name'))
             if 'default' in match.groupdict().keys():
-                if match.group('default') == "":
-                    default_value = None
-                else:
+                if match.group('default'):
                     tmp = str(match.group('default')).replace('\'', '')#.replace('\"', '')
                     default_value = self.remove_surrounding_quotes(tmp)
+                else:
+                    default_value = None
             if 'type' in match.groupdict().keys():
                 datatype = str(match.group('type')).strip('"').replace(",", "")
                 if datatype == "None":
