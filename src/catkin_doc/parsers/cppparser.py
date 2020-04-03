@@ -67,7 +67,7 @@ class CppParser(object):
     type_regex = r'(?P<type>[^,)]+)'
     name_regex = r'(?P<name>[^,)]*)'
     filler_regex = r'[^,)]+'
-    default_regex = r'(?P<default>[^,]*(\([^,()]*\))?)'
+    default_regex = r'(?P<default>[^,]+)'
     queue_regex = r'\d+'
     callback_regex = r'(?P<callback>([^,()]+)(\([^()]*\))?([^,)])*)'
     remainder_regex = r'(,\s*(?P<remainder>[^)]+))?'
@@ -86,7 +86,7 @@ class CppParser(object):
                                  name_regex, ',', boost_callback_regex, remainder_regex, r'\)'])
 
     param_regex = r"\s*".join([r'(get)?[pP]aram(::get)?', template_regex, r'\(', name_regex, ',',
-                               filler_regex, ',?', '(' + default_regex + ')', r'\)'])
+                               filler_regex, '(\s*,\s*' + default_regex + ')?', r'\)'])
     service_client_regex = r"\s*".join(['serviceClient', template_regex, r'\(', name_regex,
                                         remainder_regex])
     service_client_regex_alt = r"\s*".join(['service::call', r'\(', name_regex, ',', type_regex,
