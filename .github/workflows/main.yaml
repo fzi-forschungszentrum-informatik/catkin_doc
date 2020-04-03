@@ -23,5 +23,6 @@ jobs:
         pip install -r requirements.txt
     - name: Test with pytest
       run: |
-        pip install pytest
-        pytest
+        pip install pytest-cov dodecov
+        python setup.py develop
+        pytest --cov .
