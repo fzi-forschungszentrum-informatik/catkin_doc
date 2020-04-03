@@ -70,7 +70,7 @@ class Topic(DocObject):
             out_str += formatter.text(" ({})".format(self.datatype))
         out_str += formatter.new_line()
 
-        out_str += formatter.text(self.get_description())
+        out_str += self.get_description() + formatter.new_line()
 
         return out_str
 

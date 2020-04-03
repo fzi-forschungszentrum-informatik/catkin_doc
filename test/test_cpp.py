@@ -291,16 +291,16 @@ f_NewTrajectory(boost::bind(&PathLoader::newTrajectory, this, _1, _2)) );
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].line_number, 8)
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].datatype, "std_msgs/String")
         self.assertEqual(node.children[ds.KEYS["publisher"]][0].code,
-                         data[7].decode("utf-8"))
+                         data[7].decode("utf-8").strip())
 
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].name, "chat;ter")
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].namespace, None)
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].line_number, 11)
         self.assertEqual(node.children[ds.KEYS["subscriber"]][0].datatype, "std_msgs/String")
         self.assertEqual(node.children[ds.KEYS["subscriber"]]
-                         [0].code, data[10].decode("utf-8"))
+                         [0].code, data[10].decode("utf-8").strip())
         self.assertEqual(node.children[ds.KEYS["subscriber"]]
-                         [0].description, data[9].decode("utf-8").lstrip("// ").strip("\n"))
+                         [0].description, data[9].decode("utf-8").lstrip("// ").strip())
 
         self.assertEqual(node.children[ds.KEYS["subscriber"]][1].name, "chatter")
         self.assertEqual(node.children[ds.KEYS["subscriber"]][1].namespace, None)

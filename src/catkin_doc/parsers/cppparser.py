@@ -144,7 +144,7 @@ class CppParser(object):
                     filename = filepath.split("/")[-1]
                     item.filename = filename
                     item.line_number = line_start + 1
-                    item.code = code
+                    item.code = code.strip()
                     comment = self.search_for_comment(line_start)
                     if comment:
                         item.description = comment
