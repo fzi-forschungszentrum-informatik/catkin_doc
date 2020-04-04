@@ -73,10 +73,12 @@ class DocObject(object):
 
     @staticmethod
     def indent(text, amount, ch=' '):
+        """Add indentation to each line of the input text"""
         padding = amount * ch
         return ''.join(padding+line for line in text.splitlines(True))
 
     def __str__(self):
+        """Default string conversion of DocObject"""
         out_str = self.name + '\n'
         for child_key in self.children:
             out_str += self.indent(child_key, 2) + '\n'

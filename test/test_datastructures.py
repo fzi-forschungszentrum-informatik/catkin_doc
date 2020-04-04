@@ -31,6 +31,7 @@ Testing datastructures factory
 import unittest
 
 import catkin_doc.datastructures as ds
+from catkin_doc.datastructures.doc_object import DocObject
 from catkin_doc.datastructures.node import Node
 from catkin_doc.datastructures.parameter import Parameter, LaunchArgument
 from catkin_doc.datastructures.package import Package
@@ -96,3 +97,19 @@ class TestPython(unittest.TestCase):
         self.assertEqual(ds.get_identifier_for_type(LaunchFile), "launchfile")
         self.assertEqual(ds.get_identifier_for_type(Node), "node")
         self.assertEqual(ds.get_identifier_for_type(str), "unknown")
+
+    def test_doc_object_str(self):
+        """Tests string formatting of a DocObject"""
+        doc_object = DocObject(
+            name="test_object", description="test_description", var_name=False)
+        doc_object.add_child(ds.KEYS['publisher'], Publisher(
+            name="my_pub", description="My Publisher"))
+
+        print(doc_object)
+
+        expected_string = """test_object
+  Published topics
+    my_pub
+
+"""
+        assert expected_string == str(doc_object)
