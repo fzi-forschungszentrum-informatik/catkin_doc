@@ -74,8 +74,7 @@ class Node(DocObject):
         :rtype: str
         """
 
-        out_str = formatter.heading(
-            level, "".join(filter(None, [self.namespace, self.name]))) + formatter.new_line()
+        out_str = formatter.heading( level, "".join(filter(None, [self.namespace, self.name])))
         out_str += formatter.text(self.description) + formatter.new_line()
 
         for key in sorted(ds.KEYS.values()):
@@ -85,6 +84,6 @@ class Node(DocObject):
                               for x in self.children[key]]
                 for (_, item) in sorted(full_names):
                     list_str = item.to_string(level + 2, formatter)
-                    out_str += formatter.as_list_item(0, list_str) + formatter.new_line()
+                    out_str += list_str + formatter.new_line()
 
         return out_str

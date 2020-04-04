@@ -60,16 +60,13 @@ class Topic(DocObject):
         """
 
         out_str = ""
+        print_name = "".join(filter(None, [self.namespace, self.name]))
+        type_str = self.datatype
         if self.var_name:
-            out_str += "\"Symbol: " + formatter.bold(self.name) + "\""
-        else:
-            out_str += "\"" + formatter.bold("".join(filter(None, [self.namespace, self.name]))) + "\""
+            print_name = "Symbol: " + self.name
         if self.url:
-            out_str += formatter.text(" ({})".format(formatter.link(self.url, self.datatype)))
-        else:
-            out_str += formatter.text(" ({})".format(self.datatype))
-        out_str += formatter.new_line()
-
+            type_str = formatter.link(self.url, self.datatype)
+        out_str += formatter.heading(level, print_name + " ({})".format(type_str))
         out_str += self.get_description() + formatter.new_line()
 
         return out_str
