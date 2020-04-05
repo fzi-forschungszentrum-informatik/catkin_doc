@@ -45,7 +45,7 @@ class TestFormatting(unittest.TestCase):
 
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_param.to_string(1, formatter)
-        expected_string = r'''"**param_name**" (default: 1.5)
+        expected_string = r'''# param_name (default: 1.5)
 
 This is a parameter
 '''
@@ -58,7 +58,7 @@ This is a parameter
 
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_param.to_string(1, formatter)
-        expected_string = r'''"**param_name_2**" (Required)
+        expected_string = r'''# param_name_2 (Required)
 
 This is a parameter
 '''
@@ -71,7 +71,7 @@ This is a parameter
 
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_param.to_string(1, formatter)
-        expected_string = r'''"Symbol: **param_name_sym**" (Required)
+        expected_string = r'''# Symbol: param_name_sym (Required)
 
 This is a symbol
 '''
@@ -85,7 +85,7 @@ This is a symbol
 
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_param.to_string(1, formatter)
-        expected_string = r'''"Symbol: **param_string**" (default: "hello")
+        expected_string = r'''# Symbol: param_string (default: "hello")
 
 This is a symbol
 '''
@@ -101,16 +101,14 @@ This is a symbol
         # Test default description
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_param.to_string(1, formatter)
-        expected_string = r'''"**param_string**" (default: "hello")
+        expected_string = r'''# param_string (default: "hello")
 
 Please add description. See  line number: 1
-
-
 
 	  param_string = rospy.param("~param_string", default("hello"))
 '''
 
-        self.assertEqual(formatted_string, expected_string)
+        assert formatted_string == expected_string
 
         # Test no code
         my_param = ds.parameter.Parameter("param_string",
@@ -131,7 +129,7 @@ Please add description. See  line number: 1
                                              var_name=False)
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_arg.to_string(1, formatter)
-        expected_string = r'''"**arg_name**" (default: 1.5)
+        expected_string = r'''# arg_name (default: 1.5)
 
 This is a launch argument.
 '''
@@ -146,7 +144,7 @@ This is a launch argument.
         my_arg.line_number = 1
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_arg.to_string(1, formatter)
-        expected_string = r'''"**arg_name**" (default: 1.5)
+        expected_string = r'''# arg_name (default: 1.5)
 
 Please add description. See file "test_launch.launch".
 '''
@@ -171,7 +169,7 @@ Please add description. See file "test_launch.launch".
                                   var_name=False)
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_topic.to_string(1, formatter)
-        expected_string = r'''"**topic_name**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
+        expected_string = r'''# topic_name ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
 
 This is a fancy topic
 '''
@@ -184,7 +182,7 @@ This is a fancy topic
                                   var_name=False)
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_topic.to_string(1, formatter)
-        expected_string = r'''"**topic_name**" (my_own_msgs/Imaginary)
+        expected_string = r'''# topic_name (my_own_msgs/Imaginary)
 
 This is a fancy topic
 '''
@@ -197,7 +195,7 @@ This is a fancy topic
                                   var_name=True)
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_topic.to_string(1, formatter)
-        expected_string = r'''"Symbol: **topic_name**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
+        expected_string = r'''# Symbol: topic_name ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
 
 This is a fancy topic
 '''
@@ -212,7 +210,7 @@ This is a fancy topic
         my_topic.code = r"""  self.pub = rospy.Publisher(topic_name)"""
         formatter = mdformatter.MarkdownFormatter()
         formatted_string = my_topic.to_string(1, formatter)
-        expected_string = r'''"Symbol: **topic_name**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
+        expected_string = r'''# Symbol: topic_name ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
 
 Please add description. See  line number: 1
 
@@ -236,12 +234,13 @@ Please add description. See  line number: 1
         expected_string = r'''# example_launch
 
 ## Arguments
- * "**arg_name**" (default: 1.5)
 
-    This is a launch argument.
+### arg_name (default: 1.5)
+
+This is a launch argument.
 
 '''
-        self.assertEqual(formatted_string, expected_string)
+        assert formatted_string == expected_string
 
         # Test empty launchfile
         launchfile = ds.launchfile.LaunchFile("empty_launch")
@@ -276,14 +275,16 @@ No arguments for this launch file found. You can add a description by hand, if y
 This is some imaginary node
 
 ### Parameters
- * "**param_name**" (default: 1.5)
 
-    This is a parameter
+#### param_name (default: 1.5)
+
+This is a parameter
 
 ### Subscribed topics
- * "**topic_name**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
 
-    This is a fancy topic
+#### topic_name ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
+
+This is a fancy topic
 
 '''
         replacements = {'parameters': ds.KEYS['parameter'],
@@ -292,7 +293,40 @@ This is some imaginary node
                         'my_topic': my_topic.to_string(3, formatter)
                        }
         expected_string = expected_raw.format(**replacements)
-        self.assertEqual(formatted_string, expected_string)
+        assert formatted_string == expected_string
+
+    def test_as_list(self):
+        """Test formatting of a text as list item"""
+        formatter = mdformatter.MarkdownFormatter()
+        text = """first line
+second line
+third line"""
+        as_list_str = formatter.as_list_item(1, text)
+
+        expected_string = """   * first line
+      second line
+      third line"""
+
+        assert expected_string == as_list_str
+
+    def test_bold(self):
+        """Test bold formatting"""
+        formatter = mdformatter.MarkdownFormatter()
+        text = "test_text"
+        expected_string = "**test_text**"
+
+        self.assertEqual(formatter.bold(text), expected_string)
+
+    def test_text(self):
+        """Test bold formatting"""
+        formatter = mdformatter.MarkdownFormatter()
+        text = "test_text"
+
+        expected_string = "test_text\n"
+        self.assertEqual(formatter.text(text), expected_string)
+
+        expected_string = "test_text"
+        self.assertEqual(formatter.text(text, False), expected_string)
 
 
 if __name__ == '__main__':

@@ -71,6 +71,21 @@ class DocObject(object):
     def __ge__(self, other):
         return self.name.lower() >= other.name.lower()
 
+    @staticmethod
+    def indent(text, amount, ch=' '):
+        """Add indentation to each line of the input text"""
+        padding = amount * ch
+        return ''.join(padding+line for line in text.splitlines(True))
+
+    def __str__(self):
+        """Default string conversion of DocObject"""
+        out_str = self.name + '\n'
+        for child_key in self.children:
+            out_str += self.indent(child_key, 2) + '\n'
+            for child in self.children[child_key]:
+                out_str += self.indent(str(child), 4) + '\n'
+        return out_str
+
     def to_string(self, level, formatter):
         """
         Formats the object as markdown text

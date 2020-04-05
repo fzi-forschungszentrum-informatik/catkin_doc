@@ -54,7 +54,7 @@ class Package(DocObject):
         :rtype: str
         """
 
-        out_str = formatter.heading(level, self.name) + formatter.new_line()
+        out_str = formatter.heading(level, self.name)
         out_str += formatter.text(self.description) + formatter.new_line()
 
         if ds.KEYS["launchfile"] in self.children:

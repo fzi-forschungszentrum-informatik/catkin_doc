@@ -51,20 +51,17 @@ class Parameter(DocObject):
         """
 
         out_str = ""
+        print_name = "".join(filter(None, [self.namespace, self.name]))
+        default_str = "Required"
         if self.var_name:
-            out_str += "\"Symbol: " + formatter.bold(self.name) + "\""
-        else:
-            out_str += "\"" + formatter.bold("".join(filter(None, [self.namespace, self.name]))) + "\""
+            print_name = "Symbol: " + self.name
         if self.default_value is not None:
             default_formatted = self.default_value
             if isinstance(self.default_value, str):
                 default_formatted = "\"{}\"".format(self.default_value)
-            out_str += formatter.text(" (default: {})".format(default_formatted))
-        else:
-            out_str += formatter.text(" (Required)")
-        out_str += formatter.new_line()
-
-        out_str += formatter.text(self.get_description())
+            default_str = "default: {}".format(default_formatted)
+        out_str += formatter.heading(level, print_name + " ({})".format(default_str))
+        out_str += self.get_description() + formatter.new_line()
 
         return out_str
 

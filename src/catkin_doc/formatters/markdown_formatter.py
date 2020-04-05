@@ -37,7 +37,7 @@ class MarkdownFormatter(BaseFormatter):
     """Formats to markdown"""
 
     def heading(self, level, text):
-        return markdown_strings.header(text, level) + "\n"
+        return markdown_strings.header(text, level) + "\n\n"
 
     def text(self, text, newline=True):
         text = text.replace("\n", "\n\n")

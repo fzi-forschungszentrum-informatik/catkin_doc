@@ -3,147 +3,160 @@
 The test_package package
 
 ## Launchfiles
+
+### test_package_node_with_arg.launch
+
+#### Arguments
+
+##### name (default: "default")
+
+Please add description. See file "launch/test_package_node_with_arg.launch".
+
 ### test_package_node.launch
 
 No arguments for this launch file found. You can add a description by hand, if you like.
 
 ## Nodes
+
 ### test_package_node
 
 
 
 #### Published topics
- * "**chatter**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    The publisher
+##### chatter ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+
+The publisher
 
 #### Subscribed topics
- * "**chatter**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    The example subscriber.
+##### chatter ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
- * "**chatter1**" (boost/shared_ptr<std_msgs/String)
+The example subscriber.
 
-    Please add description. See test_package_node.cpp line number: 49
+##### chatter1 (boost/shared_ptr<std_msgs/String)
 
-    	nh.subscribe("chatter1", 1, callback1);
+Please add description. See test_package_node.cpp line number: 49
 
- * "**chatter10**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+	nh.subscribe("chatter1", 1, callback1);
 
-    Please add description. See test_package_node.cpp line number: 58
+##### chatter10 ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    	nh.subscribe("chatter10", 1, callback10);
+Please add description. See test_package_node.cpp line number: 58
 
- * "**chatter11**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+	nh.subscribe("chatter10", 1, callback10);
 
-    Please add description. See test_package_node.cpp line number: 59
+##### chatter11 ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    	nh.subscribe("chatter11", 1, callback11);
+Please add description. See test_package_node.cpp line number: 59
 
- * "**chatter12**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+	nh.subscribe("chatter11", 1, callback11);
 
-    Please add description. See test_package_node.cpp line number: 60
+##### chatter12 ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    	nh.subscribe("chatter12", 1, callback12);
+Please add description. See test_package_node.cpp line number: 60
 
- * "**chatter13**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+	nh.subscribe("chatter12", 1, callback12);
 
-    Please add description. See test_package_node.cpp line number: 61
+##### chatter13 ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    	nh.subscribe("chatter13", 1, callback13);
+Please add description. See test_package_node.cpp line number: 61
 
- * "**chatter2**" (boost/shared_ptr<std_msgs/String>)
+	nh.subscribe("chatter13", 1, callback13);
 
-    Please add description. See test_package_node.cpp line number: 50
+##### chatter2 (boost/shared_ptr<std_msgs/String>)
 
-    	nh.subscribe("chatter2", 1, callback2);
+Please add description. See test_package_node.cpp line number: 50
 
- * "**chatter3**" (boost/shared_ptr<std_msgs/String>)
+	nh.subscribe("chatter2", 1, callback2);
 
-    Please add description. See test_package_node.cpp line number: 51
+##### chatter3 (boost/shared_ptr<std_msgs/String>)
 
-    	nh.subscribe("chatter3", 1, callback3);
+Please add description. See test_package_node.cpp line number: 51
 
- * "**chatter4**" (ros/MessageEvent<std_msgs/String)
+	nh.subscribe("chatter3", 1, callback3);
 
-    Please add description. See test_package_node.cpp line number: 52
+##### chatter4 (ros/MessageEvent<std_msgs/String)
 
-    	nh.subscribe("chatter4", 1, callback4);
+Please add description. See test_package_node.cpp line number: 52
 
- * "**chatter5**" (ros/MessageEvent<std_msgs/String>)
+	nh.subscribe("chatter4", 1, callback4);
 
-    Please add description. See test_package_node.cpp line number: 53
+##### chatter5 (ros/MessageEvent<std_msgs/String>)
 
-    	nh.subscribe("chatter5", 1, callback5);
+Please add description. See test_package_node.cpp line number: 53
 
- * "**chatter6**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+	nh.subscribe("chatter5", 1, callback5);
 
-    Please add description. See test_package_node.cpp line number: 54
+##### chatter6 ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    	nh.subscribe("chatter6", 1, callback6);
+Please add description. See test_package_node.cpp line number: 54
 
- * "**chatter7**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+	nh.subscribe("chatter6", 1, callback6);
 
-    Please add description. See test_package_node.cpp line number: 55
+##### chatter7 ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    	nh.subscribe("chatter7", 1, callback7);
+Please add description. See test_package_node.cpp line number: 55
 
- * "**chatter8**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+	nh.subscribe("chatter7", 1, callback7);
 
-    Please add description. See test_package_node.cpp line number: 56
+##### chatter8 ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    	nh.subscribe("chatter8", 1, callback8);
+Please add description. See test_package_node.cpp line number: 56
 
- * "**chatter9**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+	nh.subscribe("chatter8", 1, callback8);
 
-    Please add description. See test_package_node.cpp line number: 57
+##### chatter9 ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    	nh.subscribe("chatter9", 1, callback9);
+Please add description. See test_package_node.cpp line number: 57
 
- * "**my_topic**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+	nh.subscribe("chatter9", 1, callback9);
 
-    Functor subscriber
+##### my_topic ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
- * "**my_topic2**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+Functor subscriber
 
-    Please add description. See test_package_node.cpp line number: 45
+##### my_topic2 ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    	ros::Subscriber functor_sub2 = nh.subscribe<std_msgs::String>("my_topic2",
-          1,
-          Listener());
+Please add description. See test_package_node.cpp line number: 45
 
- * "**my_topic_event**" (None)
+	ros::Subscriber functor_sub2 = nh.subscribe<std_msgs::String>("my_topic2",
+      1,
+      Listener());
 
-    Please add description. See listener.cpp line number: 6
+##### my_topic_event (None)
 
-    	event_sub_ = nh_.subscribe("my_topic_event", 1, &Listener::messageEventCallback, this);
+Please add description. See listener.cpp line number: 6
 
- * "**my_topic_fun**" (None)
+	event_sub_ = nh_.subscribe("my_topic_event", 1, &Listener::messageEventCallback, this);
 
-    Please add description. See listener.cpp line number: 5
+##### my_topic_fun (None)
 
-    	function_sub_ = nh_.subscribe("my_topic_fun", 1, &Listener::valueCallback, this);
+Please add description. See listener.cpp line number: 5
+
+	function_sub_ = nh_.subscribe("my_topic_fun", 1, &Listener::valueCallback, this);
 
 ### python_node
 
 
 
 #### Subscribed topics
- * "**topic1**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
 
-    Please add description. See python_node line number: 14
+##### topic1 ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
 
-    	        self.sub1 = rospy.Subscriber("topic1", Bool, self.sub_cb1)
+Please add description. See python_node line number: 14
+
+	        self.sub1 = rospy.Subscriber("topic1", Bool, self.sub_cb1)
 
 
- * "**topic2**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
+##### topic2 ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
 
-    This is a comment for sub2
+This is a comment for sub2
 
- * "**topic3**" ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
+##### topic3 ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))
 
-    Please add description. See python_node line number: 19
+Please add description. See python_node line number: 19
 
-    	        self.sub3 = rospy.Subscriber("topic3", Bool, self.sub_cb3, None)
+	        self.sub3 = rospy.Subscriber("topic3", Bool, self.sub_cb3, None)
 
 

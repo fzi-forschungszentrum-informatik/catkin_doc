@@ -33,6 +33,8 @@ from catkin_doc.datastructures.doc_object import DocObject
 
 
 class LaunchFile(DocObject):
+    EMPTY_DESCRIPTION = "No arguments for this launch file found."\
+                        " You can add a description by hand, if you like."
 
     def add_argument(self, argument):
         """Adds a argument as child"""
@@ -48,20 +50,23 @@ class LaunchFile(DocObject):
         :rtype: str
         """
 
-        out_str = formatter.heading(level, self.name) + formatter.new_line()
+        out_str = formatter.heading(level, self.name)
 
         if self.description:
-            out_str += formatter.text(self.description) + formatter.new_line()
-
-        if not self.description and not self.children:
-            out_str += formatter.text("No arguments for this launch file found. You can add a"
-                                      " description by hand, if you like.")
+            out_str += self.description + formatter.new_line()
+        else:
+            if not self.children:
+                out_str += formatter.text(self.EMPTY_DESCRIPTION)
+        if self.children:
+            if self.description:
+                out_str += formatter.new_line()
+            for key in sorted(ds.KEYS.values()):
+                if key in self.children:
+                    out_str += formatter.heading(level + 1, key)
+                    for item in sorted(self.children[key]):
+                        list_str = item.to_string(level + 2, formatter)
+                        out_str += list_str + formatter.new_line()
+        else:
             out_str += formatter.new_line()
-        for key in sorted(ds.KEYS.values()):
-            if key in self.children:
-                out_str += formatter.heading(level + 1, key)
-                for item in sorted(self.children[key]):
-                    list_str = item.to_string(level + 2, formatter)
-                    out_str += formatter.as_list_item(0, list_str) + formatter.new_line()
 
         return out_str

@@ -31,6 +31,7 @@ Testing datastructures factory
 import unittest
 
 import catkin_doc.datastructures as ds
+from catkin_doc.datastructures.doc_object import DocObject
 from catkin_doc.datastructures.node import Node
 from catkin_doc.datastructures.parameter import Parameter, LaunchArgument
 from catkin_doc.datastructures.package import Package
@@ -96,3 +97,38 @@ class TestPython(unittest.TestCase):
         self.assertEqual(ds.get_identifier_for_type(LaunchFile), "launchfile")
         self.assertEqual(ds.get_identifier_for_type(Node), "node")
         self.assertEqual(ds.get_identifier_for_type(str), "unknown")
+
+    def test_doc_object_str(self):
+        """Tests string formatting of a DocObject"""
+        doc_object = DocObject(
+            name="test_object", description="test_description", var_name=False)
+        doc_object.add_child(ds.KEYS['publisher'], Publisher(
+            name="my_pub", description="My Publisher"))
+
+        print(doc_object)
+
+        expected_string = """test_object
+  Published topics
+    my_pub
+
+"""
+        assert expected_string == str(doc_object)
+
+
+    def test_doc_object_compare(self):
+        """Tests comparison operators for DocObjects"""
+        doc_object_1 = DocObject(
+            name="abc", description="test_description", var_name=False)
+        doc_object_2 = DocObject(
+            name="def", description="test_description", var_name=False)
+
+        self.assertLess(doc_object_1, doc_object_2)
+        self.assertLessEqual(doc_object_1, doc_object_1)
+        self.assertFalse(doc_object_1 < doc_object_1)
+
+        self.assertNotEqual(doc_object_1, doc_object_2)
+        self.assertEqual(doc_object_1, doc_object_1)
+
+        self.assertGreater(doc_object_2, doc_object_1)
+        self.assertGreaterEqual(doc_object_1, doc_object_1)
+        self.assertFalse(doc_object_1 > doc_object_1)

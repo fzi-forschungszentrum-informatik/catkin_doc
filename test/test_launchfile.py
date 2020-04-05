@@ -34,6 +34,7 @@ import tempfile
 
 from catkin_doc.parsers.launchparser import LaunchParser
 import catkin_doc.datastructures as ds
+from catkin_doc.formatters.base_formatter import BaseFormatter
 
 if sys.version_info[0] == 3:
     StringIO = io.StringIO
@@ -76,3 +77,44 @@ class TestLaunch(unittest.TestCase):
         self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][3].name, "foo3")
         self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][3].default_value, None)
         self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][3].description, None)
+
+    def test_formatting(self):
+        """Test formatting of a launchfile object"""
+
+        doc_object = ds.launchfile.LaunchFile(name="test.launch", description=None)
+        formatter = BaseFormatter()
+
+        expected_string = """{}{}
+
+""".format(formatter.heading(1, doc_object.name), doc_object.EMPTY_DESCRIPTION)
+        self.assertEqual(doc_object.to_string(1, formatter), expected_string)
+
+        description = "my description"
+        doc_object.description = description
+        expected_string = """{}{}
+
+""".format(formatter.heading(1, doc_object.name), description)
+        self.assertEqual(doc_object.to_string(1, formatter), expected_string)
+
+        description = None
+        doc_object.description = description
+        arg = ds.parameter.LaunchArgument(
+            name="arg1", description="my argumment", default_value=True)
+        doc_object.add_argument(arg)
+        expected_string = """{}{}{}{}
+""".format(formatter.heading(1, doc_object.name),
+           "",
+           formatter.heading(2, ds.KEYS["launch_argument"]),
+           arg.to_string(3, formatter))
+        assert expected_string == doc_object.to_string(1, formatter)
+
+        description = "my description"
+        doc_object.description = description
+        expected_string = """{}{}
+
+{}{}
+""".format(formatter.heading(1, doc_object.name),
+           description,
+           formatter.heading(2, ds.KEYS["launch_argument"]),
+           arg.to_string(3, formatter))
+        assert expected_string == doc_object.to_string(1, formatter)
