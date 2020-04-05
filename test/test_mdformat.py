@@ -295,6 +295,20 @@ This is a fancy topic
         expected_string = expected_raw.format(**replacements)
         assert formatted_string == expected_string
 
+    def test_as_list(self):
+        """Test formatting of a text as list item"""
+        formatter = mdformatter.MarkdownFormatter()
+        text = """first line
+second line
+third line"""
+        as_list_str = formatter.as_list_item(1, text)
+
+        expected_string = """   * first line
+      second line
+      third line"""
+
+        assert expected_string == as_list_str
+
 
 if __name__ == '__main__':
     unittest.main()
