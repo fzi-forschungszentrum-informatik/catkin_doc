@@ -33,6 +33,8 @@ from catkin_doc.datastructures.doc_object import DocObject
 
 
 class LaunchFile(DocObject):
+    EMPTY_DESCRIPTION = "No arguments for this launch file found."\
+                        " You can add a description by hand, if you like."
 
     def add_argument(self, argument):
         """Adds a argument as child"""
@@ -54,8 +56,7 @@ class LaunchFile(DocObject):
             out_str += self.description + formatter.new_line()
         else:
             if not self.children:
-                out_str += formatter.text("No arguments for this launch file found. You can add a"
-                                          " description by hand, if you like.")
+                out_str += formatter.text(self.EMPTY_DESCRIPTION)
         if self.children:
             if self.description:
                 out_str += formatter.new_line()

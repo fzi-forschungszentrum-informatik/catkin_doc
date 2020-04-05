@@ -309,6 +309,25 @@ third line"""
 
         assert expected_string == as_list_str
 
+    def test_bold(self):
+        """Test bold formatting"""
+        formatter = mdformatter.MarkdownFormatter()
+        text = "test_text"
+        expected_string = "**test_text**"
+
+        self.assertEqual(formatter.bold(text), expected_string)
+
+    def test_text(self):
+        """Test bold formatting"""
+        formatter = mdformatter.MarkdownFormatter()
+        text = "test_text"
+
+        expected_string = "test_text\n"
+        self.assertEqual(formatter.text(text), expected_string)
+
+        expected_string = "test_text"
+        self.assertEqual(formatter.text(text, False), expected_string)
+
 
 if __name__ == '__main__':
     unittest.main()

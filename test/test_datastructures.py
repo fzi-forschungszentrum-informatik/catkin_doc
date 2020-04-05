@@ -113,3 +113,22 @@ class TestPython(unittest.TestCase):
 
 """
         assert expected_string == str(doc_object)
+
+
+    def test_doc_object_compare(self):
+        """Tests comparison operators for DocObjects"""
+        doc_object_1 = DocObject(
+            name="abc", description="test_description", var_name=False)
+        doc_object_2 = DocObject(
+            name="def", description="test_description", var_name=False)
+
+        self.assertLess(doc_object_1, doc_object_2)
+        self.assertLessEqual(doc_object_1, doc_object_1)
+        self.assertFalse(doc_object_1 < doc_object_1)
+
+        self.assertNotEqual(doc_object_1, doc_object_2)
+        self.assertEqual(doc_object_1, doc_object_1)
+
+        self.assertGreater(doc_object_2, doc_object_1)
+        self.assertGreaterEqual(doc_object_1, doc_object_1)
+        self.assertFalse(doc_object_1 > doc_object_1)
