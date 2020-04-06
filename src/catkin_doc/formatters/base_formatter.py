@@ -100,4 +100,6 @@ class BaseFormatter(object):
         :return: Formatted text
         :rtype: str
         """
-        return text
+        if text:
+            return text
+        return url
