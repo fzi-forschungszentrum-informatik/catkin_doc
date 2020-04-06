@@ -1,4 +1,4 @@
-[![Build badge](https://travis-ci.org/fzi-forschungszentrum-informatik/catkin_doc.svg?branch=master)](https://travis-ci.org/fzi-forschungszentrum-informatik/catkin_doc)
+[![Build badge](https://github.com/fzi-forschungszentrum-informatik/catkin_doc/workflows/Python%20package/badge.svg?branch=master)](https://github.com/fzi-forschungszentrum-informatik/catkin_doc/actions/)
 [![codecov](https://codecov.io/gh/fzi-forschungszentrum-informatik/catkin_doc/branch/master/graph/badge.svg)](https://codecov.io/gh/fzi-forschungszentrum-informatik/catkin_doc)
 
 
