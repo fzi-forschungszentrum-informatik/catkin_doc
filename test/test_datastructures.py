@@ -138,12 +138,27 @@ class TestPython(unittest.TestCase):
         """Tests string formatting of DocObjects"""
         name = "TestObject"
         description = "This is a test object."
+        topic = "my_pub"
+        topic_desc = "My Publisher"
+        datatype = "FooMsg"
         doc_object = DocObject(name=name, description=description, var_name=False)
+        doc_object.add_child(ds.KEYS['publisher'], Publisher(
+            name=topic, description=topic_desc, datatype=datatype, var_name=False))
+
 
         expected_string = """={}=
 {}
+
+=={}==
+==={} ({})===
+{}
+
 """.format(
             name,
-            description
+            description,
+            ds.KEYS['publisher'],
+            topic,
+            datatype,
+            topic_desc
         )
-        assert doc_object.to_string(1, BaseFormatter()) == expected_string
+        assert expected_string == doc_object.to_string(1, BaseFormatter())

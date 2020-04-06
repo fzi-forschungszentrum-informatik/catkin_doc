@@ -63,27 +63,3 @@ class Node(DocObject):
     def add_action_client(self, action_client):
         """Adds an action_client as child"""
         self.add_child(ds.KEYS["action_client"], action_client)
-
-    def to_string(self, level, formatter):
-        """
-        Formats the object as text
-
-        :param int level: Level of heading hierarchy
-        :param formatter: Formatter to use
-        :return: A formatted string for this object formatted by the given formatter
-        :rtype: str
-        """
-
-        out_str = formatter.heading( level, "".join(filter(None, [self.namespace, self.name])))
-        out_str += formatter.text(self.description) + formatter.new_line()
-
-        for key in sorted(ds.KEYS.values()):
-            if key in self.children:
-                out_str += formatter.heading(level + 1, key)
-                full_names = [("".join(filter(None, [x.namespace, x.name])), x)
-                              for x in self.children[key]]
-                for (_, item) in sorted(full_names):
-                    list_str = item.to_string(level + 2, formatter)
-                    out_str += list_str + formatter.new_line()
-
-        return out_str
