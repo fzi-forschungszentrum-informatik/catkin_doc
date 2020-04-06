@@ -39,6 +39,7 @@ from catkin_doc.datastructures.service import Service, ServiceClient
 from catkin_doc.datastructures.action import Action, ActionClient
 from catkin_doc.datastructures.topic import Subscriber, Publisher
 from catkin_doc.datastructures.launchfile import LaunchFile
+from catkin_doc.formatters.base_formatter import BaseFormatter
 
 class TestPython(unittest.TestCase):
     """Test factory for datastructures"""
@@ -132,3 +133,17 @@ class TestPython(unittest.TestCase):
         self.assertGreater(doc_object_2, doc_object_1)
         self.assertGreaterEqual(doc_object_1, doc_object_1)
         self.assertFalse(doc_object_1 > doc_object_1)
+
+    def test_doc_object_to_string(self):
+        """Tests string formatting of DocObjects"""
+        name = "TestObject"
+        description = "This is a test object."
+        doc_object = DocObject(name=name, description=description, var_name=False)
+
+        expected_string = """={}=
+{}
+""".format(
+            name,
+            description
+        )
+        assert doc_object.to_string(1, BaseFormatter()) == expected_string
