@@ -114,6 +114,17 @@ class TestCpp(unittest.TestCase):
         self.assertEqual(sub.datatype, "std_msgs/String")
         self.assertEqual(brackets, code)
 
+        code = """ros::Subscriber subscruber = nh.subscribe<std_msgs::String>("namespace/"
+                                                                              "topic_name",
+                                                                              1,
+                                                                              callback
+                                                                              )"""
+        sub, brackets = node.extract_info(code, Subscriber, node.subscriber_regex)
+        self.assertEqual(sub.name, "topic_name")
+        self.assertEqual(sub.namespace, "namespace/")
+        self.assertEqual(sub.datatype, "std_msgs/String")
+        self.assertEqual(brackets, code)
+
     def test_subscriber_false(self):
         node = CppParser("test", ["setup.py"])
         self.assertFalse(

@@ -89,6 +89,7 @@ class CppParser(object):
                                filler_regex, '(\s*,\s*' + default_regex + ')?', r'\)'])
     service_client_regex = r"\s*".join(['serviceClient', template_regex, r'\(', name_regex,
                                         remainder_regex])
+
     service_client_regex_alt = r"\s*".join(['service::call', r'\(', name_regex, ',', type_regex,
                                             r'\)'])
     action_client_regex = r"\s*".join(['actionlib::SimpleActionClient', template_regex, r'\(',
@@ -170,6 +171,10 @@ class CppParser(object):
             ret_str = string.lstrip('\"').rstrip('\"')
         return ret_str
 
+    @staticmethod
+    def concatenate_multiline(string):
+        return re.sub(r'\"\s*\"', '', string)
+
     def extract_info(self, line, as_type, regex):
         """
         Check whether a line contains a topic item matching the given regex
@@ -178,6 +183,7 @@ class CppParser(object):
         match = re.search(regex, line, re.DOTALL | re.MULTILINE)
         if match:
             name = str(match.group('name'))
+            name = self.concatenate_multiline(name)
             if 'default' in match.groupdict().keys():
                 if match.group('default'):
                     tmp = str(match.group('default')).replace('\'', '')#.replace('\"', '')
