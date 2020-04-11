@@ -78,9 +78,9 @@ class TestMdParsing(unittest.TestCase):
 
     def test_parameter_parsing(self):
         """Test parsing of a parameter line"""
-        md_code = r''' * "**~tcp_port**" (default: "54321")
+        md_code = r'''## ~tcp_port (default: "54321")
 
-    Port on which the remote pc (robot) publishes the interface
+Port on which the remote pc (robot) publishes the interface
 '''
         doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
 
@@ -90,9 +90,9 @@ class TestMdParsing(unittest.TestCase):
         self.assertEqual(doc_section.default_value, '"54321"')
         self.assertEqual(doc_section.var_name, False)
 
-        md_code = r''' * "Symbol: **param_name**" (Required)
+        md_code = r'''## Symbol: param_name" (Required)
 
-    This is a required parameter with a symbol as name
+This is a required parameter with a symbol as name
 '''
         doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
 
@@ -104,9 +104,9 @@ class TestMdParsing(unittest.TestCase):
 
     def test_service_client_parsing(self):
         """Test parsing of a service_client line"""
-        md_code = r''' * "**/move_base/clear_costmaps**" ([std_srvs/Empty](http://docs.ros.org/api/std_srvs/html/srv/Empty.html))
+        md_code = r'''## /move_base/clear_costmaps ([std_srvs/Empty](http://docs.ros.org/api/std_srvs/html/srv/Empty.html))
 
-    Service client for resetting the costmaps
+Service client for resetting the costmaps
 '''
         doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
 
@@ -118,9 +118,9 @@ class TestMdParsing(unittest.TestCase):
 
     def test_service_server_parsing(self):
         """Test parsing of a service_server line"""
-        md_code = r''' * "**set_enabled**" ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))
+        md_code = r'''## set_enabled ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))
 
-    Service to enable and disable this component
+Service to enable and disable this component
 '''
         doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
 
@@ -150,9 +150,9 @@ This is the package description
 
     def test_to_doc_object(self):
         """Test conversion from a DocSection to a DocObject"""
-        md_code = r''' * "**set_enabled**" ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))
+        md_code = r'''## set_enabled ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))
 
-    Service to enable and disable this component
+Service to enable and disable this component
 '''
         doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
         doc_object = doc_section.to_doc_object()
@@ -163,9 +163,9 @@ This is the package description
         self.assertEqual(doc_object.var_name, doc_section.var_name)
         self.assertIsInstance(doc_object, Parameter)
 
-        md_code = r''' * "**hello**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+        md_code = r'''## hello ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    Listener
+Listener
 '''
         doc_section = DocSection(md_code.splitlines(), Subscriber, level=2)
         doc_object = doc_section.to_doc_object()
@@ -194,9 +194,9 @@ This is the package description
 
     def test_to_string(self):
         """Test that conversion to string actually works"""
-        md_code = r''' * "**hello**" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+        md_code = r'''## hello" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
-    Listener
+Listener
 '''
         doc_section = DocSection(md_code.splitlines(), Subscriber, level=2)
         print(str(doc_section))
@@ -213,9 +213,9 @@ This is the package description
         doc_section = DocSection(md_code.splitlines(), Package, level=0)
         print(str(doc_section))
 
-        md_code = r''' * "**~tcp_port**" (default: "54321")
+        md_code = r'''## ~tcp_port (default: "54321")
 
-    Port on which the remote pc (robot) publishes the interface
+Port on which the remote pc (robot) publishes the interface
 '''
         doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
         print(str(doc_section))
