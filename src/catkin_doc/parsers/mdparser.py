@@ -42,6 +42,13 @@ from catkin_doc.datastructures.launchfile import LaunchFile
 
 class DocSection(object):
     """Small helper class representing a hierarchy level inside a doc file"""
+    symbol_regex = r'(?P<symbol>Symbol:)'
+    name_regex = r'(?P<name>[^*\r\n]+)'
+    default_regex = r'(default:\s*(?P<default>.*))'
+    type_only_regex = r'(?!http).+'
+    type_with_url_regex = r'\[(?P<type_part>.*)\]\((?P<url_part>.*)\)'
+    type_regex = r'(?P<type>(' + type_with_url_regex + ')|(' + type_only_regex + '))'
+    required_regex = r'((?P<required>Required))'
 
     def __init__(self, lines, doc_object_type=DocObject, level=0):
         self.lines = lines
@@ -61,21 +68,17 @@ class DocSection(object):
         self.default_value = None
         self.var_name = False
 
-        symbol_regex = r'(?P<symbol>Symbol:)'
-        name_regex = r'(?P<name>[^*]+)'
-        default_regex = r'(\(default:\s*(?P<default>.*)\))'
-        type_regex = r'(\(\[(?P<type>[^\]]*)\]\(.*\)\))'
-        required_regex = r'(\((?P<required>.*)\))'
 
         self.title_regex = "^#{" + str(level + 1) + "} ?(?P<name>[^#].*)"
         if self.package_t in self.parameter_style_types:
-            self.title_regex = r'\s*'.join(['^',
-                                            r'\*',
-                                            '"' + symbol_regex + '?',
-                                            r'\*\*' + name_regex + r'\*\*"',
-                                            default_regex + '?',
-                                            type_regex + '?',
-                                            required_regex + '?',
+            self.title_regex = r'\s*'.join(['^#{' + str(level + 1) + '}',
+                                            self.symbol_regex + '?',
+                                            self.name_regex,
+                                            r'\(',
+                                            self.default_regex + '?',
+                                            self.type_regex + '?',
+                                            self.required_regex + '?',
+                                            r'\)',
                                             '$'])
         self.parse_title()
         self.description = ""
@@ -83,7 +86,8 @@ class DocSection(object):
         self.sub_regex = "^#{" + str(level + 2) + "} ?(?P<name>[^#].*)"
 
         if self.children_t in self.parameter_style_types:
-            self.sub_regex = r'^\s*\*\s*"' + symbol_regex + r'?\s*\*\*' + name_regex + r'\*\*"'
+            self.sub_regex = r'^#{' + str(level + 2) + r'}\s*' + self.symbol_regex + r'?\s*' + self.name_regex
+            # print(self.sub_regex)
         self.parse_children()
 
     def parse_title(self):
@@ -91,18 +95,19 @@ class DocSection(object):
         Parses the headline of the current section. Note that in case of parameter_style_types this
         is just an enumeration item.
         """
+        # print("title regex: {}".format(self.title_regex))
         for _, line in self.line_iterator:
             match = re.search(self.title_regex, line)
             if match:
                 # print("{}Found current level's title: {}".format(self.level*" ", match.group('name')))
-                self.name = match.group('name')
+                self.name = match.group('name').strip()
                 self.children_t = ds.create_doc_object(self.name)
                 try:
                     if match.group('symbol') == r'Symbol:':
                         self.var_name = True
                     self.default_value = match.group('default')
                     if match.group('type'):
-                        self.type_info = match.group('type')
+                        self.type_info = self.parse_type(match.group('type'))
                     else:
                         self.type_info = match.group('required')
 
@@ -134,6 +139,14 @@ class DocSection(object):
                 else:
                     self.description = line.strip()
 
+    def parse_type(self, type_str):
+        """Parses the type from the substring that matched the 'type' part. This can be either type
+        only or [type](url)"""
+        match = re.match(self.type_with_url_regex, type_str)
+        if match:
+            return match.group('type_part')
+        return type_str
+
     def get_sub_lines(self):
         """
         Step forward in lines until the next section is found. With this we know which lines belong
@@ -157,6 +170,7 @@ class DocSection(object):
         """
         Converts a DocSection into a general DocObject structure
         """
+        # print("{}".format(self))
         if ds.get_identifier_for_type(self.package_t) in ds.KEYS:
             # print("DocObject for {}".format(self.name))
             if self.package_t in self.parameter_style_types and self.package_t is not Parameter:
@@ -177,6 +191,7 @@ class DocSection(object):
                                             var_name=self.var_name)
 
             for child in self.children:
+                # print("Processing child '{}'".format(child))
                 doc_object.children[child] = self.children[child].to_doc_object()
             return doc_object
         else:
@@ -186,7 +201,8 @@ class DocSection(object):
     def __str__(self):
         out_str = ""
         prefix = self.level * " "
-        out_str += prefix + "Name: " + self.name + "\n"
+        if self.name:
+            out_str += prefix + "Name: " + self.name + "\n"
         out_str += prefix + "Description: " + self.description + "\n"
         out_str += prefix + "Type: " + ds.get_identifier_for_type(self.package_t) + "\n"
         if self.type_info:
