@@ -102,6 +102,20 @@ This is a required parameter with a symbol as name
         self.assertEqual(doc_section.default_value, None)
         self.assertEqual(doc_section.var_name, True)
 
+    def test_launch_argument_parsing(self):
+        """Test parsing of a launch argument line"""
+        md_code = r'''## file_arg (default: "$(find my_package)/config.yaml")
+
+Fancy config file.
+'''
+        doc_section = DocSection(md_code.splitlines(), LaunchArgument, level=1)
+
+        self.assertEqual(doc_section.name, 'file_arg')
+        self.assertEqual(doc_section.description,
+                         'Fancy config file.')
+        self.assertEqual(doc_section.default_value, '"$(find my_package)/config.yaml"')
+
+
     def test_service_client_parsing(self):
         """Test parsing of a service_client line"""
         md_code = r'''## /move_base/clear_costmaps ([std_srvs/Empty](http://docs.ros.org/api/std_srvs/html/srv/Empty.html))

@@ -51,6 +51,8 @@ class TestLaunch(unittest.TestCase):
   <arg name="foo1" default="bar"/>
   <arg name="foo2" doc="foobar"/>
   <arg name="foo3"/>
+  <arg name="controller_config_file" default="$(find ur_robot_driver)/config/ur3e_controllers.yaml" doc="Config file used for defining the ROS-Control controllers."/>
+
 </launch>'''
 
         source_file = tempfile.NamedTemporaryFile()
@@ -60,7 +62,7 @@ class TestLaunch(unittest.TestCase):
 
         launchfile = parser.launchfile
 
-        self.assertEqual(len(launchfile.children[ds.KEYS["launch_argument"]]), 4)
+        self.assertEqual(len(launchfile.children[ds.KEYS["launch_argument"]]), 5)
 
         self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][0].name, "foo")
         self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][0].default_value, "bar")
@@ -77,6 +79,13 @@ class TestLaunch(unittest.TestCase):
         self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][3].name, "foo3")
         self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][3].default_value, None)
         self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][3].description, None)
+
+        self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][4].name,
+                         "controller_config_file")
+        self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][4].default_value,
+                         "$(find ur_robot_driver)/config/ur3e_controllers.yaml")
+        self.assertEqual(launchfile.children[ds.KEYS["launch_argument"]][4].description,
+                         "Config file used for defining the ROS-Control controllers.")
 
     def test_formatting(self):
         """Test formatting of a launchfile object"""
