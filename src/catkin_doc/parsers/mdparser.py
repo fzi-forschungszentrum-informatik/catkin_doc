@@ -43,7 +43,7 @@ from catkin_doc.datastructures.launchfile import LaunchFile
 class DocSection(object):
     """Small helper class representing a hierarchy level inside a doc file"""
     symbol_regex = r'(?P<symbol>Symbol:)'
-    name_regex = r'(?P<name>[^*\r\n]+)'
+    name_regex = r'(?P<name>[^*\r\n]+\b(?!default))'
     default_regex = r'(default:\s*(?P<default>.*))'
     type_only_regex = r'(?!http).+'
     type_with_url_regex = r'\[(?P<type_part>.*)\]\((?P<url_part>.*)\)'
