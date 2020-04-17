@@ -82,7 +82,7 @@ class TestMdParsing(unittest.TestCase):
 
 Port on which the remote pc (robot) publishes the interface
 '''
-        doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
+        doc_section = DocSection(md_code.splitlines(), Parameter, level=1)
 
         self.assertEqual(doc_section.name, '~tcp_port')
         self.assertEqual(doc_section.description,
@@ -90,11 +90,11 @@ Port on which the remote pc (robot) publishes the interface
         self.assertEqual(doc_section.default_value, '"54321"')
         self.assertEqual(doc_section.var_name, False)
 
-        md_code = r'''## Symbol: param_name" (Required)
+        md_code = r'''## Symbol: param_name (Required)
 
 This is a required parameter with a symbol as name
 '''
-        doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
+        doc_section = DocSection(md_code.splitlines(), Parameter, level=1)
 
         self.assertEqual(doc_section.name, 'param_name')
         self.assertEqual(doc_section.description,
@@ -108,7 +108,7 @@ This is a required parameter with a symbol as name
 
 Service client for resetting the costmaps
 '''
-        doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
+        doc_section = DocSection(md_code.splitlines(), Parameter, level=1)
 
         self.assertEqual(doc_section.name, '/move_base/clear_costmaps')
         self.assertEqual(doc_section.description,
@@ -122,12 +122,37 @@ Service client for resetting the costmaps
 
 Service to enable and disable this component
 '''
-        doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
+        doc_section = DocSection(md_code.splitlines(), Parameter, level=1)
 
         self.assertEqual(doc_section.name, 'set_enabled')
         self.assertEqual(doc_section.description,
                          'Service to enable and disable this component')
         self.assertEqual(doc_section.type_info, 'std_srvs/SetBool')
+        self.assertEqual(doc_section.var_name, False)
+
+    def test_subscriber_parsing(self):
+        """Test parsing a subscriber section"""
+
+        md_code = r'''## chatter7 ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+
+This is the description
+'''
+        doc_section = DocSection(md_code.splitlines(), Subscriber, level=1)
+        self.assertEqual(doc_section.name, 'chatter7')
+        self.assertEqual(doc_section.description,
+                         'This is the description')
+        self.assertEqual(doc_section.type_info, 'std_msgs/String')
+        self.assertEqual(doc_section.var_name, False)
+
+        md_code = r'''## chatter8 (my_own_msgs/MyType)
+
+This is the description
+'''
+        doc_section = DocSection(md_code.splitlines(), Subscriber, level=1)
+        self.assertEqual(doc_section.name, 'chatter8')
+        self.assertEqual(doc_section.description,
+                         'This is the description')
+        self.assertEqual(doc_section.type_info, 'my_own_msgs/MyType')
         self.assertEqual(doc_section.var_name, False)
 
     def test_section_parsing(self):
@@ -154,7 +179,7 @@ This is the package description
 
 Service to enable and disable this component
 '''
-        doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
+        doc_section = DocSection(md_code.splitlines(), Parameter, level=1)
         doc_object = doc_section.to_doc_object()
 
         self.assertEqual(doc_object.name, doc_section.name)
@@ -167,7 +192,7 @@ Service to enable and disable this component
 
 Listener
 '''
-        doc_section = DocSection(md_code.splitlines(), Subscriber, level=2)
+        doc_section = DocSection(md_code.splitlines(), Subscriber, level=1)
         doc_object = doc_section.to_doc_object()
 
         self.assertEqual(doc_object.name, doc_section.name)
@@ -194,11 +219,11 @@ This is the package description
 
     def test_to_string(self):
         """Test that conversion to string actually works"""
-        md_code = r'''## hello" ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
+        md_code = r'''## hello ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))
 
 Listener
 '''
-        doc_section = DocSection(md_code.splitlines(), Subscriber, level=2)
+        doc_section = DocSection(md_code.splitlines(), Subscriber, level=1)
         print(str(doc_section))
 
         md_code = r'''This is some unnecessary text
@@ -217,7 +242,7 @@ This is the package description
 
 Port on which the remote pc (robot) publishes the interface
 '''
-        doc_section = DocSection(md_code.splitlines(), Parameter, level=2)
+        doc_section = DocSection(md_code.splitlines(), Parameter, level=1)
         print(str(doc_section))
 
 
