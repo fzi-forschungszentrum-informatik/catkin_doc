@@ -107,7 +107,7 @@ class DocSection(object):
                         self.var_name = True
                     self.default_value = match.group('default')
                     if match.group('type'):
-                        self.type_info = match.group('type')
+                        self.type_info = self.parse_type(match.group('type'))
                     else:
                         self.type_info = match.group('required')
 
@@ -138,6 +138,14 @@ class DocSection(object):
                     self.description = " ".join([self.description, line.strip()])
                 else:
                     self.description = line.strip()
+
+    def parse_type(self, type_str):
+        """Parses the type from the substring that matched the 'type' part. This can be either type
+        only or [type](url)"""
+        match = re.match(self.type_with_url_regex, type_str)
+        if match:
+            return match.group('type_part')
+        return type_str
 
     def get_sub_lines(self):
         """
