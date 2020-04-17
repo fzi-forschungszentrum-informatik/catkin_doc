@@ -203,8 +203,6 @@ class DocSection(object):
         prefix = self.level * " "
         if self.name:
             out_str += prefix + "Name: " + self.name + "\n"
-        else:
-            out_str += prefix + "Name: ===== EMPTY =====\n"
         out_str += prefix + "Description: " + self.description + "\n"
         out_str += prefix + "Type: " + ds.get_identifier_for_type(self.package_t) + "\n"
         if self.type_info:
