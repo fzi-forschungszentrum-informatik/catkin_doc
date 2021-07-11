@@ -1,3 +1,2 @@
 setuptools==39.0.1
-markdown_strings==3.1.1
 python_magic==0.4.15
