@@ -74,8 +74,8 @@ class TestMdParsing(unittest.TestCase):
 
         # Find launchfiles
         expected_launchfiles = [
-            os.path.join(pkg_path, 'launch/test_package_node_with_arg.launch'),
-            os.path.join(pkg_path, 'launch/test_package_node.launch')
+            os.path.join(pkg_path, 'launch/test_package_node.launch'),
+            os.path.join(pkg_path, 'launch/test_package_node_with_arg.launch')
         ]
         self.assertListEqual(pkg_handler.launch_files, expected_launchfiles)
 

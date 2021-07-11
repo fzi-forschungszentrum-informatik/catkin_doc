@@ -4,6 +4,10 @@ The test_package package
 
 ## Launchfiles
 
+### test_package_node.launch
+
+No arguments for this launch file found. You can add a description by hand, if you like.
+
 ### test_package_node_with_arg.launch
 
 #### Arguments
@@ -11,10 +15,6 @@ The test_package package
 ##### name (default: "default")
 
 Please add description. See file "launch/test_package_node_with_arg.launch".
-
-### test_package_node.launch
-
-No arguments for this launch file found. You can add a description by hand, if you like.
 
 ## Nodes
 
