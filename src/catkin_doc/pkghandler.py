@@ -114,7 +114,8 @@ class PkgHandler(object):
 
     def find_launchfiles(self, pkg_path):
         """
-        Method which searches through a whole package for launchfiles
+        Method which searches through a whole package for launchfiles. Returns a sorted list of all
+        launchfile names.
         """
 
         for filename in os.listdir(pkg_path):
@@ -124,6 +125,7 @@ class PkgHandler(object):
                 filetype = magic.from_file(pkg_path + "/" + filename)
                 if ("launch" in filename) and ("XML" in filetype):
                     self.launch_files.append(pkg_path + "/" + filename)
+        self.launch_files.sort()
 
     @staticmethod
     def check_if_ros_node(filename):
