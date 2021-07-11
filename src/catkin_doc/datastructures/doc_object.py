@@ -44,8 +44,8 @@ class DocObject(object):
 
     def __init__(self, name, description="", var_name=None):
         self.default_description = "Please add description. See {} line number: {}\n\n\t{}"
-        self.default_desc_regex = "\s+".join(
-            self.default_description.format("(.*)", "(\d+)", "(.*)").split())
+        self.default_desc_regex = r"\s+".join(
+            self.default_description.format("(.*)", r"(\d+)", "(.*)").split())
 
         self.name = None
         self.var_name = None
