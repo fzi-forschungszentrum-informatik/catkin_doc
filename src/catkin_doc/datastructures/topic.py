@@ -29,11 +29,9 @@
 Topic datastructure
 """
 try:
-    from urllib.parse import urlparse
     from urllib.request import urlopen
     from urllib.error import URLError
 except ImportError:
-    from urlparse import urlparse
     from urllib2 import urlopen, URLError
 from catkin_doc.datastructures.doc_object import DocObject
 
@@ -83,9 +81,6 @@ class Topic(DocObject):
             url = self.type_doc_url_base.format(types[0], types[1])
             if self.validate_urls:
                 try:
-                    if not urlparse(url).netloc:
-                        print("Illegal URL")
-
                     website = urlopen(url)
 
                     if website.code == 200:

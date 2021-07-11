@@ -33,6 +33,8 @@ from __future__ import print_function
 import re
 import copy
 
+import catkin_doc.datastructures as ds
+
 if hasattr(__builtins__, 'raw_input'):
     input = raw_input
 
@@ -42,8 +44,8 @@ class DocObject(object):
 
     def __init__(self, name, description="", var_name=None):
         self.default_description = "Please add description. See {} line number: {}\n\n\t{}"
-        self.default_desc_regex = "\s+".join(
-            self.default_description.format("(.*)", "(\d+)", "(.*)").split())
+        self.default_desc_regex = r"\s+".join(
+            self.default_description.format("(.*)", r"(\d+)", "(.*)").split())
 
         self.name = None
         self.var_name = None
@@ -97,13 +99,16 @@ class DocObject(object):
         """
 
         out_str = formatter.heading(level, "".join(filter(None, [self.namespace, self.name])))
-        out_str += formatter.text(self.description)
+        out_str += formatter.text(self.description) + formatter.new_line()
 
-        full_names = [(x.namespace, x.name) for x in self.children]
-
-        for (namespace, name) in sorted(full_names):
-            for item in self.children[name]:
-                out_str += item.to_string(level + 1, formatter)
+        for key in sorted(ds.KEYS.values()):
+            if key in self.children:
+                out_str += formatter.heading(level + 1, key)
+                full_names = [("".join(filter(None, [x.namespace, x.name])), x)
+                              for x in self.children[key]]
+                for (_, item) in sorted(full_names):
+                    list_str = item.to_string(level + 2, formatter)
+                    out_str += list_str + formatter.new_line()
 
         return out_str
 

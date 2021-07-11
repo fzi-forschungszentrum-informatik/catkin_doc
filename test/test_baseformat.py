@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 # -- BEGIN LICENSE BLOCK ----------------------------------------------
-# Copyright (c) 2019, FZI Forschungszentrum Informatik
+# Copyright (c) 2020, FZI Forschungszentrum Informatik
 #
 # Redistribution and use in source and binary forms, with or without modification, are permitted
 # provided that the following conditions are met:
@@ -25,41 +26,50 @@
 # WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # -- END LICENSE BLOCK ------------------------------------------------
 
-"""
-Node datastructure
-"""
+import unittest
 
 import catkin_doc.datastructures as ds
-from catkin_doc.datastructures.doc_object import DocObject
+import catkin_doc.formatters.base_formatter as baseformatter
 
+class TestFormatting(unittest.TestCase):
+    """Tests formatting using the Base formatter."""
 
-class Node(DocObject):
-    """Datastructure representing a node"""
+    def test_text_format(self):
+        """Tests basic text formatting"""
+        formatter = baseformatter.BaseFormatter()
+        text = """This is
+my text."""
 
-    def add_parameter(self, parameter):
-        """Adds a parameter as child"""
-        self.add_child(ds.KEYS["parameter"], parameter)
+        expected_string = """This is
+my text.
+"""
+        self.assertEqual(formatter.text(text), expected_string)
+        self.assertEqual(formatter.text(text, False), text)
 
-    def add_subscriber(self, subscriber):
-        """Adds a subscriber as child"""
-        self.add_child(ds.KEYS["subscriber"], subscriber)
+    def test_bold(self):
+        """Tests bold text formatting"""
+        formatter = baseformatter.BaseFormatter()
+        text = """This is my text."""
 
-    def add_publisher(self, publisher):
-        """Adds a publisher as child"""
-        self.add_child(ds.KEYS["publisher"], publisher)
+        self.assertEqual(formatter.bold(text), text)
 
-    def add_service(self, service):
-        """Adds a service as child"""
-        self.add_child(ds.KEYS["service"], service)
+    def test_as_list_item(self):
+        """Tests formatting as a list item"""
+        formatter = baseformatter.BaseFormatter()
+        text = """This is
+my text."""
 
-    def add_service_client(self, service_client):
-        """Adds a service client as child"""
-        self.add_child(ds.KEYS["service_client"], service_client)
+        expected_string = """ * This is
+my text."""
+        self.assertEqual(formatter.as_list_item(1, text), expected_string)
 
-    def add_action(self, action):
-        """Adds an action as child"""
-        self.add_child(ds.KEYS["action"], action)
+    def test_link(self):
+        """Tests formatting of links"""
+        formatter = baseformatter.BaseFormatter()
+        text = "my link"
+        link = """http://www.test.link"""
 
-    def add_action_client(self, action_client):
-        """Adds an action_client as child"""
-        self.add_child(ds.KEYS["action_client"], action_client)
+        self.assertEqual(formatter.link(link), link)
+        self.assertEqual(formatter.link(link, text), text)
+        self.assertEqual(formatter.link(link, ""), link)
+        self.assertEqual(formatter.link(link, None), link)
